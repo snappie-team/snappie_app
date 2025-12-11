@@ -280,6 +280,15 @@ class AuthService extends GetxService {
       // User tidak ditemukan di backend - return false
       // Controller akan handle navigasi ke halaman registrasi
       if (e.response?.statusCode == 404 || e.response?.statusCode == 401) {
+        // Sign out from Google if user is signed in with Google
+        try {
+          final googleAuthService = Get.find<GoogleAuthService>();
+          if (googleAuthService.isLoggedIn) {
+            await googleAuthService.signOut();
+          }
+        } catch (e) {
+          print('❌ Error signing out from Google: $e');
+        }
         return false;
       }
       

@@ -7,6 +7,7 @@ import 'package:snappie_app/app/core/helpers/api_response_helper.dart';
 import 'package:snappie_app/app/core/network/dio_client.dart';
 import 'package:snappie_app/app/data/models/user_model.dart';
 import 'package:snappie_app/app/data/datasources/local/user_local_datasource.dart';
+import 'package:snappie_app/app/core/errors/auth_result.dart';
 import '../constants/app_constants.dart';
 import '../constants/environment_config.dart';
 import '../../routes/api_endpoints.dart';
@@ -201,20 +202,26 @@ class AuthService extends GetxService {
   }
 
   // TODO: replace /auth/login email-only with Firebase-ID-token check before public release.
-  Future<bool> login() async {
+  Future<AuthResult> login() async {
     /* ---------- Step 1: Google Sign-In ---------- */
     final googleAuthService = Get.find<GoogleAuthService>();
     final userCredential = await googleAuthService.signInWithGoogle();
 
     if (userCredential == null) {
       print('🔐 Google Sign In was cancelled');
-      return false;
+      return AuthResult.fail(
+        AuthErrorType.unknown,
+        message: 'Google Sign In was cancelled',
+      );
     }
 
     final user = userCredential.user;
     if (user == null || user.email == null) {
       print('❌ No user data from Google Sign In');
-      return false;
+      return AuthResult.fail(
+        AuthErrorType.unknown,
+        message: 'No user data from Google Sign In',
+      );
     }
 
     // TODO: Using hardcoded email for testing purposes
@@ -252,7 +259,11 @@ class AuthService extends GetxService {
 
         if (token == null || token.isEmpty) {
           print('❌ No token received from server');
-          return false;
+          return AuthResult.fail(
+            AuthErrorType.unknown,
+            message: 'No token received from server',
+            statusCode: response.statusCode,
+          );
         }
 
         print('🔐 Token received: ${token.substring(0, 10)}...');
@@ -268,34 +279,80 @@ class AuthService extends GetxService {
         );
 
         _isLoggedIn.value = true;
-        return true;
+        return AuthResult.ok(message: 'Login successful');
       } else {
         print('❌ Unexpected status code: ${response.statusCode}');
-        return false;
+        return AuthResult.fail(
+          AuthErrorType.unknown,
+          message: 'Unexpected status code: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
       }
     } on dio_lib.DioException catch (e) {
       print('❌ LOGIN DIO ERROR: ${e.response?.statusCode}');
       print('DioError Response: ${e.response?.data}');
-      
-      // User tidak ditemukan di backend - return false
-      // Controller akan handle navigasi ke halaman registrasi
-      if (e.response?.statusCode == 404 || e.response?.statusCode == 401) {
-        // Sign out from Google if user is signed in with Google
-        try {
-          final googleAuthService = Get.find<GoogleAuthService>();
-          if (googleAuthService.isLoggedIn) {
-            await googleAuthService.signOut();
-          }
-        } catch (e) {
-          print('❌ Error signing out from Google: $e');
+
+      final statusCode = e.response?.statusCode;
+
+      // Sign out from Google if user is signed in with Google
+      try {
+        final googleAuthService = Get.find<GoogleAuthService>();
+        if (googleAuthService.isLoggedIn) {
+          await googleAuthService.signOut();
         }
-        return false;
+      } catch (signOutError) {
+        print('❌ Error signing out from Google: $signOutError');
       }
-      
-      return false;
+
+      // Status-code based auth failures
+      // User tidak ditemukan / belum terdaftar
+      if (statusCode == 404 || statusCode == 401) {
+        return AuthResult.fail(
+          AuthErrorType.userNotFound,
+          message: 'User not found',
+          statusCode: statusCode,
+          cause: e,
+        );
+      }
+
+      if (statusCode == 409) {
+        print('❌ Conflict error during login');
+        return AuthResult.fail(
+          AuthErrorType.hasActiveSession,
+          message: 'Has active session',
+          statusCode: statusCode,
+          cause: e,
+        );
+      }
+
+      // Network-ish failures
+      final isNetworkError = statusCode == null &&
+          (e.type == dio_lib.DioExceptionType.connectionTimeout ||
+              e.type == dio_lib.DioExceptionType.sendTimeout ||
+              e.type == dio_lib.DioExceptionType.receiveTimeout ||
+              e.type == dio_lib.DioExceptionType.connectionError);
+
+      if (isNetworkError) {
+        return AuthResult.fail(
+          AuthErrorType.network,
+          message: 'Network error',
+          cause: e,
+        );
+      }
+
+      return AuthResult.fail(
+        AuthErrorType.unknown,
+        message: 'Login failed',
+        statusCode: statusCode,
+        cause: e,
+      );
     } catch (e) {
       print('❌ LOGIN ERROR: $e');
-      return false;
+      return AuthResult.fail(
+        AuthErrorType.unknown,
+        message: 'Login failed',
+        cause: e,
+      );
     }
   }
 
@@ -359,9 +416,9 @@ class AuthService extends GetxService {
         final data = response.data;
 
         if (data['success'] == true && data['data'] != null) {
-          final loginSuccess = await login();
+          final loginResult = await login();
 
-          if (!loginSuccess) {
+          if (!loginResult.success) {
             return false;
           }
 

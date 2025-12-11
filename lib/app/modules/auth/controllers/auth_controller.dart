@@ -6,6 +6,7 @@ import 'package:snappie_app/app/core/services/google_auth_service.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/constants/remote_assets.dart';
+import '../../../core/errors/auth_result.dart';
 
 enum Gender { male, female, others }
 
@@ -110,9 +111,9 @@ class AuthController extends GetxController {
     _setLoading(true);
 
     try {
-      final success = await authService.login();
+      final result = await authService.login();
 
-      if (success) {
+      if (result.success) {
         _isLoggedIn.value = true;
 
         Get.snackbar(
@@ -125,25 +126,46 @@ class AuthController extends GetxController {
 
         // Navigate to main app
         Get.offAllNamed(AppPages.MAIN);
-      } else {
-        Get.snackbar(
-          'Error',
-          'Google Sign In failed. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-      }
-    } catch (e) {
-      // Check if user not found and needs registration
-      if (e == 'USER_NOT_FOUND') {
-        print('🔍 User not found, navigating to registration');
-        // Load Google user data before navigating
-        _loadGoogleUserData();
-        Get.toNamed(AppPages.REGISTER);
+
+        _setLoading(false);
         return;
       }
 
+      switch (result.errorType ?? AuthErrorType.unknown) {
+        case AuthErrorType.userNotFound:
+          print('🔍 User not found, navigating to registration');
+          _loadGoogleUserData();
+          Get.toNamed(AppPages.REGISTER);
+          break;
+        case AuthErrorType.hasActiveSession:
+          Get.snackbar(
+            'Session Active',
+            result.message ?? 'Masih ada sesi aktif. Silakan coba lagi.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.orange,
+            colorText: Colors.white,
+          );
+          break;
+        case AuthErrorType.network:
+          Get.snackbar(
+            'Network Error',
+            'Please check your connection and try again.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+          break;
+        case AuthErrorType.unknown:
+          Get.snackbar(
+            'Error',
+            result.message ?? 'Google Sign In failed. Please try again.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+          break;
+      }
+    } catch (e) {
       Get.snackbar(
         'Error',
         'Network error: Please check your connection and try again.',
@@ -160,9 +182,9 @@ class AuthController extends GetxController {
     _setLoading(true);
 
     try {
-      final success = await authService.login();
+      final result = await authService.login();
 
-      if (success) {
+      if (result.success) {
         _isLoggedIn.value = true;
 
         Get.snackbar(
@@ -175,10 +197,38 @@ class AuthController extends GetxController {
 
         // Navigate to main app
         Get.offAllNamed(AppPages.MAIN);
-      } else {
-        _loadGoogleUserData();
 
+        _setLoading(false);
+        return;
+      }
+
+      if (result.errorType == AuthErrorType.userNotFound) {
+        _loadGoogleUserData();
         Get.toNamed(AppPages.REGISTER);
+      } else if (result.errorType == AuthErrorType.hasActiveSession) {
+        Get.snackbar(
+          'Session Active',
+          result.message ?? 'Masih ada sesi aktif. Silakan coba lagi.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
+      } else if (result.errorType == AuthErrorType.network) {
+        Get.snackbar(
+          'Network Error',
+          'Please check your connection and try again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          result.message ?? 'Google Sign In failed. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
       Get.snackbar(
@@ -214,7 +264,8 @@ class AuthController extends GetxController {
 
     try {
       final success = await authService.registerUser(
-        name: '${firstnameController.text.trim()} ${lastnameController.text.trim()}',
+        name:
+            '${firstnameController.text.trim()} ${lastnameController.text.trim()}',
         username: usernameController.text.trim(),
         email: registerEmailController.text.trim(),
         gender: _selectedGender.value,

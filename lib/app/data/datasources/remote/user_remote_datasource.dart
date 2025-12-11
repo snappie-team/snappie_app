@@ -118,30 +118,16 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       if (gender != null) payload['gender'] = gender;
       if (imageUrl != null) payload['image_url'] = imageUrl;
       if (phone != null) payload['phone'] = phone;
-      if (dateOfBirth != null)
+      if (dateOfBirth != null) {
         payload['date_of_birth'] = dateOfBirth.toIso8601String();
+      }
       if (bio != null) payload['bio'] = bio;
-      if (privacySettings != null)
+      if (privacySettings != null) {
         payload['privacy_settings'] = privacySettings;
-      if (notificationPreferences != null)
+      }
+      if (notificationPreferences != null) {
         payload['notification_preferences'] = notificationPreferences;
-
-      // Keep existing logic for fields not in the flat update spec but present in code?
-      // The spec for update profile does NOT include food_type/place_value/user_settings/user_notification at top level.
-      // But the previous code put them in additional_info.
-      // If I strictly follow "Flatten body fields", I should put them at top level IF they are in the spec.
-      // But they are NOT in the spec for Update Profile.
-      // I will assume the user wants the code to match the spec, so I should probably NOT send them if they aren't in the spec?
-      // But that might break app functionality if the backend actually supports them.
-      // However, the mismatch said "Flat body fields (gender, bio, etc.) | Nested in additional_info".
-      // It didn't mention food_type.
-      // I will keep the others in additional_info if they were there, OR I will remove them if I want to be 100% spec compliant.
-      // Given the instruction "move gender, bio, etc. inside additional_info map" (which I interpreted as "flatten them" based on the mismatch list),
-      // I will assume the goal is to match the spec.
-      // I will leave the other fields out of the payload if they are not in the spec, OR put them in additional_info if the backend supports it loosely.
-      // But wait, the previous code had them.
-      // I'll try to keep them but maybe flattened if possible? No, spec doesn't have them.
-      // I'll just leave them in additional_info for now as "extra" data, but flatten the ones that ARE in the spec.
+      }
 
       final additional = <String, dynamic>{};
 
@@ -177,8 +163,9 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
           flattenAdditionalInfoForUser(userData, removeContainer: false);
       return UserModel.fromJson(userJson);
     } on ApiResponseException catch (e) {
-      if (e.errors != null)
+      if (e.errors != null) {
         throw ValidationException(e.message, errors: e.errors);
+      }
       throw ServerException(e.message, e.statusCode ?? 500);
     } on DioException catch (e) {
       throw _handleDioException(e);

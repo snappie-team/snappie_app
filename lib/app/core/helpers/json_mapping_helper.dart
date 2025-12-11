@@ -34,11 +34,16 @@ Json flattenContainerKeys(
 /// Tambahkan model lain seiring kebutuhan.
 const Map<String, List<String>> _liftKeysRegistry = {
   'user': [
-    'user_detail', 'userDetail',
-    'user_preferences', 'userPreferences',
-    'user_saved', 'userSaved',
-    'user_settings', 'userSettings',
-    'user_notification', 'userNotification',
+    'user_detail',
+    'userDetail',
+    'user_preferences',
+    'userPreferences',
+    // 'user_saved', 
+    // 'userSaved',
+    'user_settings',
+    'userSettings',
+    'user_notification',
+    'userNotification',
   ],
   'place': [
     'place_detail',
@@ -61,7 +66,7 @@ Json flattenByModelPreset(
   bool removeContainer = false,
 }) {
   final keys = _liftKeysRegistry[modelKey] ?? const <String>[];
-  
+
   // First, flatten the container keys
   var result = flattenContainerKeys(
     src,
@@ -69,11 +74,11 @@ Json flattenByModelPreset(
     keysToLift: keys,
     removeContainer: removeContainer,
   );
-  
+
   // Handle duplicate fields (snake_case and camelCase) by preferring camelCase
   // and converting snake_case to proper types if needed
   result = _fixDuplicateFieldsAndTypeMismatches(result);
-  
+
   return result;
 }
 
@@ -81,53 +86,64 @@ Json flattenByModelPreset(
 /// Prefers camelCase fields and handles type conversions
 Json _fixDuplicateFieldsAndTypeMismatches(Json data) {
   final result = Map<String, dynamic>.from(data);
-  
+
   // Handle user_detail vs userDetail - ALWAYS prefer camelCase
   if (result.containsKey('user_detail')) {
     // Keep snake_case for generated models, provide camelCase copy for convenience
     result['userDetail'] = result['userDetail'] ?? result['user_detail'];
   }
-  
+
   // Handle user_preferences vs userPreferences - ALWAYS prefer camelCase
   if (result.containsKey('user_preferences')) {
-    result['userPreferences'] = result['userPreferences'] ?? result['user_preferences'];
+    result['userPreferences'] =
+        result['userPreferences'] ?? result['user_preferences'];
   }
-  
+
   // Handle user_saved vs userSaved - ALWAYS prefer camelCase
   if (result.containsKey('user_saved')) {
     result['userSaved'] = result['userSaved'] ?? result['user_saved'];
   }
-  
+
   // Handle user_settings vs userSettings - ALWAYS prefer camelCase
   if (result.containsKey('user_settings')) {
     result['userSettings'] = result['userSettings'] ?? result['user_settings'];
   }
-  
+
   // Handle user_notification vs userNotification - ALWAYS prefer camelCase
   if (result.containsKey('user_notification')) {
-    result['userNotification'] = result['userNotification'] ?? result['user_notification'];
+    result['userNotification'] =
+        result['userNotification'] ?? result['user_notification'];
   }
-  
+
   // Fix type mismatches in numeric fields
   _fixNumericFieldTypes(result);
-  
+
   return result;
 }
 
 /// Fix type mismatches for numeric fields that might come as strings
 void _fixNumericFieldTypes(Json data) {
   final numericFields = [
-    'totalCoin', 'totalExp', 'totalFollowing', 'totalFollower',
-    'totalCheckin', 'totalPost', 'totalArticle', 'totalReview',
-    'totalAchievement', 'totalChallenge', 'id'
+    'totalCoin',
+    'totalExp',
+    'totalFollowing',
+    'totalFollower',
+    'totalCheckin',
+    'totalPost',
+    'totalArticle',
+    'totalReview',
+    'totalAchievement',
+    'totalChallenge',
+    'id'
   ];
-  
+
   for (final field in numericFields) {
     if (data.containsKey(field) && data[field] is String) {
       try {
         final value = data[field] as String;
         if (value.isNotEmpty) {
-          data[field] = int.tryParse(value) ?? double.tryParse(value) ?? data[field];
+          data[field] =
+              int.tryParse(value) ?? double.tryParse(value) ?? data[field];
         }
       } catch (e) {
         // Keep original value if parsing fails

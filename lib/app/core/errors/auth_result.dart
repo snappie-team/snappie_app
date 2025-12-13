@@ -1,6 +1,3 @@
-import 'package:get/get.dart';
-import 'package:snappie_app/app/core/services/google_auth_service.dart';
-
 enum AuthErrorType {
   network,
   userNotFound,

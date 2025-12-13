@@ -101,7 +101,8 @@ class AuthService extends GetxService {
       final requestUrl = ApiEndpoints.getFullUrl(endpoint);
 
       try {
-        print('🔄 Attempting refresh with token: ${_refreshToken?.substring(0, 10)}...');
+        print(
+            '🔄 Attempting refresh with token: ${_refreshToken?.substring(0, 10)}...');
         final response = await dioClient.dio.post(
           requestUrl,
           data: {'refresh_token': _refreshToken},
@@ -183,8 +184,9 @@ class AuthService extends GetxService {
       _tokenExpiry = _parseStoredDate(prefs.getString(_tokenExpiryKey));
       _refreshTokenExpiry =
           _parseStoredDate(prefs.getString(_refreshTokenExpiryKey));
-      
-      print('🔑 Loaded refresh token: ${_refreshToken != null ? "${_refreshToken!.substring(0, 10)}..." : "null"}');
+
+      print(
+          '🔑 Loaded refresh token: ${_refreshToken != null ? "${_refreshToken!.substring(0, 10)}..." : "null"}');
       print('⏰ Token expiry: $_tokenExpiry');
       print('⏰ Refresh token expiry: $_refreshTokenExpiry');
       final userDataString = prefs.getString(_userDataKey);
@@ -240,7 +242,8 @@ class AuthService extends GetxService {
         options: dio_lib.Options(
           headers: getAuthHeaders(useRegistrationKey: true),
           extra: {
-            DioClient.skipAuthRefreshKey: true, // Skip refresh interceptor for login
+            DioClient.skipAuthRefreshKey:
+                true, // Skip refresh interceptor for login
           },
         ),
       );
@@ -250,7 +253,7 @@ class AuthService extends GetxService {
             (json) => Map<String, dynamic>.from(json as Map<String, dynamic>));
 
         print('🔐 LOGIN RESPONSE DATA KEYS: ${data.keys.toList()}');
-        
+
         final Map<String, dynamic>? userData = data['user'] == null
             ? null
             : Map<String, dynamic>.from(data['user'] as Map<String, dynamic>);
@@ -267,7 +270,8 @@ class AuthService extends GetxService {
         }
 
         print('🔐 Token received: ${token.substring(0, 10)}...');
-        print('🔐 Refresh token received: ${refreshTokenFromResponse != null ? "${refreshTokenFromResponse.substring(0, 10)}..." : "NULL"}');
+        print(
+            '🔐 Refresh token received: ${refreshTokenFromResponse != null ? "${refreshTokenFromResponse.substring(0, 10)}..." : "NULL"}');
 
         await _saveAuthSession(
           token: token,

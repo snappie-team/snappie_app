@@ -15,6 +15,7 @@ import 'package:snappie_app/app/modules/profile/views/edit_profile_view.dart';
 import 'package:snappie_app/app/modules/profile/views/language_view.dart';
 import 'package:snappie_app/app/modules/profile/views/help_center_view.dart';
 import 'package:snappie_app/app/modules/profile/views/faq_view.dart';
+import 'package:snappie_app/app/modules/home/views/notifications_view.dart';
 import 'package:snappie_app/app/modules/shared/components/tnc_view.dart';
 import 'package:snappie_app/app/modules/home/views/post_detail_view.dart';
 import '../modules/auth/views/login_view.dart';
@@ -33,6 +34,7 @@ import '../modules/mission/views/mission_photo_view.dart';
 import '../modules/mission/views/mission_photo_preview_view.dart';
 import '../modules/mission/views/mission_review_view.dart';
 import '../modules/mission/bindings/mission_binding.dart';
+import '../modules/home/views/create_post_view.dart';
 
 class AppPages {
   AppPages._();
@@ -49,6 +51,8 @@ class AppPages {
   static const MAIN = '/main';
   static const POST = '/post';
   static const POST_DETAIL = '/post-detail';
+  static const CREATE_POST = '/create-post';
+  static const NOTIFICATIONS = '/notifications';
 
   // Explore
   static const EXPLORE = '/explore';
@@ -65,7 +69,8 @@ class AppPages {
 
   // Profile
   static const PROFILE = '/profile';
-  static const USER_PROFILE = '/user-profile'; // Read-only profile untuk navigasi dari widget lain
+  static const USER_PROFILE =
+      '/user-profile'; // Read-only profile untuk navigasi dari widget lain
   static const SETTINGS = '/settings';
   static const EDIT_PROFILE = '/edit-profile';
   static const LANGUAGE = '/language';
@@ -92,7 +97,7 @@ class AppPages {
       name: SPLASH,
       page: () => const SplashView(),
     ),
-    
+
     // Auth module - dengan AuthBinding
     GetPage(
       name: LOGIN,
@@ -123,6 +128,15 @@ class AppPages {
     GetPage(
       name: POST_DETAIL,
       page: () => const PostDetailView(),
+    ),
+
+    GetPage(
+      name: CREATE_POST,
+      page: () => const CreatePostView(),
+    ),
+    GetPage(
+      name: NOTIFICATIONS,
+      page: () => const NotificationsView(),
     ),
 
     // Explore detail pages - full screen navigation dari tab explore
@@ -189,7 +203,7 @@ class AppPages {
       page: () => const EditProfileView(),
       // Mengandalkan ProfileController yang sudah di MainBinding
     ),
-    
+
     // New profile pages
     GetPage(
       name: COINS_HISTORY,
@@ -216,7 +230,7 @@ class AppPages {
       page: () => const MissionReviewView(),
       // Uses existing MissionController
     ),
-    
+
     // Saved items pages (uses existing ProfileController from MainBinding)
     GetPage(
       name: SAVED_PLACES,
@@ -226,7 +240,7 @@ class AppPages {
       name: SAVED_POSTS,
       page: () => const SavedPostsView(),
     ),
-    
+
     // Achievement pages
     GetPage(
       name: LEADERBOARD,
@@ -244,7 +258,7 @@ class AppPages {
       name: CHALLENGES,
       page: () => const ChallengesView(),
     ),
-    
+
     // Social pages
     GetPage(
       name: FOLLOWERS_FOLLOWING,

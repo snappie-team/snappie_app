@@ -11,10 +11,11 @@ import '../../../../data/repositories/review_repository_impl.dart';
 import '../../../../data/repositories/checkin_repository_impl.dart';
 import '../../../../data/repositories/user_repository_impl.dart';
 import '../../../../data/repositories/achievement_repository_impl.dart';
+import '../../../../data/repositories/social_repository_impl.dart';
 
 /// Binding untuk MainLayout
 /// Inject semua controllers yang dibutuhkan oleh tabs di MainLayout
-/// 
+///
 /// HYBRID APPROACH:
 /// - MainController: permanent (root controller)
 /// - Tab Controllers: lazyPut (dibuat saat pertama kali diakses)
@@ -27,18 +28,20 @@ class MainBinding extends Bindings {
       MainController(),
       permanent: true,
     );
-    
+
     // Tab controllers - lazyPut (created when first accessed)
     // Di-combine dengan LazyIndexedChild untuk lazy initialization
-    
+
     // Home tab
     Get.lazyPut<HomeController>(
       () => HomeController(
         authService: Get.find<AuthService>(),
         postRepository: Get.find<PostRepository>(),
+        socialRepository: Get.find<SocialRepository>(),
+        userRepository: Get.find<UserRepository>(),
       ),
     );
-    
+
     // Explore tab
     Get.lazyPut<ExploreController>(
       () => ExploreController(
@@ -50,18 +53,18 @@ class MainBinding extends Bindings {
         authService: Get.find<AuthService>(),
       ),
     );
-    
+
     // Articles tab
     Get.lazyPut<ArticlesController>(
       () => ArticlesController(),
     );
-    
+
     // Profile tab
     Get.lazyPut<ProfileController>(
       () => ProfileController(
         authService: Get.find<AuthService>(),
-        userRepository: Get.find<UserRepository>(), 
-        postRepository: Get.find<PostRepository>(), 
+        userRepository: Get.find<UserRepository>(),
+        postRepository: Get.find<PostRepository>(),
         placeRepository: Get.find<PlaceRepository>(),
         achievementRepository: Get.find<AchievementRepository>(),
       ),

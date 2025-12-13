@@ -55,6 +55,8 @@ class ApiEndpoints {
   // Posts endpoints
   static const String posts = '/social/posts';
   static const String postDetail = '/social/posts/id/{id}';
+  static const String postLike = '/social/posts/id/{post_id}/like';
+  static const String postComment = '/social/posts/id/{post_id}/comment';
 
   // Social endpoints
   static const String socialFollow = '/social/follow';

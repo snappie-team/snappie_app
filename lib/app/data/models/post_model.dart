@@ -57,6 +57,39 @@ class PostModel {
       _$PostModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$PostModelToJson(this);
+
+  PostModel copyWith({
+    int? id,
+    int? userId,
+    int? placeId,
+    List<String>? imageUrls,
+    String? content,
+    int? likesCount,
+    int? commentsCount,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? status,
+    UserPost? user,
+    PlacePost? place,
+    List<LikeModel>? likes,
+    List<CommentModel>? comments,
+  }) {
+    return PostModel()
+      ..id = id ?? this.id
+      ..userId = userId ?? this.userId
+      ..placeId = placeId ?? this.placeId
+      ..imageUrls = imageUrls ?? this.imageUrls
+      ..content = content ?? this.content
+      ..likesCount = likesCount ?? this.likesCount
+      ..commentsCount = commentsCount ?? this.commentsCount
+      ..createdAt = createdAt ?? this.createdAt
+      ..updatedAt = updatedAt ?? this.updatedAt
+      ..status = status ?? this.status
+      ..user = user ?? this.user
+      ..place = place ?? this.place
+      ..likes = likes ?? this.likes
+      ..comments = comments ?? this.comments;
+  }
 }
 
 @JsonSerializable()

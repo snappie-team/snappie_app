@@ -12,6 +12,7 @@ class CloudinaryFolder {
   static const String missions = 'snappie/missions';
   static const String reviews = 'snappie/reviews';
   static const String profiles = 'snappie/profiles';
+  static const String posts = 'snappie/posts';
 }
 
 /// Upload progress callback type
@@ -84,17 +85,17 @@ class CloudinaryService {
     final cloudinaryUrl = 'cloudinary://$apiKey:$apiSecret@$cloudName';
     _cloudinary = Cloudinary.fromStringUrl(cloudinaryUrl);
     _uploader = _cloudinary.uploader();
-    
+
     print('[CloudinaryService] Initialized with cloud: $cloudName');
   }
 
   /// Upload an image file to Cloudinary
-  /// 
+  ///
   /// [file] - The file to upload
   /// [folder] - The folder to upload to (use CloudinaryFolder constants)
   /// [progressCallback] - Optional callback for upload progress
   /// [quality] - Image quality (80-100, default 85)
-  /// 
+  ///
   /// Returns [CloudinaryUploadResult] with the uploaded image details
   Future<CloudinaryUploadResult> uploadImage(
     File file, {
@@ -135,7 +136,7 @@ class CloudinaryService {
       // Generate optimized URL with quality transformation
       final optimizedUrl = _generateOptimizedUrl(result.secureUrl, quality);
       print('[CloudinaryService] Upload success: $optimizedUrl');
-      
+
       // Update the result with optimized URL
       final optimizedResult = CloudinaryUploadResult(
         publicId: result.publicId,
@@ -147,7 +148,7 @@ class CloudinaryService {
         bytes: result.bytes,
         success: true,
       );
-      
+
       return optimizedResult;
     } catch (e, stackTrace) {
       print('[CloudinaryService] Upload exception: $e');
@@ -162,19 +163,19 @@ class CloudinaryService {
     if (originalUrl == null || originalUrl.isEmpty) {
       return '';
     }
-    
+
     // Insert transformation parameters into the URL
     // Format: q_{quality}/f_auto/c_limit/
     // q_{quality} - quality setting
     // f_auto - automatic format selection (WebP, JPEG, etc)
     // c_limit - limit to avoid distortion
-    
+
     final transformations = 'q_$quality,f_auto,c_limit';
     final optimizedUrl = originalUrl.replaceFirst(
       '/image/upload/',
       '/image/upload/$transformations/',
     );
-    
+
     return optimizedUrl;
   }
 
@@ -214,6 +215,19 @@ class CloudinaryService {
       folder: CloudinaryFolder.profiles,
       progressCallback: progressCallback,
       quality: 90, // Higher quality for profile pictures
+    );
+  }
+
+  /// Upload an image file specifically for posts
+  Future<CloudinaryUploadResult> uploadPostImage(
+    File file, {
+    UploadProgressCallback? progressCallback,
+  }) {
+    return uploadImage(
+      file,
+      folder: CloudinaryFolder.posts,
+      progressCallback: progressCallback,
+      quality: 85, // Good quality for post photos
     );
   }
 

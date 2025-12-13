@@ -23,16 +23,16 @@ class PostDetailView extends StatefulWidget {
 class _PostDetailViewState extends State<PostDetailView> {
   final _postRepository = Get.find<PostRepository>();
   final _authService = Get.find<AuthService>();
-  
+
   late int _postId;
-  
+
   bool _isLoading = true;
   bool _isLoadingComments = false;
   String _errorMessage = '';
-  
+
   PostModel? _post;
   List<CommentModel> _comments = [];
-  
+
   final TextEditingController _commentController = TextEditingController();
   final PageController _imagePageController = PageController();
   int _currentImageIndex = 0;
@@ -42,7 +42,7 @@ class _PostDetailViewState extends State<PostDetailView> {
     super.initState();
     final args = Get.arguments as Map<String, dynamic>?;
     _postId = args?['postId'] ?? 0;
-    
+
     if (_postId == 0) {
       setState(() {
         _errorMessage = 'Post ID tidak valid';
@@ -68,7 +68,7 @@ class _PostDetailViewState extends State<PostDetailView> {
       });
 
       final post = await _postRepository.getPostById(_postId);
-      
+
       setState(() {
         _post = post;
         _comments = post.comments ?? [];
@@ -156,19 +156,19 @@ class _PostDetailViewState extends State<PostDetailView> {
           children: [
             // Post Header
             _buildPostHeader(),
-            
+
             // Post Content
             _buildPostContent(),
-            
+
             // Post Images
             if (_post?.imageUrls != null && _post!.imageUrls!.isNotEmpty)
               _buildPostImages(),
-            
+
             // Post Stats & Actions
             _buildPostActions(),
-            
+
             const Divider(height: 1),
-            
+
             // Comments Section
             _buildCommentsSection(),
           ],
@@ -221,8 +221,8 @@ class _PostDetailViewState extends State<PostDetailView> {
             ),
           ),
           Text(
-            _post?.createdAt != null 
-                ? TimeFormatter.formatTimeAgo(_post!.createdAt!) 
+            _post?.createdAt != null
+                ? TimeFormatter.formatTimeAgo(_post!.createdAt!)
                 : '',
             style: TextStyle(
               color: AppColors.textSecondary,
@@ -238,7 +238,7 @@ class _PostDetailViewState extends State<PostDetailView> {
     if (_post?.content == null || _post!.content!.isEmpty) {
       return const SizedBox.shrink();
     }
-    
+
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -254,7 +254,7 @@ class _PostDetailViewState extends State<PostDetailView> {
 
   Widget _buildPostImages() {
     final imageUrls = _post!.imageUrls!;
-    
+
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.only(top: 12),
@@ -289,7 +289,7 @@ class _PostDetailViewState extends State<PostDetailView> {
               },
             ),
           ),
-          
+
           // Image indicator
           if (imageUrls.length > 1)
             Padding(
@@ -318,8 +318,9 @@ class _PostDetailViewState extends State<PostDetailView> {
 
   Widget _buildPostActions() {
     final currentUserId = _authService.userData?.id;
-    final isLiked = _post?.likes?.any((like) => like.userId == currentUserId) ?? false;
-    
+    final isLiked =
+        _post?.likes?.any((like) => like.userId == currentUserId) ?? false;
+
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.all(16),
@@ -346,9 +347,9 @@ class _PostDetailViewState extends State<PostDetailView> {
               ],
             ),
           ),
-          
+
           const SizedBox(width: 24),
-          
+
           // Comment count
           Row(
             children: [
@@ -367,9 +368,9 @@ class _PostDetailViewState extends State<PostDetailView> {
               ),
             ],
           ),
-          
+
           const Spacer(),
-          
+
           // View place button
           if (_post?.placeId != null)
             TextButton(
@@ -403,7 +404,6 @@ class _PostDetailViewState extends State<PostDetailView> {
             ),
           ),
           const SizedBox(height: 16),
-          
           if (_comments.isEmpty)
             Center(
               child: Padding(
@@ -565,16 +565,16 @@ class _PostDetailViewState extends State<PostDetailView> {
 
   Future<void> _navigateToPlace(int? placeId) async {
     if (placeId == null) return;
-    
+
     try {
       Get.dialog(
         const Center(child: CircularProgressIndicator()),
         barrierDismissible: false,
       );
-      
+
       final placeRepository = Get.find<PlaceRepository>();
       final place = await placeRepository.getPlaceById(placeId);
-      
+
       Get.back();
       Get.toNamed(AppPages.PLACE_DETAIL, arguments: place);
     } catch (e) {
@@ -591,32 +591,88 @@ class _PostDetailViewState extends State<PostDetailView> {
     // TODO: Implement fullscreen image viewer
   }
 
-  void _toggleLike() {
-    // TODO: Implement like/unlike
-    Get.snackbar(
-      'Info',
-      'Fitur like akan segera hadir',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+  void _toggleLike() async {
+    final postId = _post?.id;
+    if (postId == null) return;
+
+    try {
+      setState(() => _isLoading = true);
+
+      final postRepository = Get.find<PostRepository>();
+      final isLiked = await postRepository.toggleLikePost(postId);
+
+      // Reload post to get updated like count and state
+      await _loadPost();
+    } catch (e) {
+      Get.snackbar(
+        'Gagal',
+        'Tidak dapat menyukai post',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
-  void _submitComment() {
+  void _submitComment() async {
     final comment = _commentController.text.trim();
-    if (comment.isEmpty) return;
-    
-    // TODO: Implement submit comment
-    _commentController.clear();
-    Get.snackbar(
-      'Info',
-      'Fitur komentar akan segera hadir',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    final postId = _post?.id;
+
+    if (comment.isEmpty || postId == null) return;
+
+    try {
+      await _postRepository.createComment(postId, comment);
+      _commentController.clear();
+
+      // Reload post to get updated comments
+      await _loadPost();
+
+      Get.snackbar(
+        'Berhasil',
+        'Komentar berhasil ditambahkan',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 2),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Gagal',
+        'Tidak dapat menambahkan komentar',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
   }
 
-  void _sharePost() {
+  void _sharePost() async {
     if (_post == null) return;
-    
-    final shareText = '${_post!.user?.name ?? 'Someone'} di Snappie: ${_post!.content ?? ''}\n\nhttps://snappie.app/post/${_post!.id}';
-    Share.share(shareText);
+
+    final userName = _post!.user?.name ?? 'Seseorang';
+    final content = _post!.content ?? '';
+    final postId = _post!.id;
+    final placeName = _post!.place?.name;
+
+    String shareText = '📝 $userName membagikan di Snappie\n';
+    if (content.isNotEmpty) {
+      shareText += '\n$content\n';
+    }
+    if (placeName != null) {
+      shareText += '\n📍 Lokasi: $placeName';
+    }
+    if (postId != null) {
+      shareText += '\n\nLihat selengkapnya:\nhttps://snappie.app/post/$postId';
+    }
+    shareText += '\n\nTemukan di Snappie App! 📱';
+
+    await SharePlus.instance.share(
+      ShareParams(
+        text: shareText,
+        subject: 'Lihat postingan ini dari $userName',
+      ),
+    );
   }
 }

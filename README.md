@@ -4,15 +4,20 @@ A Flutter application built with simplified architecture principles, featuring u
 
 ## Architecture Overview
 
-This project follows a **simplified architecture** approach, focusing on maintainability and development speed. The architecture is divided into two main layers:
+This project follows a **simplified architecture** approach, focusing on maintainability and development speed.
 
-- **Data Layer**: Handles data sources, repositories implementation, and models
-- **Presentation Layer**: UI components, controllers, and state management
+At a high level:
+
+- **Data layer**: datasources + repositories + models (no domain layer)
+- **Presentation layer**: feature modules (GetX controllers + views)
+- **Core**: shared infrastructure (network, services, DI, errors, helpers)
 
 ## Project Structure
 
 ```
 lib/
+├── main.dart                    # App entry point
+├── firebase_options.dart         # Firebase options (generated)
 ├── app/
 │   ├── core/                    # Core utilities and configurations
 │   │   ├── constants/           # App-wide constants
@@ -33,6 +38,7 @@ lib/
 │   │   ├── auth/                # Authentication feature
 │   │   ├── explore/             # Explore places feature
 │   │   ├── home/                # Home feed feature
+│   │   ├── mission/              # Missions / challenges
 │   │   ├── profile/             # User profile feature
 │   │   └── shared/              # Shared components and widgets
 │   │       ├── components/      # Reusable UI components
@@ -46,7 +52,6 @@ lib/
 │   │           ├── _navigation_widgets/ # Navigation and button widgets
 │   │           └── _state_widgets/     # Loading, error, empty state widgets
 │   ├── routes/                  # App routing configuration
-│   └── main.dart                # App entry point
 ```
 
 ## Layer Details
@@ -104,10 +109,12 @@ Organized widget system for consistent UI development:
 - **Local Database**: Isar (NoSQL database)
 - **HTTP Client**: Dio with custom interceptors
 - **Dependency Injection**: GetX
-- **Architecture**: Simplified Data + Presentation layers
+- **Architecture**: Simplified (no domain layer) with shared Core infrastructure
 - **Error Handling**: Custom exception handling with API response helpers
 - **External URLs**: url_launcher for opening external links
-- **Authentication**: Laravel Sanctum with token management
+- **Authentication**: Firebase Auth + Google Sign-In, plus backend token/session handling
+- **Media Uploads**: Cloudinary
+- **Sharing**: share_plus + QR (qr_flutter)
 
 ## Getting Started
 
@@ -129,12 +136,26 @@ cd snappie_app
 flutter pub get
 ```
 
-3. Generate Isar database schemas and JSON serialization:
+3. Configure environment variables:
+
+Create a `.env` file at the project root. Required keys are defined in `lib/app/core/constants/environment_config.dart`.
+
+Example:
+
+```dotenv
+ENVIRONMENT=development
+LOCAL_BASE_URL=http://10.0.2.2:8000
+HOST_BASE_URL=https://api.example.com
+API_VERSION=v1
+REGISTRATION_API_KEY=your_key_here
+```
+
+4. Generate Isar database schemas and JSON serialization:
 ```bash
 flutter packages pub run build_runner build --delete-conflicting-outputs
 ```
 
-4. Run the app:
+5. Run the app:
 ```bash
 flutter run
 ```
@@ -191,11 +212,14 @@ The simplified architecture makes testing straightforward:
 ## Features
 
 ### Current Features
-- **Authentication**: Login/Register with Laravel Sanctum
-- **Social Feed**: Post creation, likes, comments
+- **Authentication**: Google Sign-In / Firebase Auth + session handling
+- **Social Feed**: Post creation, likes, comments, post detail
+- **Create Post**: Dedicated create post screen
+- **Notifications**: Notifications screen (UI/navigation)
 - **Place Discovery**: Browse places, check-ins, reviews
 - **Articles**: Browse articles with external URL support
 - **Profile Management**: User profiles and settings
+- **Profile Sharing**: Share profile via link/QR modal
 - **Promotional Banners**: Dismissible promotional content
 
 ### Key Components

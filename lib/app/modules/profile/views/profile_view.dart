@@ -4,7 +4,6 @@ import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart'
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../controllers/profile_controller.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../data/models/post_model.dart';
 import '../../../data/models/user_model.dart';
 import '../../shared/widgets/index.dart';
 import '../widgets/share_profile_modal.dart';
@@ -340,9 +339,6 @@ class ProfileView extends GetView<ProfileController> {
               children: controller.userPosts.map((post) {
                 return PostCard(
                   post: post,
-                  onCommentTap: () => _showComments(post),
-                  onShareTap: () => _sharePost(post),
-                  onMoreTap: () => _showPostOptions(post),
                 );
               }).toList(),
             );
@@ -744,177 +740,6 @@ class ProfileView extends GetView<ProfileController> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: AppColors.overlayDark,
-    );
-  }
-
-  void _showComments(PostModel post) {
-    Get.bottomSheet(
-      Container(
-        height: Get.height * 0.7,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const Text(
-              'Komentar',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const Divider(height: 20),
-            const Expanded(
-              child: Center(
-                child: Text(
-                  'Belum ada komentar',
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _sharePost(PostModel post) {
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const Text(
-              'Bagikan Post',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildShareOption(Icons.copy, 'Salin Link'),
-                _buildShareOption(Icons.chat, 'WhatsApp'),
-                _buildShareOption(Icons.send, 'Telegram'),
-                _buildShareOption(Icons.more_horiz, 'Lainnya'),
-              ],
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildShareOption(IconData icon, String label) {
-    return GestureDetector(
-      onTap: () {
-        Get.back();
-        Get.snackbar('Info', 'Dibagikan via $label');
-      },
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.backgroundContainer,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: AppColors.primary),
-          ),
-          const SizedBox(height: 8),
-          Text(label, style: const TextStyle(fontSize: 12)),
-        ],
-      ),
-    );
-  }
-
-  void _showPostOptions(PostModel post) {
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('Edit Post'),
-              onTap: () {
-                Get.back();
-                Get.snackbar('Info', 'Fitur edit akan segera hadir');
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.delete, color: AppColors.error),
-              title: Text('Hapus Post', style: TextStyle(color: AppColors.error)),
-              onTap: () {
-                Get.back();
-                _confirmDeletePost(post);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _confirmDeletePost(PostModel post) {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Hapus Post'),
-        content: const Text('Apakah Anda yakin ingin menghapus post ini?'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              // TODO: Implement delete post
-              Get.snackbar('Info', 'Post dihapus');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Hapus'),
-          ),
-        ],
-      ),
     );
   }
 }

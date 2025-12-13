@@ -389,28 +389,8 @@ class _UserProfileViewState extends State<UserProfileView> {
       children: _userPosts.map((post) {
         return PostCard(
           post: post,
-          onCommentTap: () => _showComments(post),
-          onShareTap: () => _sharePost(post),
         );
       }).toList(),
-    );
-  }
-
-  void _showComments(PostModel post) {
-    // TODO: Show comments bottom sheet
-    Get.snackbar(
-      'Info',
-      'Fitur komentar akan segera hadir',
-      snackPosition: SnackPosition.BOTTOM,
-    );
-  }
-
-  void _sharePost(PostModel post) {
-    // TODO: Share post
-    Get.snackbar(
-      'Info',
-      'Fitur share akan segera hadir',
-      snackPosition: SnackPosition.BOTTOM,
     );
   }
 }

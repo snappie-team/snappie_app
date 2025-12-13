@@ -116,12 +116,24 @@ class UserRepository {
     return await remoteDataSource.toggleSavedPlace(placeIds);
   }
 
-  /// Search users by name or username
+  /// Toggle saved post (add if not saved, remove if already saved)
+  /// Returns updated list of saved post IDs
   /// Throws: [NetworkException], [ServerException]
-  Future<UserSearchResult> searchUsers(String query, {int page = 1, int perPage = 10}) async {
+  Future<List<int>> toggleSavedPost(List<int> postIds) async {
     if (!await networkInfo.isConnected) {
       throw NetworkException('No internet connection');
     }
-    return await remoteDataSource.searchUsers(query, page: page, perPage: perPage);
+    return await remoteDataSource.toggleSavedPost(postIds);
+  }
+
+  /// Search users by name or username
+  /// Throws: [NetworkException], [ServerException]
+  Future<UserSearchResult> searchUsers(String query,
+      {int page = 1, int perPage = 10}) async {
+    if (!await networkInfo.isConnected) {
+      throw NetworkException('No internet connection');
+    }
+    return await remoteDataSource.searchUsers(query,
+        page: page, perPage: perPage);
   }
 }

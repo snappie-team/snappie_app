@@ -3,6 +3,7 @@ import '../../../core/errors/exceptions.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../routes/api_endpoints.dart';
 import '../../../core/helpers/api_response_helper.dart';
+import 'package:snappie_app/app/core/utils/api_response.dart';
 import '../../models/review_model.dart';
 
 abstract class ReviewRemoteDataSource {
@@ -59,27 +60,10 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
         response,
         (json) => ReviewModel.fromJson(json as Map<String, dynamic>),
       );
+    } on ApiResponseException catch (e) {
+      throw ServerException(e.message, e.statusCode ?? 500);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw AuthenticationException('Authentication required');
-      } else if (e.response?.statusCode == 403) {
-        throw AuthorizationException('Access denied');
-      } else if (e.response?.statusCode == 409) {
-        // Conflict - already reviewed
-        final errorMsg = e.response?.data['error'] ?? 
-            e.response?.data['message'] ?? 
-            'You have already reviewed this place';
-        throw ConflictException(errorMsg);
-      } else if (e.response?.statusCode == 422) {
-        throw ValidationException(
-          e.response?.data['message'] ?? 'Validation failed',
-        );
-      } else {
-        throw ServerException(
-          e.response?.data['message'] ?? 'Network error occurred',
-          e.response?.statusCode ?? 500,
-        );
-      }
+      throw _mapDioException(e);
     } catch (e) {
       throw ServerException('Unexpected error occurred: $e', 500);
     }
@@ -118,23 +102,10 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
         response,
         (json) => ReviewModel.fromJson(json as Map<String, dynamic>),
       );
+    } on ApiResponseException catch (e) {
+      throw ServerException(e.message, e.statusCode ?? 500);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw AuthenticationException('Authentication required');
-      } else if (e.response?.statusCode == 403) {
-        throw AuthorizationException('Access denied');
-      } else if (e.response?.statusCode == 404) {
-        throw ServerException('Review not found', 404);
-      } else if (e.response?.statusCode == 422) {
-        throw ValidationException(
-          e.response?.data['message'] ?? 'Validation failed',
-        );
-      } else {
-        throw ServerException(
-          e.response?.data['message'] ?? 'Network error occurred',
-          e.response?.statusCode ?? 500,
-        );
-      }
+      throw _mapDioException(e);
     } catch (e) {
       throw ServerException('Unexpected error occurred: $e', 500);
     }
@@ -149,21 +120,34 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
         response,
         (json) => ReviewModel.fromJson(json as Map<String, dynamic>),
       );
+    } on ApiResponseException catch (e) {
+      throw ServerException(e.message, e.statusCode ?? 500);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw AuthenticationException('Authentication required');
-      } else if (e.response?.statusCode == 403) {
-        throw AuthorizationException('Access denied');
-      } else if (e.response?.statusCode == 404) {
-        throw ServerException('Place not found', 404);
-      } else {
-        throw ServerException(
-          e.response?.data['message'] ?? 'Network error occurred',
-          e.response?.statusCode ?? 500,
-        );
-      }
+      throw _mapDioException(e);
     } catch (e) {
       throw ServerException('Unexpected error occurred: $e', 500);
     }
   }
+
+  Exception _mapDioException(DioException e) {
+    final status = e.response?.statusCode;
+    final data = e.response?.data;
+
+    if (status == 401) return AuthenticationException('Authentication required');
+    if (status == 403) return AuthorizationException('Access denied');
+    if (status == 404) return ServerException('Not found', 404);
+    if (status == 409) {
+      final errorMsg = data is Map ? data['error'] ?? data['message'] ?? 'Conflict' : 'Conflict';
+      return ConflictException(errorMsg.toString());
+    }
+    if (status == 422) {
+      return ValidationException(
+        data is Map ? (data['message'] ?? 'Validation failed') : 'Validation failed',
+        errors: data is Map && data['errors'] is Map ? Map<String, dynamic>.from(data['errors']) : null,
+      );
+    }
+
+    return ServerException(data is Map ? data['message'] ?? 'Network error occurred' : 'Network error occurred', status ?? 500);
+  }
 }
+

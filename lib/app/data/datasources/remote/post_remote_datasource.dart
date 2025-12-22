@@ -3,6 +3,7 @@ import '../../../core/errors/exceptions.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../routes/api_endpoints.dart';
 import '../../../core/helpers/api_response_helper.dart';
+import 'package:snappie_app/app/core/utils/api_response.dart';
 import 'package:snappie_app/app/core/helpers/json_mapping_helper.dart';
 import '../../models/post_model.dart';
 import '../../models/comment_model.dart';
@@ -62,17 +63,10 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
           return PostModel.fromJson(postJson);
         },
       );
+    } on ApiResponseException catch (e) {
+      throw ServerException(e.message, e.statusCode ?? 500);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw AuthenticationException('Authentication required');
-      } else if (e.response?.statusCode == 403) {
-        throw AuthorizationException('Access denied');
-      } else {
-        throw ServerException(
-          e.response?.data['message'] ?? 'Network error occurred',
-          e.response?.statusCode ?? 500,
-        );
-      }
+      throw _mapDioException(e);
     }
   }
 
@@ -87,17 +81,10 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         response,
         (json) => PostModel.fromJson(json as Map<String, dynamic>),
       );
+    } on ApiResponseException catch (e) {
+      throw ServerException(e.message, e.statusCode ?? 500);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw AuthenticationException('Authentication required');
-      } else if (e.response?.statusCode == 403) {
-        throw AuthorizationException('Access denied');
-      } else {
-        throw ServerException(
-          e.response?.data['message'] ?? 'Network error occurred',
-          e.response?.statusCode ?? 500,
-        );
-      }
+      throw _mapDioException(e);
     }
   }
 
@@ -122,17 +109,10 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
           return PostModel.fromJson(postJson);
         },
       );
+    } on ApiResponseException catch (e) {
+      throw ServerException(e.message, e.statusCode ?? 500);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw AuthenticationException('Authentication required');
-      } else if (e.response?.statusCode == 403) {
-        throw AuthorizationException('Access denied');
-      } else {
-        throw ServerException(
-          e.response?.data['message'] ?? 'Network error occurred',
-          e.response?.statusCode ?? 500,
-        );
-      }
+      throw _mapDioException(e);
     } catch (e) {
       throw ServerException('Unexpected error occurred: $e', 500);
     }
@@ -159,17 +139,10 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
           return PostModel.fromJson(postJson);
         },
       );
+    } on ApiResponseException catch (e) {
+      throw ServerException(e.message, e.statusCode ?? 500);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw AuthenticationException('Authentication required');
-      } else if (e.response?.statusCode == 403) {
-        throw AuthorizationException('Access denied');
-      } else {
-        throw ServerException(
-          e.response?.data['message'] ?? 'Network error occurred',
-          e.response?.statusCode ?? 500,
-        );
-      }
+      throw _mapDioException(e);
     } catch (e) {
       throw ServerException('Unexpected error occurred: $e', 500);
     }
@@ -189,17 +162,10 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       );
 
       return isLiked;
+    } on ApiResponseException catch (e) {
+      throw ServerException(e.message, e.statusCode ?? 500);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw AuthenticationException('Authentication required');
-      } else if (e.response?.statusCode == 403) {
-        throw AuthorizationException('Access denied');
-      } else {
-        throw ServerException(
-          e.response?.data['message'] ?? 'Network error occurred',
-          e.response?.statusCode ?? 500,
-        );
-      }
+      throw _mapDioException(e);
     } catch (e) {
       throw ServerException('Unexpected error occurred: $e', 500);
     }
@@ -217,17 +183,10 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         response,
         (json) => CommentModel.fromJson(json as Map<String, dynamic>),
       );
+    } on ApiResponseException catch (e) {
+      throw ServerException(e.message, e.statusCode ?? 500);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw AuthenticationException('Authentication required');
-      } else if (e.response?.statusCode == 403) {
-        throw AuthorizationException('Access denied');
-      } else {
-        throw ServerException(
-          e.response?.data['message'] ?? 'Network error occurred',
-          e.response?.statusCode ?? 500,
-        );
-      }
+      throw _mapDioException(e);
     } catch (e) {
       throw ServerException('Unexpected error occurred: $e', 500);
     }
@@ -274,22 +233,10 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
           return PostModel.fromJson(postJson);
         },
       );
+    } on ApiResponseException catch (e) {
+      throw ServerException(e.message, e.statusCode ?? 500);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw AuthenticationException('Authentication required');
-      } else if (e.response?.statusCode == 403) {
-        throw AuthorizationException('Access denied');
-      } else if (e.response?.statusCode == 422) {
-        throw ValidationException(
-          e.response?.data['message'] ?? 'Validation error',
-          errors: e.response?.data['errors'],
-        );
-      } else {
-        throw ServerException(
-          e.response?.data['message'] ?? 'Network error occurred',
-          e.response?.statusCode ?? 500,
-        );
-      }
+      throw _mapDioException(e);
     } catch (e) {
       throw ServerException('Unexpected error occurred: $e', 500);
     }
@@ -323,4 +270,21 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   //     throw Exception('Failed to delete post: $e');
   //   }
   // }
+
+  Exception _mapDioException(DioException e) {
+    final status = e.response?.statusCode;
+    final data = e.response?.data;
+
+    if (status == 401) return AuthenticationException('Authentication required');
+    if (status == 403) return AuthorizationException('Access denied');
+    if (status == 404) return ServerException('Not found', 404);
+    if (status == 422) {
+      return ValidationException(
+        data is Map ? (data['message'] ?? 'Validation failed') : 'Validation failed',
+        errors: data is Map && data['errors'] is Map ? Map<String, dynamic>.from(data['errors']) : null,
+      );
+    }
+
+    return ServerException(data is Map ? data['message'] ?? 'Network error occurred' : 'Network error occurred', status ?? 500);
+  }
 }

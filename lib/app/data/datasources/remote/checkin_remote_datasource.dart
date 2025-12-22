@@ -4,9 +4,10 @@ import '../../../core/network/dio_client.dart';
 import '../../../routes/api_endpoints.dart';
 import '../../../core/helpers/api_response_helper.dart';
 import '../../models/checkin_model.dart';
+import '../../models/gamification_response_model.dart';
 
 abstract class CheckinRemoteDataSource {
-  Future<CheckinModel> createCheckin({
+  Future<ActionResponseWithGamification<CheckinModel>> createCheckin({
     required int placeId,
     required double latitude,
     required double longitude,
@@ -23,7 +24,7 @@ class CheckinRemoteDataSourceImpl implements CheckinRemoteDataSource {
   CheckinRemoteDataSourceImpl(this.dioClient);
 
   @override
-  Future<CheckinModel> createCheckin({
+  Future<ActionResponseWithGamification<CheckinModel>> createCheckin({
     required int placeId,
     required double latitude,
     required double longitude,
@@ -54,9 +55,28 @@ class CheckinRemoteDataSourceImpl implements CheckinRemoteDataSource {
 
       print('⭐ createCheckin response: $response');
 
-      return extractApiResponseData<CheckinModel>(
-        response,
-        (json) => CheckinModel.fromJson(json as Map<String, dynamic>),
+      final data = response.data['data'] as Map<String, dynamic>;
+      
+      // Parse checkin data
+      final checkinJson = data['checkin'] ?? data;
+      final checkin = CheckinModel.fromJson(checkinJson as Map<String, dynamic>);
+      
+      // Parse gamification data (optional)
+      GamificationResult? gamification;
+      if (data['gamification'] != null) {
+        try {
+          gamification = GamificationResult.fromJson(
+            data['gamification'] as Map<String, dynamic>,
+          );
+          print('⭐ Gamification data found: achievements=${gamification.achievementsUnlocked?.length}, challenges=${gamification.challengesCompleted?.length}');
+        } catch (e) {
+          print('⚠️ Failed to parse gamification data: $e');
+        }
+      }
+      
+      return ActionResponseWithGamification<CheckinModel>(
+        actionData: checkin,
+        gamification: gamification,
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {

@@ -5,6 +5,7 @@ import '../../../core/services/auth_service.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/profile_controller.dart';
 import '../../shared/widgets/index.dart';
+import '../../../core/services/app_update_service.dart';
 
 /// Settings page with menu items
 class SettingsView extends StatelessWidget {
@@ -55,6 +56,19 @@ class SettingsView extends StatelessWidget {
                     icon: Icons.quiz_outlined,
                     title: 'FAQ',
                     onTap: () => Get.toNamed(AppPages.FAQ),
+                  ),
+
+                  _buildMenuItem(
+                    icon: Icons.system_update_alt,
+                    title: 'Periksa Pembaruan',
+                    onTap: () async {
+                      try {
+                        await Get.find<AppUpdateService>().checkAndPrompt(
+                          showNoUpdateDialog: true,
+                          showErrorDialog: true,
+                        );
+                      } catch (_) {}
+                    },
                   ),
 
                   // Keluar

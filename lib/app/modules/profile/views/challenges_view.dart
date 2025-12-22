@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/modules/shared/widgets/_state_widgets/empty_state_widget.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/achievement_model.dart';
 import '../../../data/repositories/achievement_repository_impl.dart';
@@ -18,7 +19,7 @@ class _ChallengesViewState extends State<ChallengesView> {
   final ProfileController _profileController = Get.find<ProfileController>();
   
   bool _isLoading = true;
-  List<UserChallenge> _challenges = [];
+  List<Challenge> _challenges = [];
 
   @override
   void initState() {
@@ -32,7 +33,7 @@ class _ChallengesViewState extends State<ChallengesView> {
     try {
       final userId = _profileController.userData?.id;
       if (userId != null) {
-        final result = await _repository.getUserChallenges(userId);
+        final result = await _repository.getChallenges(userId);
         setState(() {
           _challenges = result.items ?? [];
         });
@@ -47,23 +48,22 @@ class _ChallengesViewState extends State<ChallengesView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundContainer,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        backgroundColor: AppColors.backgroundContainer,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: AppColors.primary),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
+        title: Text(
           'Tantangan',
           style: TextStyle(
-            color: Colors.white,
+            color: AppColors.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
-        centerTitle: true,
       ),
       body: Column(
         children: [
@@ -96,11 +96,7 @@ class _ChallengesViewState extends State<ChallengesView> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.blue, Colors.blue.shade700],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
+        gradient: AppColors.primaryGradient,
       ),
       child: Column(
         children: [
@@ -109,16 +105,15 @@ class _ChallengesViewState extends State<ChallengesView> {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: AppColors.primarySurface.withOpacity(0.6),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.flag,
-              color: Colors.white,
+              color: AppColors.textOnPrimary,
               size: 48,
             ),
-          ),
-          
+          ),          
           const SizedBox(height: 16),
           
           Text(
@@ -149,13 +144,13 @@ class _ChallengesViewState extends State<ChallengesView> {
               _buildStatChip(
                 Icons.check_circle,
                 '$completedCount Selesai',
-                Colors.green,
+                AppColors.success,
               ),
               const SizedBox(width: 16),
               _buildStatChip(
                 Icons.hourglass_bottom,
                 '$inProgressCount Berjalan',
-                Colors.orange,
+                AppColors.warning,
               ),
             ],
           ),
@@ -168,7 +163,7 @@ class _ChallengesViewState extends State<ChallengesView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: AppColors.primarySurface.withOpacity(0.6),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -178,8 +173,8 @@ class _ChallengesViewState extends State<ChallengesView> {
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: AppColors.textOnPrimary,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -190,37 +185,14 @@ class _ChallengesViewState extends State<ChallengesView> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.flag_outlined,
-            size: 64,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Belum ada tantangan',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Tantangan baru akan segera hadir!',
-            style: TextStyle(
-              color: Colors.grey[500],
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
+    return const EmptyStateWidget(
+      iconData: Icons.flag_outlined,
+      title: 'Belum ada tantangan',
+      subtitle: 'Tantangan baru akan segera hadir!',
     );
   }
 
-  Widget _buildChallengeItem(UserChallenge challenge) {
+  Widget _buildChallengeItem(Challenge challenge) {
     final isCompleted = challenge.status ?? false;
     final info = challenge.additionalInfo;
     final progress = info != null && info.targetCount != null && info.targetCount! > 0

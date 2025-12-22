@@ -35,3 +35,6 @@ export '_card_widgets/review_stats_card.dart';
 // Filter Widgets
 export '_filter_widgets/filter_chip_widget.dart';
 export '_filter_widgets/place_filter_bar.dart';
+
+// Gamification Widgets
+export '_gamification_widgets/achievement_popup_widget.dart';

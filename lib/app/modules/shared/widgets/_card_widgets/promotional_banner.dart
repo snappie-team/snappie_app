@@ -62,7 +62,7 @@ class PromotionalBanner extends StatelessWidget {
     switch (size) {
       case BannerSize.standard:
         return BannerConfig(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.backgroundContainer,
           borderRadius: 12,
           margin: const EdgeInsets.symmetric(horizontal: 16),
           padding: const EdgeInsets.all(20),

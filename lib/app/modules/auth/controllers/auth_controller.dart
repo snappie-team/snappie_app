@@ -7,6 +7,7 @@ import 'package:snappie_app/app/routes/app_pages.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/constants/remote_assets.dart';
 import '../../../core/errors/auth_result.dart';
+import '../../../core/services/app_update_service.dart';
 
 enum Gender { male, female, others }
 
@@ -71,6 +72,15 @@ class AuthController extends GetxController {
     // Check if user is already logged in
     _isLoggedIn.value = authService.isLoggedIn;
     _loadGoogleUserData();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    try {
+      final updater = Get.find<AppUpdateService>();
+      updater.checkAndPrompt();
+    } catch (_) {}
   }
 
   @override

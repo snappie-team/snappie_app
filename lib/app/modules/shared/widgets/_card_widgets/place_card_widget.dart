@@ -136,7 +136,7 @@ class PlaceCardWidget extends StatelessWidget {
         child: Container(
           padding: padding ?? cardConfig.contentPadding,
           decoration: BoxDecoration(
-            color: backgroundColor ?? AppColors.background,
+            color: backgroundColor ?? AppColors.backgroundContainer,
             borderRadius: BorderRadius.circular(cardConfig.borderRadius),
             boxShadow: [
               BoxShadow(

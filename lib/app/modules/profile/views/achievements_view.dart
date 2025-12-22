@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/modules/shared/widgets/_state_widgets/empty_state_widget.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/achievement_model.dart';
 import '../../../data/repositories/achievement_repository_impl.dart';
@@ -18,7 +19,7 @@ class _AchievementsViewState extends State<AchievementsView> {
   final ProfileController _profileController = Get.find<ProfileController>();
   
   bool _isLoading = true;
-  List<UserAchievement> _achievements = [];
+  List<Achievement> _achievements = [];
 
   @override
   void initState() {
@@ -32,7 +33,7 @@ class _AchievementsViewState extends State<AchievementsView> {
     try {
       final userId = _profileController.userData?.id;
       if (userId != null) {
-        final result = await _repository.getUserAchievements(userId);
+        final result = await _repository.getAchievements(userId);
         setState(() {
           _achievements = result.items ?? [];
         });
@@ -47,23 +48,22 @@ class _AchievementsViewState extends State<AchievementsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundContainer,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.purple,
+        backgroundColor: AppColors.backgroundContainer,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: AppColors.primary),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
+        title: Text(
           'Penghargaan Saya',
           style: TextStyle(
-            color: Colors.white,
+            color: AppColors.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
-        centerTitle: true,
       ),
       body: Column(
         children: [
@@ -93,11 +93,7 @@ class _AchievementsViewState extends State<AchievementsView> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.purple, Colors.purple.shade700],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
+        gradient: AppColors.primaryGradient,
       ),
       child: Column(
         children: [
@@ -106,16 +102,15 @@ class _AchievementsViewState extends State<AchievementsView> {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: AppColors.primarySurface.withOpacity(0.6),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.emoji_events,
-              color: Colors.amber,
+              color: AppColors.accent,
               size: 48,
             ),
-          ),
-          
+          ),          
           const SizedBox(height: 16),
           
           Text(
@@ -152,38 +147,14 @@ class _AchievementsViewState extends State<AchievementsView> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.emoji_events_outlined,
-            size: 64,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Belum ada penghargaan',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Selesaikan tantangan untuk mendapat penghargaan!',
-            style: TextStyle(
-              color: Colors.grey[500],
-              fontSize: 14,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+    return const EmptyStateWidget(
+      iconData: Icons.emoji_events_outlined,
+      title: 'Belum ada penghargaan',
+      subtitle: 'Selesaikan tantangan untuk mendapat penghargaan!',
     );
   }
 
-  Widget _buildAchievementItem(UserAchievement achievement) {
+  Widget _buildAchievementItem(Achievement achievement) {
     final isUnlocked = achievement.status ?? false;
     
     return Container(
@@ -208,13 +179,13 @@ class _AchievementsViewState extends State<AchievementsView> {
             height: 56,
             decoration: BoxDecoration(
               color: isUnlocked 
-                  ? Colors.amber.withOpacity(0.1)
-                  : Colors.grey.withOpacity(0.1),
+                  ? AppColors.accentContainer.withOpacity(0.8)
+                  : AppColors.surface.withOpacity(0.8),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               Icons.emoji_events,
-              color: isUnlocked ? Colors.amber : Colors.grey,
+              color: isUnlocked ? AppColors.accent : AppColors.textTertiary,
               size: 28,
             ),
           ),

@@ -1068,7 +1068,7 @@ class PlaceDetailView extends GetView<ExploreController> {
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: AppColors.backgroundContainer,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
@@ -1090,7 +1090,7 @@ class PlaceDetailView extends GetView<ExploreController> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: AppColors.backgroundContainer,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(

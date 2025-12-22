@@ -29,10 +29,10 @@ class HomeView extends GetView<HomeController> {
             ? SliverToBoxAdapter(
                 child: PromotionalBanner(
                   title: 'Ayo Beraksi!',
-                  subtitle:
-                      'Raih XP, Koin, dan hadiah eksklusif lainnya dengan menyelesaikan misi!',
+                  subtitle: 'Raih XP, Koin, dan hadiah eksklusif lainnya dengan menyelesaikan misi!',
                   imageAsset: Image.asset('assets/images/target.png'),
                   size: BannerSize.compact,
+                  onTap: () => Get.toNamed(AppPages.CHALLENGES),
                   showCloseButton: true,
                   onClose: () => controller.hideBanner(),
                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/routes/app_pages.dart';
 import '../controllers/explore_controller.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../shared/layout/views/scaffold_frame.dart';
@@ -66,6 +67,7 @@ class ExploreView extends GetView<ExploreController> {
                         subtitle: 'Dapatkan hadiah dengan menyelesaikan misi!',
                         imageAsset: Image.asset('assets/images/gift.png'),
                         size: BannerSize.standard,
+                        onTap: () => Get.toNamed(AppPages.CHALLENGES),
                         showCloseButton: false,
                         onClose: () => controller.hideBanner(),
                       ),
@@ -93,7 +95,7 @@ class ExploreView extends GetView<ExploreController> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.background,
+          color: isSelected ? AppColors.primary : AppColors.backgroundContainer,
           borderRadius: BorderRadius.circular(5),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.border,

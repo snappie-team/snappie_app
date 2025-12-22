@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/data/models/leaderboard_model.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../data/models/achievement_model.dart';
 import '../controllers/profile_controller.dart';
 import '../../shared/widgets/index.dart';
 

@@ -40,7 +40,7 @@ class AppColors {
   // ============================================================================
   
   /// Background colors for different surfaces
-  static Color background = MetaColors.meta50; // Light Grey
+  static Color background = MetaColors.meta100; // Light Grey
   static Color backgroundContainer = Colors.white; // White
   
   static Color surface = MetaColors.meta100; // White
@@ -86,7 +86,7 @@ class AppColors {
   
   /// Accent colors - for highlights and special elements
   static Color accent = AccentColors.accent500; // Orange
-  static Color accentLight = AccentColors.accent300; // Light Orange
+  static Color accentLight = AccentColors.accent100; // Light Orange
   static Color accentDark = AccentColors.accent700; // Dark Orange
   static Color accentSurface = AccentColors.accent50; // Very Light Orange
   static Color accentContainer = AccentColors.accent100; // Light Orange Container

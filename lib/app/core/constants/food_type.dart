@@ -1,61 +1,81 @@
 import 'package:flutter/material.dart';
 
 enum FoodType {
-  nusantara,
-  internasional,
-  seafood,
-  kafein,
-  nonKafein,
-  vegetarian,
-  dessert,
-  makananRingan,
-  pastry,
+  nonSup,
+  miInstan,
+  menuKomposit,
+  supSoto,
+  menuCampuran,
+  minumanDanTambahan,
+  liwetan,
+  gayaPadang,
+  gayaTionghoa,
+  makananCepatSaji,
+  makananTradisional,
+  makananKemasan,
+  buahBuahan,
 }
 
 extension FoodTypeExtension on FoodType {
   String get label {
     switch (this) {
-      case FoodType.nusantara:
-        return 'Nusantara';
-      case FoodType.internasional:
-        return 'Internasional';
-      case FoodType.seafood:
-        return 'Seafood';
-      case FoodType.kafein:
-        return 'Kafein';
-      case FoodType.nonKafein:
-        return 'Non-Kafein';
-      case FoodType.vegetarian:
-        return 'Vegetarian';
-      case FoodType.dessert:
-        return 'Dessert';
-      case FoodType.makananRingan:
-        return 'Makanan Ringan';
-      case FoodType.pastry:
-        return 'Pastry';
+      case FoodType.nonSup:
+        return 'Non-Sup';
+      case FoodType.miInstan:
+        return 'Mi Instan';
+      case FoodType.menuKomposit:
+        return 'Menu Komposit';
+      case FoodType.supSoto:
+        return 'Sup/Soto';
+      case FoodType.menuCampuran:
+        return 'Menu Campuran';
+      case FoodType.minumanDanTambahan:
+        return 'Minuman dan Tambahan';
+      case FoodType.liwetan:
+        return 'Liwetan';
+      case FoodType.gayaPadang:
+        return 'Gaya Padang';
+      case FoodType.gayaTionghoa:
+        return 'Gaya Tionghoa';
+      case FoodType.makananCepatSaji:
+        return 'Makanan Cepat Saji';
+      case FoodType.makananTradisional:
+        return 'Makanan Tradisional';
+      case FoodType.makananKemasan:
+        return 'Makanan Kemasan';
+      case FoodType.buahBuahan:
+        return 'Buah-buahan';
     }
   }
 
   IconData get icon {
     switch (this) {
-      case FoodType.nusantara:
-        return Icons.rice_bowl;
-      case FoodType.internasional:
-        return Icons.public;
-      case FoodType.seafood:
+      case FoodType.nonSup:
+        return Icons.restaurant;
+      case FoodType.miInstan:
+        return Icons.ramen_dining;
+      case FoodType.menuKomposit:
+        return Icons.dining;
+      case FoodType.supSoto:
+        return Icons.soup_kitchen;
+      case FoodType.menuCampuran:
         return Icons.set_meal;
-      case FoodType.kafein:
-        return Icons.coffee;
-      case FoodType.nonKafein:
+      case FoodType.minumanDanTambahan:
         return Icons.local_drink;
-      case FoodType.vegetarian:
-        return Icons.eco;
-      case FoodType.dessert:
-        return Icons.cake;
-      case FoodType.makananRingan:
+      case FoodType.liwetan:
+        return Icons.rice_bowl;
+      case FoodType.gayaPadang:
+        return Icons.food_bank;
+      case FoodType.gayaTionghoa:
+        return Icons.restaurant_menu;
+      case FoodType.makananCepatSaji:
         return Icons.fastfood;
-      case FoodType.pastry:
-        return Icons.bakery_dining;
+      case FoodType.makananTradisional:
+        return Icons.temple_hindu;
+      case FoodType.makananKemasan:
+        return Icons.inventory_2;
+      case FoodType.buahBuahan:
+        return Icons.apple;
     }
   }
 

@@ -4,6 +4,7 @@ class ApiEndpoints {
   // Base URLs - Now using EnvironmentConfig
   static String get baseUrl => EnvironmentConfig.baseUrl;
   static String get apiVersion => EnvironmentConfig.apiVersion;
+  static String get localUrl => EnvironmentConfig.localUrl;
 
   // Auth endpoints
   static const String login = '/auth/login';
@@ -29,6 +30,13 @@ class ApiEndpoints {
   static const String userPosts = '/users/id/{id}/posts';
   static const String userAchievements = '/users/id/{id}/achievements';
   static const String userChallenges = '/users/id/{id}/challenges';
+
+  // Gamification endpoints
+  static const String userAchievementsProgress = '/gamification/achievements';
+
+  // App endpoints
+  static const String appUpdate = '/app/update';
+  static const String userChallengesProgress = '/gamification/challenges';
 
   // Place endpoints
   static const String places = '/places';

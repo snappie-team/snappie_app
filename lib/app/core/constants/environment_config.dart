@@ -37,6 +37,7 @@ class EnvironmentConfig {
   }
 
   static String get fullApiUrl => '$baseUrl$apiVersion';
+  static String get localUrl => '${_getEnv('LOCAL_BASE_URL')}$apiVersion';
   
   // Logging configuration
   static const bool enableLogging = true;

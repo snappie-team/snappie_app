@@ -1,5 +1,8 @@
 import 'package:get/get.dart';
+import 'package:snappie_app/app/data/models/achievement_model.dart';
 import 'package:snappie_app/app/modules/profile/views/profile_view.dart';
+import 'package:snappie_app/app/modules/profile/views/user_achievement_view.dart';
+import 'package:snappie_app/app/modules/profile/views/user_challenge_view.dart';
 import 'package:snappie_app/app/modules/profile/views/user_profile_view.dart';
 import 'package:snappie_app/app/modules/profile/views/saved_places_view.dart';
 import 'package:snappie_app/app/modules/profile/views/saved_posts_view.dart';
@@ -252,11 +255,11 @@ class AppPages {
     ),
     GetPage(
       name: ACHIEVEMENTS,
-      page: () => const AchievementsView(),
+      page: () => const UserAchievementView(),
     ),
     GetPage(
       name: CHALLENGES,
-      page: () => const ChallengesView(),
+      page: () => const UserChallengesView(),
     ),
 
     // Social pages

@@ -3,19 +3,19 @@ import 'package:flutter/material.dart';
 enum PlaceValue {
   affordablePrice,
   authenticTaste,
-  variedMenu,
+  uniqueMenu,
   open24Hours,
   goodNetwork,
   aesthetic,
   calmAtmosphere,
-  traditionalAtmosphere,
   homeyAtmosphere,
+  historicalTraditional,
   petFriendly,
   familyFriendly,
   friendlyService,
+  meetingDiscussion,
   hangoutSpot,
   workFromCafe,
-  historicalPlace,
 }
 
 extension PlaceValueExtension on PlaceValue {
@@ -25,32 +25,32 @@ extension PlaceValueExtension on PlaceValue {
         return 'Harga Terjangkau';
       case PlaceValue.authenticTaste:
         return 'Rasa Autentik';
-      case PlaceValue.variedMenu:
-        return 'Menu Bervariasi';
+      case PlaceValue.uniqueMenu:
+        return 'Menu Unik/Variasi';
       case PlaceValue.open24Hours:
         return 'Buka 24 Jam';
       case PlaceValue.goodNetwork:
         return 'Jaringan Lancar';
       case PlaceValue.aesthetic:
-        return 'Estetika';
+        return 'Estetika/Instagrammable';
       case PlaceValue.calmAtmosphere:
         return 'Suasana Tenang';
-      case PlaceValue.traditionalAtmosphere:
-        return 'Suasana Tradisional';
       case PlaceValue.homeyAtmosphere:
         return 'Suasana Homey';
+      case PlaceValue.historicalTraditional:
+        return 'Bersejarah/Tradisional';
       case PlaceValue.petFriendly:
         return 'Pet Friendly';
       case PlaceValue.familyFriendly:
         return 'Ramah Keluarga';
       case PlaceValue.friendlyService:
         return 'Pelayanan Ramah';
+      case PlaceValue.meetingDiscussion:
+        return 'Rapat/Diskusi';
       case PlaceValue.hangoutSpot:
-        return 'Cocok untuk Nongkrong';
+        return 'Nongkrong';
       case PlaceValue.workFromCafe:
-        return 'Cocok untuk Work From Cafe';
-      case PlaceValue.historicalPlace:
-        return 'Tempat Bersejarah';
+        return 'Work From Cafe';
     }
   }
 
@@ -60,32 +60,32 @@ extension PlaceValueExtension on PlaceValue {
         return Icons.attach_money;
       case PlaceValue.authenticTaste:
         return Icons.restaurant;
-      case PlaceValue.variedMenu:
+      case PlaceValue.uniqueMenu:
         return Icons.menu_book;
       case PlaceValue.open24Hours:
         return Icons.nights_stay;
       case PlaceValue.goodNetwork:
         return Icons.wifi;
       case PlaceValue.aesthetic:
-        return Icons.brush;
+        return Icons.photo_camera;
       case PlaceValue.calmAtmosphere:
         return Icons.spa;
-      case PlaceValue.traditionalAtmosphere:
-        return Icons.temple_hindu;
       case PlaceValue.homeyAtmosphere:
         return Icons.home_filled;
+      case PlaceValue.historicalTraditional:
+        return Icons.museum_outlined;
       case PlaceValue.petFriendly:
         return Icons.pets;
       case PlaceValue.familyFriendly:
         return Icons.family_restroom;
       case PlaceValue.friendlyService:
         return Icons.emoji_people;
+      case PlaceValue.meetingDiscussion:
+        return Icons.meeting_room;
       case PlaceValue.hangoutSpot:
         return Icons.groups_2_outlined;
       case PlaceValue.workFromCafe:
         return Icons.laptop_mac;
-      case PlaceValue.historicalPlace:
-        return Icons.museum_outlined;
     }
   }
 

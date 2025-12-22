@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/data/models/leaderboard_model.dart';
 import 'package:snappie_app/app/data/repositories/place_repository_impl.dart';
 import 'package:snappie_app/app/data/repositories/user_repository_impl.dart';
 import 'package:snappie_app/app/data/repositories/post_repository_impl.dart';
@@ -8,7 +9,7 @@ import 'package:snappie_app/app/routes/app_pages.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/models/post_model.dart';
-import '../../../data/models/achievement_model.dart';
+
 
 class ProfileController extends GetxController {
   final AuthService authService;
@@ -65,6 +66,10 @@ class ProfileController extends GetxController {
   int get totalReviews => _userData.value?.totalReview ?? 0;
   int get totalAchievements => _userData.value?.totalAchievement ?? 0;
   int get totalChallenges => _userData.value?.totalChallenge ?? 0;
+  
+  // Gamification challenge badge counter
+  final _completedChallengesCount = 0.obs;
+  int get completedChallengesCount => _completedChallengesCount.value;
   
   // Add stats getter for compatibility with profile_view
   Map<String, dynamic> get stats => {
@@ -339,5 +344,79 @@ class ProfileController extends GetxController {
 
   void _setLoading(bool loading) {
     _isLoading.value = loading;
+  }
+
+  /// Increment completed challenges badge counter
+  void incrementCompletedChallenges(int count) {
+    _completedChallengesCount.value += count;
+    print('👤 Profile: Completed challenges badge incremented by $count, total: ${_completedChallengesCount.value}');
+  }
+
+  /// Reset completed challenges badge (called when user opens challenges page)
+  void resetCompletedChallengesBadge() {
+    _completedChallengesCount.value = 0;
+    print('👤 Profile: Completed challenges badge reset');
+  }
+
+  /// Load challenges data in background
+  Future<void> loadChallenges() async {
+    final userId = _userData.value?.id;
+    if (userId == null) return;
+    
+    try {
+      // Refresh user challenges data
+      await achievementRepository.getChallenges(userId);
+      print('👤 Profile: Challenges data refreshed');
+    } catch (e) {
+      print('❌ Error loading challenges: $e');
+    }
+  }
+
+  /// Add coins to user balance
+  Future<void> addCoins(int amount) async {
+    if (_userData.value != null) {
+      _userData.value = UserModel()
+        ..id = _userData.value!.id
+        ..name = _userData.value!.name
+        ..username = _userData.value!.username
+        ..email = _userData.value!.email
+        ..imageUrl = _userData.value!.imageUrl
+        ..totalCoin = (_userData.value!.totalCoin ?? 0) + amount
+        ..totalExp = _userData.value!.totalExp
+        ..totalFollowing = _userData.value!.totalFollowing
+        ..totalFollower = _userData.value!.totalFollower
+        ..totalCheckin = _userData.value!.totalCheckin
+        ..totalPost = _userData.value!.totalPost
+        ..totalArticle = _userData.value!.totalArticle
+        ..totalReview = _userData.value!.totalReview
+        ..totalAchievement = _userData.value!.totalAchievement
+        ..totalChallenge = _userData.value!.totalChallenge;
+      
+      print('👤 Profile: Added $amount coins, new total: ${_userData.value!.totalCoin}');
+    }
+  }
+
+  /// Add XP to user balance
+  Future<void> addExp(int amount) async {
+    if (_userData.value != null) {
+      _userData.value = UserModel()
+        ..id = _userData.value!.id
+        ..name = _userData.value!.name
+        ..username = _userData.value!.username
+        ..email = _userData.value!.email
+        ..imageUrl = _userData.value!.imageUrl
+        ..totalCoin = _userData.value!.totalCoin
+        ..totalExp = (_userData.value!.totalExp ?? 0) + amount
+        ..totalFollowing = _userData.value!.totalFollowing
+        ..totalFollower = _userData.value!.totalFollower
+        ..totalCheckin = _userData.value!.totalCheckin
+        ..totalPost = _userData.value!.totalPost
+        ..totalArticle = _userData.value!.totalArticle
+        ..totalReview = _userData.value!.totalReview
+        ..totalAchievement = _userData.value!.totalAchievement
+        ..totalChallenge = _userData.value!.totalChallenge;
+      
+      print('👤 Profile: Added $amount XP, new total: ${_userData.value!.totalExp}');
+    }
   }
 }

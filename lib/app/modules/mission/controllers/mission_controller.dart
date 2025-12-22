@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
 import 'package:snappie_app/app/core/services/cloudinary_service.dart';
+import 'package:snappie_app/app/core/services/gamification_handler_service.dart';
 import 'package:snappie_app/app/core/services/location_service.dart';
 import '../../../data/models/place_model.dart';
 import '../../../data/models/checkin_model.dart';
@@ -41,9 +42,12 @@ class MissionController extends GetxController {
   // Review state
   final reviewController = TextEditingController();
   final Rx<int> rating = 0.obs; // Start with 0 (no rating selected)
-  final RxList<String> reviewMediaPaths = <String>[].obs; // Photos/videos for review
-  final RxList<FoodType> selectedFoodTypes = <FoodType>[].obs; // Selected food types
-  final RxList<PlaceValue> selectedPlaceValues = <PlaceValue>[].obs; // Selected place values
+  final RxList<String> reviewMediaPaths =
+      <String>[].obs; // Photos/videos for review
+  final RxList<FoodType> selectedFoodTypes =
+      <FoodType>[].obs; // Selected food types
+  final RxList<PlaceValue> selectedPlaceValues =
+      <PlaceValue>[].obs; // Selected place values
 
   // Survey state
   final RxMap<String, dynamic> surveyAnswers = <String, dynamic>{}.obs;
@@ -61,7 +65,8 @@ class MissionController extends GetxController {
 
   // Error state
   final Rx<String?> errorMessage = Rx<String?>(null);
-  final RxBool isConflictError = false.obs; // 409 Conflict - already reviewed/checked-in
+  final RxBool isConflictError =
+      false.obs; // 409 Conflict - already reviewed/checked-in
 
   // Results
   final Rx<CheckinModel?> checkinResult = Rx<CheckinModel?>(null);
@@ -157,11 +162,11 @@ class MissionController extends GetxController {
       showSnackbars: false,
       accuracy: LocationAccuracy.high,
     );
-    
+
     if (position == null) {
       errorMessage.value = 'Failed to get location';
     }
-    
+
     return position;
   }
 
@@ -186,24 +191,25 @@ class MissionController extends GetxController {
       // Upload image to Cloudinary
       final cloudinaryService = Get.find<CloudinaryService>();
       final file = File(capturedImagePath.value!);
-      
+
       print('[MissionController] Uploading to Cloudinary...');
       final uploadResult = await cloudinaryService.uploadCheckinImage(file);
-      
+
       if (!uploadResult.success || uploadResult.secureUrl == null) {
         errorMessage.value = uploadResult.error ?? 'Failed to upload image';
         isSubmitting.value = false;
         return false;
       }
-      
+
       final imageUrl = uploadResult.secureUrl!;
       uploadedImageUrl.value = imageUrl;
 
-      print('[MissionController] Position: ${position.latitude}, ${position.longitude}');
+      print(
+          '[MissionController] Position: ${position.latitude}, ${position.longitude}');
       print('[MissionController] Uploaded image URL: $imageUrl');
 
       // Create checkin
-      final checkin = await _checkinRepository.createCheckin(
+      final response = await _checkinRepository.createCheckin(
         placeId: currentPlace!.id!,
         latitude: position.latitude,
         longitude: position.longitude,
@@ -213,7 +219,16 @@ class MissionController extends GetxController {
         },
       );
 
-      checkinResult.value = checkin;
+      checkinResult.value = response.actionData;
+
+      // Handle gamification if present
+      if (response.hasGamification) {
+        print('[MissionController] Gamification data received, processing...');
+        await GamificationHandlerService.handleGamificationResult(
+          response.gamification!,
+        );
+      }
+
       isConflictError.value = false;
       return true;
     } on NetworkException catch (e) {
@@ -294,7 +309,6 @@ class MissionController extends GetxController {
     }
   }
 
-
   /// Submit review mission (includes survey in additional_info)
   Future<bool> submitReview() async {
     if (reviewController.text.trim().isEmpty || currentPlace == null) {
@@ -321,13 +335,13 @@ class MissionController extends GetxController {
 
       // Add selected food types
       if (selectedFoodTypes.isNotEmpty) {
-        additionalInfo['food_types'] = 
+        additionalInfo['food_types'] =
             selectedFoodTypes.map((e) => e.label).toList();
       }
 
       // Add selected place values
       if (selectedPlaceValues.isNotEmpty) {
-        additionalInfo['place_values'] = 
+        additionalInfo['place_values'] =
             selectedPlaceValues.map((e) => e.label).toList();
       }
 

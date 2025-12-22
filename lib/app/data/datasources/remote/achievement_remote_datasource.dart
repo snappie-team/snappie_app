@@ -5,13 +5,17 @@ import '../../../core/network/dio_client.dart';
 import '../../../routes/api_endpoints.dart';
 import '../../../core/helpers/api_response_helper.dart';
 import '../../../data/models/achievement_model.dart';
+import '../../../data/models/leaderboard_model.dart';
+import '../../../data/models/reward_model.dart';
 
 abstract class AchievementRemoteDataSource {
   Future<List<LeaderboardEntry>> getWeeklyLeaderboard();
   Future<List<LeaderboardEntry>> getMonthlyLeaderboard();
+  Future<List<UserAchievement>> getUserAchievements();
+  Future<List<UserAchievement>> getUserChallenges();
   Future<PaginatedUserRewards> getUserRewards(int userId, {int page = 1, int perPage = 10});
-  Future<PaginatedUserAchievements> getUserAchievements(int userId, {int page = 1, int perPage = 10});
-  Future<PaginatedUserChallenges> getUserChallenges(int userId, {int page = 1, int perPage = 10});
+  Future<PaginatedAchievements> getAchievements(int userId, {int page = 1, int perPage = 10});
+  Future<PaginatedChallenges> getChallenges(int userId, {int page = 1, int perPage = 10});
 }
 
 class AchievementRemoteDataSourceImpl implements AchievementRemoteDataSource {
@@ -55,6 +59,43 @@ class AchievementRemoteDataSourceImpl implements AchievementRemoteDataSource {
   }
 
   @override
+  Future<List<UserAchievement>> getUserAchievements() async {
+    try {
+      final resp = await dioClient.dio.get(ApiEndpoints.userAchievementsProgress);
+      print('Response data: ${resp.data}');
+      final rawList = extractApiResponseListData<UserAchievement>(
+        resp,
+        (json) => UserAchievement.fromJson(json),
+      );
+      return rawList;
+    } on ApiResponseException catch (e) {
+      throw ServerException(e.message, e.statusCode ?? 500);
+    } on DioException catch (e) {
+      throw _handleDioException(e);
+    } catch (e) {
+      throw ServerException('Failed to get user achievements: $e', 500);
+    }
+  }
+
+  @override
+  Future<List<UserAchievement>> getUserChallenges() async {
+    try {
+      final resp = await dioClient.dio.get(ApiEndpoints.userChallengesProgress);
+      final rawList = extractApiResponseListData<UserAchievement>(
+        resp,
+        (json) => UserAchievement.fromJson(json),
+      );
+      return rawList;
+    } on ApiResponseException catch (e) {
+      throw ServerException(e.message, e.statusCode ?? 500);
+    } on DioException catch (e) {
+      throw _handleDioException(e);
+    } catch (e) {
+      throw ServerException('Failed to get user challenges: $e', 500);
+    }
+  }
+
+  @override
   Future<PaginatedUserRewards> getUserRewards(int userId, {int page = 1, int perPage = 10}) async {
     try {
       final endpoint = ApiEndpoints.userRewards.replaceAll('{id}', userId.toString());
@@ -77,7 +118,7 @@ class AchievementRemoteDataSourceImpl implements AchievementRemoteDataSource {
   }
 
   @override
-  Future<PaginatedUserAchievements> getUserAchievements(int userId, {int page = 1, int perPage = 10}) async {
+  Future<PaginatedAchievements> getAchievements(int userId, {int page = 1, int perPage = 10}) async {
     try {
       final endpoint = ApiEndpoints.userAchievements.replaceAll('{id}', userId.toString());
       final resp = await dioClient.dio.get(
@@ -88,7 +129,7 @@ class AchievementRemoteDataSourceImpl implements AchievementRemoteDataSource {
         resp,
         (json) => Map<String, dynamic>.from(json as Map<String, dynamic>),
       );
-      return PaginatedUserAchievements.fromJson(raw);
+      return PaginatedAchievements.fromJson(raw);
     } on ApiResponseException catch (e) {
       throw ServerException(e.message, e.statusCode ?? 500);
     } on DioException catch (e) {
@@ -99,7 +140,7 @@ class AchievementRemoteDataSourceImpl implements AchievementRemoteDataSource {
   }
 
   @override
-  Future<PaginatedUserChallenges> getUserChallenges(int userId, {int page = 1, int perPage = 10}) async {
+  Future<PaginatedChallenges> getChallenges(int userId, {int page = 1, int perPage = 10}) async {
     try {
       final endpoint = ApiEndpoints.userChallenges.replaceAll('{id}', userId.toString());
       final resp = await dioClient.dio.get(
@@ -110,7 +151,7 @@ class AchievementRemoteDataSourceImpl implements AchievementRemoteDataSource {
         resp,
         (json) => Map<String, dynamic>.from(json as Map<String, dynamic>),
       );
-      return PaginatedUserChallenges.fromJson(raw);
+      return PaginatedChallenges.fromJson(raw);
     } on ApiResponseException catch (e) {
       throw ServerException(e.message, e.statusCode ?? 500);
     } on DioException catch (e) {

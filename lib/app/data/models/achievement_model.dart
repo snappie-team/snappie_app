@@ -2,69 +2,67 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'achievement_model.g.dart';
 
-/// Leaderboard entry model
-@JsonSerializable()
-class LeaderboardEntry {
-  int? rank;
-  @JsonKey(name: 'user_id')
-  int? userId;
-  String? name;
-  String? username;
-  @JsonKey(name: 'image_url')
-  String? imageUrl;
-  @JsonKey(name: 'total_exp')
-  int? totalExp;
-  @JsonKey(name: 'total_checkin')
-  int? totalCheckin;
-  String? period;
+/// Enum for reset schedule types
+enum ResetSchedule {
+  @JsonValue('none')
+  none('none', 'Sekali Saja'),
+  @JsonValue('daily')
+  daily('daily', 'Harian'),
+  @JsonValue('weekly')
+  weekly('weekly', 'Mingguan');
 
-  LeaderboardEntry();
+  final String value;
+  final String label;
 
-  factory LeaderboardEntry.fromJson(Map<String, dynamic> json) =>
-      _$LeaderboardEntryFromJson(json);
-  Map<String, dynamic> toJson() => _$LeaderboardEntryToJson(this);
+  const ResetSchedule(this.value, this.label);
+
+  factory ResetSchedule.fromString(String? value) {
+    switch (value?.toLowerCase()) {
+      case 'daily':
+        return ResetSchedule.daily;
+      case 'weekly':
+        return ResetSchedule.weekly;
+      case 'none':
+      default:
+        return ResetSchedule.none;
+    }
+  }
 }
 
-/// User reward model
-@JsonSerializable()
-class UserReward {
-  int? id;
-  @JsonKey(name: 'user_id')
-  int? userId;
-  @JsonKey(name: 'reward_id')
-  int? rewardId;
-  bool? status;
-  @JsonKey(name: 'additional_info')
-  RewardAdditionalInfo? additionalInfo;
-  @JsonKey(name: 'created_at')
-  String? createdAt;
-  @JsonKey(name: 'updated_at')
-  String? updatedAt;
-
-  UserReward();
-
-  factory UserReward.fromJson(Map<String, dynamic> json) =>
-      _$UserRewardFromJson(json);
-  Map<String, dynamic> toJson() => _$UserRewardToJson(this);
-}
-
-@JsonSerializable()
-class RewardAdditionalInfo {
-  @JsonKey(name: 'redemption_code')
-  String? redemptionCode;
-  @JsonKey(name: 'redeemed_at')
-  String? redeemedAt;
-
-  RewardAdditionalInfo();
-
-  factory RewardAdditionalInfo.fromJson(Map<String, dynamic> json) =>
-      _$RewardAdditionalInfoFromJson(json);
-  Map<String, dynamic> toJson() => _$RewardAdditionalInfoToJson(this);
-}
-
-/// User achievement model
+// User Achievement model
 @JsonSerializable()
 class UserAchievement {
+  int? id;
+  String? code;
+  String? name;
+  String? description;
+  @JsonKey(name: 'icon_url')
+  String? iconUrl;
+  String? type;
+  @JsonKey(name: 'reward_coins')
+  int? rewardCoins;
+  @JsonKey(name: 'reward_xp')
+  int? rewardXp;
+  @JsonKey(name: 'reset_schedule')
+  String? resetSchedule;
+  int? progress;
+  int? target;
+  int? percentage;
+  @JsonKey(name: 'is_completed')
+  bool? isCompleted;
+  @JsonKey(name: 'completed_at')
+  String? completedAt;
+
+  UserAchievement();
+
+  factory UserAchievement.fromJson(Map<String, dynamic> json) =>
+      _$UserAchievementFromJson(json);
+  Map<String, dynamic> toJson() => _$UserAchievementToJson(this);
+}
+
+/// Achievement model
+@JsonSerializable()
+class Achievement {
   int? id;
   @JsonKey(name: 'user_id')
   int? userId;
@@ -78,29 +76,16 @@ class UserAchievement {
   @JsonKey(name: 'updated_at')
   String? updatedAt;
 
-  UserAchievement();
+  Achievement();
 
-  factory UserAchievement.fromJson(Map<String, dynamic> json) =>
-      _$UserAchievementFromJson(json);
-  Map<String, dynamic> toJson() => _$UserAchievementToJson(this);
+  factory Achievement.fromJson(Map<String, dynamic> json) =>
+      _$AchievementFromJson(json);
+  Map<String, dynamic> toJson() => _$AchievementToJson(this);
 }
 
+/// Challenge model
 @JsonSerializable()
-class AchievementAdditionalInfo {
-  @JsonKey(name: 'unlocked_at')
-  String? unlockedAt;
-  String? progress;
-
-  AchievementAdditionalInfo();
-
-  factory AchievementAdditionalInfo.fromJson(Map<String, dynamic> json) =>
-      _$AchievementAdditionalInfoFromJson(json);
-  Map<String, dynamic> toJson() => _$AchievementAdditionalInfoToJson(this);
-}
-
-/// User challenge model
-@JsonSerializable()
-class UserChallenge {
+class Challenge {
   int? id;
   @JsonKey(name: 'user_id')
   int? userId;
@@ -108,21 +93,24 @@ class UserChallenge {
   int? challengeId;
   bool? status;
   @JsonKey(name: 'additional_info')
-  ChallengeAdditionalInfo? additionalInfo;
+  AchievementAdditionalInfo? additionalInfo;
   @JsonKey(name: 'created_at')
   String? createdAt;
   @JsonKey(name: 'updated_at')
   String? updatedAt;
 
-  UserChallenge();
+  Challenge();
 
-  factory UserChallenge.fromJson(Map<String, dynamic> json) =>
-      _$UserChallengeFromJson(json);
-  Map<String, dynamic> toJson() => _$UserChallengeToJson(this);
+  factory Challenge.fromJson(Map<String, dynamic> json) =>
+      _$ChallengeFromJson(json);
+  Map<String, dynamic> toJson() => _$ChallengeToJson(this);
 }
 
 @JsonSerializable()
-class ChallengeAdditionalInfo {
+class AchievementAdditionalInfo {
+  @JsonKey(name: 'unlocked_at')
+  String? unlockedAt;
+  String? progress;
   @JsonKey(name: 'current_count')
   int? currentCount;
   @JsonKey(name: 'target_count')
@@ -132,12 +120,12 @@ class ChallengeAdditionalInfo {
   @JsonKey(name: 'completed_at')
   String? completedAt;
 
-  ChallengeAdditionalInfo();
+  AchievementAdditionalInfo();
 
-  factory ChallengeAdditionalInfo.fromJson(Map<String, dynamic> json) =>
-      _$ChallengeAdditionalInfoFromJson(json);
-  Map<String, dynamic> toJson() => _$ChallengeAdditionalInfoToJson(this);
-  
+  factory AchievementAdditionalInfo.fromJson(Map<String, dynamic> json) =>
+      _$AchievementAdditionalInfoFromJson(json);
+  Map<String, dynamic> toJson() => _$AchievementAdditionalInfoToJson(this);
+
   /// Calculate progress percentage
   double get progressPercent {
     if (targetCount == null || targetCount == 0) return 0;
@@ -145,10 +133,9 @@ class ChallengeAdditionalInfo {
   }
 }
 
-/// Paginated response wrapper for achievements data
 @JsonSerializable()
-class PaginatedUserRewards {
-  List<UserReward>? items;
+class PaginatedAchievements {
+  List<Achievement>? items;
   int? total;
   @JsonKey(name: 'current_page')
   int? currentPage;
@@ -157,16 +144,16 @@ class PaginatedUserRewards {
   @JsonKey(name: 'last_page')
   int? lastPage;
 
-  PaginatedUserRewards();
+  PaginatedAchievements();
 
-  factory PaginatedUserRewards.fromJson(Map<String, dynamic> json) =>
-      _$PaginatedUserRewardsFromJson(json);
-  Map<String, dynamic> toJson() => _$PaginatedUserRewardsToJson(this);
+  factory PaginatedAchievements.fromJson(Map<String, dynamic> json) =>
+      _$PaginatedAchievementsFromJson(json);
+  Map<String, dynamic> toJson() => _$PaginatedAchievementsToJson(this);
 }
 
 @JsonSerializable()
-class PaginatedUserAchievements {
-  List<UserAchievement>? items;
+class PaginatedChallenges {
+  List<Challenge>? items;
   int? total;
   @JsonKey(name: 'current_page')
   int? currentPage;
@@ -175,27 +162,9 @@ class PaginatedUserAchievements {
   @JsonKey(name: 'last_page')
   int? lastPage;
 
-  PaginatedUserAchievements();
+  PaginatedChallenges();
 
-  factory PaginatedUserAchievements.fromJson(Map<String, dynamic> json) =>
-      _$PaginatedUserAchievementsFromJson(json);
-  Map<String, dynamic> toJson() => _$PaginatedUserAchievementsToJson(this);
-}
-
-@JsonSerializable()
-class PaginatedUserChallenges {
-  List<UserChallenge>? items;
-  int? total;
-  @JsonKey(name: 'current_page')
-  int? currentPage;
-  @JsonKey(name: 'per_page')
-  int? perPage;
-  @JsonKey(name: 'last_page')
-  int? lastPage;
-
-  PaginatedUserChallenges();
-
-  factory PaginatedUserChallenges.fromJson(Map<String, dynamic> json) =>
-      _$PaginatedUserChallengesFromJson(json);
-  Map<String, dynamic> toJson() => _$PaginatedUserChallengesToJson(this);
+  factory PaginatedChallenges.fromJson(Map<String, dynamic> json) =>
+      _$PaginatedChallengesFromJson(json);
+  Map<String, dynamic> toJson() => _$PaginatedChallengesToJson(this);
 }

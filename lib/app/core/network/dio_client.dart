@@ -2,11 +2,13 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart' as getx;
 import '../services/auth_service.dart';
 import '../constants/app_constants.dart';
+import '../constants/environment_config.dart';
 import '../../routes/app_pages.dart';
 
 class DioClient {
   static const String skipAuthRefreshKey = 'skip_auth_refresh';
   static const String retryAttemptedKey = 'token_retry_attempted';
+  static const String fallbackRetryKey = 'fallback_retry_attempted';
 
   late Dio _dio;
   
@@ -98,6 +100,17 @@ class _ErrorInterceptor extends Interceptor {
         requestOptions.extra[DioClient.skipAuthRefreshKey] == true;
     final hasRetried =
         requestOptions.extra[DioClient.retryAttemptedKey] == true;
+    final hasFallbackRetried =
+        requestOptions.extra[DioClient.fallbackRetryKey] == true;
+
+    // Check if we should attempt fallback to local URL
+    if (!hasFallbackRetried && _shouldAttemptFallback(err)) {
+      final fallbackResponse = await _attemptFallbackRequest(requestOptions, err);
+      if (fallbackResponse != null) {
+        handler.resolve(fallbackResponse);
+        return;
+      }
+    }
 
     // Skip refresh logic for login/register requests or already retried requests
     if (shouldSkipRefresh || hasRetried) {
@@ -166,5 +179,67 @@ class _ErrorInterceptor extends Interceptor {
       return getx.Get.find<AuthService>();
     }
     return null;
+  }
+
+  bool _shouldAttemptFallback(DioException err) {
+    if (!EnvironmentConfig.canUseFallback) {
+      return false;
+    }
+
+    final statusCode = err.response?.statusCode;
+    
+    // Server errors (500-599)
+    if (statusCode != null && statusCode >= 500 && statusCode < 600) {
+      return true;
+    }
+
+    // Connection/timeout errors
+    if (err.type == DioExceptionType.connectionTimeout ||
+        err.type == DioExceptionType.receiveTimeout ||
+        err.type == DioExceptionType.connectionError ||
+        err.type == DioExceptionType.unknown) {
+      return true;
+    }
+
+    return false;
+  }
+
+  Future<Response?> _attemptFallbackRequest(
+      RequestOptions requestOptions, DioException originalError) async {
+    try {
+      print('⚠️ Server error detected, attempting fallback to local URL...');
+      
+      // Enable fallback mode
+      EnvironmentConfig.enableFallback();
+      
+      // Update the base URL to local
+      final localBaseUrl = EnvironmentConfig.fullApiUrl;
+      
+      // Clone request options with new base URL
+      final fallbackOptions = requestOptions.copyWith(
+        baseUrl: localBaseUrl,
+      );
+      
+      // Mark as fallback retry attempted
+      fallbackOptions.extra[DioClient.fallbackRetryKey] = true;
+      
+      print('🔄 Retrying request with local URL: $localBaseUrl${fallbackOptions.path}');
+      
+      // Attempt the request with local URL
+      final response = await _dio.fetch(fallbackOptions);
+      
+      print('✅ Fallback request successful!');
+      return response;
+      
+    } on DioException catch (e) {
+      print('❌ Fallback request failed: ${e.message}');
+      // Disable fallback if it didn't work
+      EnvironmentConfig.disableFallback();
+      return null;
+    } catch (e) {
+      print('❌ Unexpected error during fallback: $e');
+      EnvironmentConfig.disableFallback();
+      return null;
+    }
   }
 }

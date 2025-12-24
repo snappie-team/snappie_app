@@ -228,7 +228,6 @@ class AuthService extends GetxService {
 
     // TODO: Using hardcoded email for testing purposes
     _userEmail = user.email;
-    // _userEmail = 'sincere86@example.net';
     print('🔐 Google email: $_userEmail');
 
     /* ---------- Step 2: Backend Login ---------- */

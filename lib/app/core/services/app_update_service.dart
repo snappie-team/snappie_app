@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/core/constants/environment_config.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../constants/app_constants.dart';
 import '../network/dio_client.dart';
 import '../../routes/api_endpoints.dart';
@@ -45,8 +44,7 @@ class AppUpdateService extends GetxService {
   AppUpdateService({required this.dioClient});
 
   Future<AppUpdateInfo?> checkUpdate() async {
-    final requestUrl = ApiEndpoints.localUrl + ApiEndpoints.appUpdate;
-    print(requestUrl);
+    final requestUrl = ApiEndpoints.appUpdate;
     final resp = await dioClient.dio.get(
       requestUrl,
       queryParameters: {

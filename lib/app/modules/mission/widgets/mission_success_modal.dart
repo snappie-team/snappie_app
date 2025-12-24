@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_assets.dart';
 
 /// Modal sukses setelah menyelesaikan misi
 class MissionSuccessModal extends StatelessWidget {
@@ -17,7 +18,8 @@ class MissionSuccessModal extends StatelessWidget {
 
   static Future<bool?> show({
     String title = 'Misi Berhasil!',
-    String description = 'Selamat, Anda telah menyelesaikan misi.\nKlaim 100 XP dan 50 Koin Kamu!',
+    String description =
+        'Selamat, Anda telah menyelesaikan misi.\nKlaim 100 XP dan 50 Koin Kamu!',
   }) {
     return Get.dialog<bool>(
       MissionSuccessModal(
@@ -46,7 +48,7 @@ class MissionSuccessModal extends StatelessWidget {
               alignment: Alignment.bottomRight,
               children: [
                 Image.asset(
-                  'assets/images/mission.png',
+                  AppAssets.images.mission,
                   height: 100,
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) {
@@ -134,4 +136,3 @@ class MissionSuccessModal extends StatelessWidget {
     );
   }
 }
-

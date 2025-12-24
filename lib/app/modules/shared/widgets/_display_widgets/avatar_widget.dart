@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_assets.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/remote_assets.dart';
 
@@ -112,7 +113,7 @@ class AvatarWidget extends StatelessWidget {
       errorBuilder: (context, error, stackTrace) {
         // Fallback to local asset if network fails
         final filename = RemoteAssets.getExactFilename(frameUrl!);
-        final localFramePath = 'assets/frames/$filename';
+        final localFramePath = AppAssets.frames.byName(filename.replaceAll('.png', ''));
         
         return Image.asset(
           localFramePath,
@@ -188,10 +189,8 @@ class AvatarWidget extends StatelessWidget {
     if (imageUrl != null && imageUrl!.isNotEmpty) {
       final filename = RemoteAssets.getExactFilename(imageUrl!);
       final color = avatarColors[filename];
+      
       return color ?? AppColors.surfaceContainer;
-      // if (color != null) {
-      //   return color.withOpacity(0.7);
-      // }
     }
     
     return AppColors.surfaceContainer;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../routes/app_pages.dart';
@@ -418,7 +419,7 @@ class SettingsView extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
-                'assets/images/logout.png',
+                AppAssets.images.logout,
                 width: 140,
                 height: 140,
                 fit: BoxFit.contain,

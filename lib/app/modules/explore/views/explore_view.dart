@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../controllers/explore_controller.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../shared/layout/views/scaffold_frame.dart';
 import '../../shared/widgets/index.dart';
@@ -65,7 +66,7 @@ class ExploreView extends GetView<ExploreController> {
                     child: PromotionalBanner(
                         title: 'Dapatkan lebih banyak!',
                         subtitle: 'Dapatkan hadiah dengan menyelesaikan misi!',
-                        imageAsset: Image.asset('assets/images/gift.png'),
+                        imageAsset: Image.asset(AppAssets.images.gift),
                         size: BannerSize.standard,
                         onTap: () => Get.toNamed(AppPages.CHALLENGES),
                         showCloseButton: false,

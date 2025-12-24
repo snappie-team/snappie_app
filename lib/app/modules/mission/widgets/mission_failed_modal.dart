@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_assets.dart';
 
 /// Tipe kegagalan misi
 enum MissionFailureType {
@@ -33,8 +34,8 @@ class MissionFailedModal extends StatelessWidget {
     return Get.dialog<bool>(
       MissionFailedModal(
         failureType: failureType,
-        onRetry: failureType != MissionFailureType.alreadyCompleted 
-            ? () => Get.back(result: true) 
+        onRetry: failureType != MissionFailureType.alreadyCompleted
+            ? () => Get.back(result: true)
             : null,
         onClose: () => Get.back(result: false),
       ),
@@ -97,8 +98,8 @@ class MissionFailedModal extends StatelessWidget {
             // Mascot image or icon
             Image.asset(
               failureType == MissionFailureType.alreadyCompleted
-                  ? 'assets/images/mission.png' // Could use different image
-                  : 'assets/images/mission.png',
+                  ? AppAssets.images.mission // Could use different image
+                  : AppAssets.images.mission,
               height: 100,
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {

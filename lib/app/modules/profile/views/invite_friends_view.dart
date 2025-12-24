@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/modules/profile/widgets/share_profile_modal.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/repositories/user_repository_impl.dart';
@@ -44,7 +45,7 @@ class InviteFriendsView extends StatelessWidget {
             _buildOptionCard(
               onTap: () => Get.to(() => const _AddFriendsSearchView()),
               leading: Image.asset(
-                'assets/images/find.png',
+                AppAssets.images.find,
                 width: 56,
                 height: 56,
               ),
@@ -57,7 +58,7 @@ class InviteFriendsView extends StatelessWidget {
             _buildOptionCard(
               onTap: () => _showShareProfileModal(profileController),
               leading: Image.asset(
-                'assets/images/friends.png',
+                AppAssets.images.friends,
                 width: 56,
                 height: 56,
               ),

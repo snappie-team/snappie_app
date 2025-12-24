@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:snappie_app/app/data/models/reward_model.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/gamification_model.dart';
 import '../../../data/repositories/gamification_repository_impl.dart';
@@ -471,7 +472,7 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
             width: 48,
             height: 48,
             child: Image.asset(
-              'assets/images/coin.png',
+              AppAssets.images.coin,
               fit: BoxFit.contain,
             ),
           ),

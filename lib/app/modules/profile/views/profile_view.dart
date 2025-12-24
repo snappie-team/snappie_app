@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../controllers/profile_controller.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/user_model.dart';
 import '../../shared/widgets/index.dart';
@@ -439,11 +440,11 @@ class ProfileView extends GetView<ProfileController> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Image.asset(
-                          'assets/images/achievement.png',
+                          AppAssets.images.achievement,
                           height: 100,
                         ),
                         Image.asset(
-                          'assets/images/leaderboard.png',
+                          AppAssets.images.leaderboard,
                           height: 100,
                         ),
                       ],
@@ -463,11 +464,11 @@ class ProfileView extends GetView<ProfileController> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Image.asset(
-                          'assets/images/coins.png',
+                          AppAssets.images.coins,
                           height: 100,
                         ),
                         Image.asset(
-                          'assets/images/coupon.png',
+                          AppAssets.images.coupon,
                           height: 100,
                         ),
                       ],
@@ -487,15 +488,15 @@ class ProfileView extends GetView<ProfileController> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Image.asset(
-                          'assets/images/achievement.png',
+                          AppAssets.images.achievement,
                           height: 100,
                         ),
                         Image.asset(
-                          'assets/images/leaderboard.png',
+                          AppAssets.images.leaderboard,
                           height: 100,
                         ),
                         Image.asset(
-                          'assets/images/achievement.png',
+                          AppAssets.images.achievement,
                           height: 100,
                         ),
                       ],
@@ -515,11 +516,11 @@ class ProfileView extends GetView<ProfileController> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Image.asset(
-                          'assets/images/challenge_m.png',
+                          AppAssets.images.challenge(isFemale: false),
                           height: 100,
                         ),
                         Image.asset(
-                          'assets/images/challenge_f.png',
+                          AppAssets.images.challenge(isFemale: true),
                           height: 100,
                         ),
                       ],

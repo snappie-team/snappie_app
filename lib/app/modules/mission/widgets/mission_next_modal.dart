@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_assets.dart';
 
 /// Modal untuk misi selanjutnya
 class MissionNextModal extends StatelessWidget {
@@ -19,7 +20,8 @@ class MissionNextModal extends StatelessWidget {
 
   static Future<bool?> show({
     String title = 'Misi Selanjutnya!',
-    String description = 'Berikan ulasanmu di tempat ini\ndan dapatkan hadiahnya!',
+    String description =
+        'Berikan ulasanmu di tempat ini\ndan dapatkan hadiahnya!',
   }) {
     return Get.dialog<bool>(
       MissionNextModal(
@@ -46,7 +48,7 @@ class MissionNextModal extends StatelessWidget {
           children: [
             // Mascot image
             Image.asset(
-              'assets/images/mission.png',
+              AppAssets.images.mission,
               height: 100,
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {

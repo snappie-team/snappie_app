@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../controllers/home_controller.dart';
@@ -30,7 +31,7 @@ class HomeView extends GetView<HomeController> {
                 child: PromotionalBanner(
                   title: 'Ayo Beraksi!',
                   subtitle: 'Raih XP, Koin, dan hadiah eksklusif lainnya dengan menyelesaikan misi!',
-                  imageAsset: Image.asset('assets/images/target.png'),
+                  imageAsset: Image.asset(AppAssets.images.target),
                   size: BannerSize.compact,
                   onTap: () => Get.toNamed(AppPages.CHALLENGES),
                   showCloseButton: true,

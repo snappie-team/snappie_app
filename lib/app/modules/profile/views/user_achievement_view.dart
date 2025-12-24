@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/modules/shared/widgets/index.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/achievement_model.dart';
 import '../../../data/repositories/achievement_repository_impl.dart';
@@ -148,14 +149,14 @@ class _UserAchievementViewState extends State<UserAchievementView> {
                   width: 75,
                   errorBuilder: (context, error, stackTrace) {
                     return Image.asset(
-                      'assets/images/unlocked.png',
+                      AppAssets.images.unlocked,
                       fit: BoxFit.cover,
                       width: 80,
                     );
                   },
                 )
               : Image.asset(
-                  'assets/images/unlocked.png',
+                  AppAssets.images.unlocked,
                   fit: BoxFit.cover,
                   width: 80,
                 ),

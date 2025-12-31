@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:snappie_app/app/data/models/achievement_model.dart';
 import 'package:snappie_app/app/modules/profile/views/profile_view.dart';
 import 'package:snappie_app/app/modules/profile/views/user_achievement_view.dart';
 import 'package:snappie_app/app/modules/profile/views/user_challenge_view.dart';
@@ -7,8 +6,6 @@ import 'package:snappie_app/app/modules/profile/views/user_profile_view.dart';
 import 'package:snappie_app/app/modules/profile/views/saved_places_view.dart';
 import 'package:snappie_app/app/modules/profile/views/saved_posts_view.dart';
 import 'package:snappie_app/app/modules/profile/views/rewards_view.dart';
-import 'package:snappie_app/app/modules/profile/views/achievements_view.dart';
-import 'package:snappie_app/app/modules/profile/views/challenges_view.dart';
 import 'package:snappie_app/app/modules/profile/views/followers_following_view.dart';
 import 'package:snappie_app/app/modules/profile/views/leaderboard_full_view.dart';
 import 'package:snappie_app/app/modules/profile/views/coins_history_view.dart';
@@ -23,7 +20,9 @@ import 'package:snappie_app/app/modules/shared/components/tnc_view.dart';
 import 'package:snappie_app/app/modules/home/views/post_detail_view.dart';
 import '../modules/auth/views/login_view.dart';
 import '../modules/auth/views/register_view.dart';
+import '../modules/auth/views/onboarding_view.dart';
 import '../modules/auth/bindings/auth_binding.dart';
+import '../modules/auth/bindings/onboarding_binding.dart';
 import '../modules/shared/layout/views/main_layout.dart';
 import '../modules/shared/layout/bindings/main_binding.dart';
 import '../modules/explore/views/place_detail_view.dart';
@@ -42,9 +41,10 @@ import '../modules/home/views/create_post_view.dart';
 class AppPages {
   AppPages._();
 
-  static const INITIAL = '/login';
+  static const INITIAL = '/onboarding';
 
   // Splash and Auth
+  static const ONBOARDING = '/onboarding';
   static const LOGIN = '/login';
   static const REGISTER = '/register';
   static const SPLASH = '/splash';
@@ -101,10 +101,17 @@ class AppPages {
       page: () => const SplashView(),
     ),
 
+    // Onboarding
+    GetPage(
+      name: ONBOARDING,
+      page: () => const OnboardingView(),
+      binding: OnboardingBinding(),
+    ),
+
     // Auth module - dengan AuthBinding
     GetPage(
       name: LOGIN,
-      page: () => const LoginView(),
+      page: () => LoginView(),
       binding: AuthBinding(),
     ),
     GetPage(

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:snappie_app/app/modules/profile/widgets/share_profile_modal.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
+import 'package:snappie_app/app/modules/shared/widgets/_dialog_widgets/share_profile_modal.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/user_model.dart';
@@ -19,54 +20,40 @@ class InviteFriendsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final ProfileController profileController = Get.find<ProfileController>();
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundContainer,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Get.back(),
-        ),
-        title: Text(
-          'Tambah Teman',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+    return ScaffoldFrame.detail(
+      title: 'Tambah Teman',
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              // Option 1: Search by name
+              _buildOptionCard(
+                onTap: () => Get.to(() => const _AddFriendsSearchView()),
+                leading: Image.asset(
+                  AppAssets.images.find,
+                  width: 56,
+                  height: 56,
+                ),
+                title: 'Cari berdasarkan nama',
+              ),
+
+              const SizedBox(height: 12),
+
+              // Option 2: Share profile link
+              _buildOptionCard(
+                onTap: () => _showShareProfileModal(profileController),
+                leading: Image.asset(
+                  AppAssets.images.friends,
+                  width: 56,
+                  height: 56,
+                ),
+                title: 'Bagikan profil tautan',
+              ),
+            ]),
           ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Option 1: Search by name
-            _buildOptionCard(
-              onTap: () => Get.to(() => const _AddFriendsSearchView()),
-              leading: Image.asset(
-                AppAssets.images.find,
-                width: 56,
-                height: 56,
-              ),
-              title: 'Cari berdasarkan nama',
-            ),
-
-            const SizedBox(height: 12),
-
-            // Option 2: Share profile link
-            _buildOptionCard(
-              onTap: () => _showShareProfileModal(profileController),
-              leading: Image.asset(
-                AppAssets.images.friends,
-                width: 56,
-                height: 56,
-              ),
-              title: 'Bagikan profil tautan',
-            ),
-          ],
-        ),
-      ),
+      ],
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/social_model.dart';
 import '../../../data/repositories/social_repository_impl.dart';
@@ -90,34 +91,19 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundContainer,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Get.back(),
+    return ScaffoldFrame.detail(
+      title: _title,
+      slivers: [
+        SliverToBoxAdapter(
+          child: _buildSearchBar(),
         ),
-        title: Text(
-          _title,
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      body: Column(
-        children: [
-          _buildSearchBar(),
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _buildList(),
-          ),
-        ],
-      ),
+        if (_isLoading)
+          const SliverFillRemaining(
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else
+          _buildListSliver(),
+      ],
     );
   }
 
@@ -155,30 +141,34 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
     );
   }
 
-  Widget _buildList() {
+  Widget _buildListSliver() {
     if (_currentList.isEmpty) {
-      return _buildEmptyState();
+      return SliverFillRemaining(
+        child: _buildEmptyState(),
+      );
     }
 
     // Show no results state when search has no matches
     if (_filteredList.isEmpty && _searchQuery.isNotEmpty) {
-      return _buildNoResultsState();
+      return SliverFillRemaining(
+        child: _buildNoResultsState(),
+      );
     }
 
-    return RefreshIndicator(
-      onRefresh: _loadFollowData,
-      child: ListView.separated(
-        padding: EdgeInsets.zero,
-        itemCount: _filteredList.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 8),
-        itemBuilder: (context, index) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
           final entry = _filteredList[index];
           // Use appropriate nested data based on view type
           final user = _viewType == FollowViewType.followers 
               ? entry.follower 
               : entry.following;
-          return _buildUserTile(user, entry);
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _buildUserTile(user, entry),
+          );
         },
+        childCount: _filteredList.length,
       ),
     );
   }

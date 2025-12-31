@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:snappie_app/app/data/models/reward_model.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/gamification_model.dart';
@@ -84,42 +85,26 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundContainer,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Get.back(),
+    return ScaffoldFrame.detail(
+      title: 'Koin',
+      slivers: [
+        SliverToBoxAdapter(
+          child: _buildHeader(),
         ),
-        title: Text(
-          'Koin',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 4),
         ),
-      ),
-      body: Column(
-        children: [
-          // Header with user avatar and coins
-          _buildHeader(),
-
-          const SizedBox(height: 4),
-
-          // Tab selector
-          _buildTabSelector(),
-
-          const SizedBox(height: 4),
-
-          // Content
-          Expanded(
-            child: _selectedTab == 0 ? _buildKuponContent() : _buildRiwayatContent(),
-          ),
-        ],
-      ),
+        SliverToBoxAdapter(
+          child: _buildTabSelector(),
+        ),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 4),
+        ),
+        if (_selectedTab == 0)
+          ..._buildKuponContentSlivers()
+        else
+          ..._buildRiwayatContentSlivers(),
+      ],
     );
   }
 
@@ -234,45 +219,53 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
     );
   }
 
-  Widget _buildKuponContent() {
+  List<Widget> _buildKuponContentSlivers() {
     if (_isLoadingRewards) {
-      return const Center(child: CircularProgressIndicator());
+      return [
+        const SliverFillRemaining(
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ];
     }
 
     if (_rewards.isEmpty) {
-      return _buildEmptyState(
-        icon: Icons.card_giftcard,
-        title: 'Belum ada kupon',
-        subtitle: 'Kumpulkan koin untuk menukar kupon',
-      );
+      return [
+        SliverFillRemaining(
+          child: _buildEmptyState(
+            icon: Icons.card_giftcard,
+            title: 'Belum ada kupon',
+            subtitle: 'Kumpulkan koin untuk menukar kupon',
+          ),
+        ),
+      ];
     }
 
-    return RefreshIndicator(
-      onRefresh: _loadRewards,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: ListView.builder(
-          physics: const AlwaysScrollableScrollPhysics(),
-          itemCount: _rewards.length,
-          itemBuilder: (context, index) {
-            final reward = _rewards[index];
-            return _buildRewardItem(reward, index == _rewards.length - 1);
-          },
+    return [
+      SliverToBoxAdapter(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: _rewards.asMap().entries.map((entry) {
+              final index = entry.key;
+              final reward = entry.value;
+              return _buildRewardItem(reward, index == _rewards.length - 1);
+            }).toList(),
+          ),
         ),
       ),
-    );
+    ];
   }
 
   Widget _buildRewardItem(UserReward reward, bool isLast) {
@@ -344,40 +337,46 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
     );
   }
 
-  Widget _buildRiwayatContent() {
+  List<Widget> _buildRiwayatContentSlivers() {
     if (_isLoadingHistory) {
-      return const Center(child: CircularProgressIndicator());
+      return [
+        const SliverFillRemaining(
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ];
     }
 
     if (_transactions.isEmpty) {
-      return _buildEmptyState(
-        icon: Icons.history,
-        title: 'Belum ada riwayat',
-        subtitle: 'Riwayat transaksi koin akan muncul di sini',
-      );
+      return [
+        SliverFillRemaining(
+          child: _buildEmptyState(
+            icon: Icons.history,
+            title: 'Belum ada riwayat',
+            subtitle: 'Riwayat transaksi koin akan muncul di sini',
+          ),
+        ),
+      ];
     }
 
     // Group transactions by date
     final groupedTransactions = _groupTransactionsByDate(_transactions);
 
-    return RefreshIndicator(
-      onRefresh: _loadHistory,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
+    return [
+      SliverToBoxAdapter(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: groupedTransactions.entries.map((entry) {
@@ -386,7 +385,7 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
           ),
         ),
       ),
-    );
+    ];
   }
 
   Map<String, List<CoinTransaction>> _groupTransactionsByDate(List<CoinTransaction> transactions) {

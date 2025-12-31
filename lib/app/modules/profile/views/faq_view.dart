@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import '../../../core/constants/app_colors.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 
 class FaqView extends StatelessWidget {
   const FaqView({super.key});
@@ -9,35 +8,25 @@ class FaqView extends StatelessWidget {
   Widget build(BuildContext context) {
     final sections = _faqSections();
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundContainer,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Get.back(),
-        ),
-        title: Text(
-          'FAQ',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+    return ScaffoldFrame.detail(
+      title: 'FAQ',
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final section = sections[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _FaqCard(section: section),
+                );
+              },
+              childCount: sections.length,
+            ),
           ),
         ),
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: sections.length,
-        itemBuilder: (context, index) {
-          final section = sections[index];
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: _FaqCard(section: section),
-          );
-        },
-      ),
+      ],
     );
   }
 

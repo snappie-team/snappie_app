@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/modules/shared/widgets/_state_widgets/empty_state_widget.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/achievement_model.dart';
@@ -47,45 +48,31 @@ class _ChallengesViewState extends State<ChallengesView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundContainer,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Get.back(),
+    return ScaffoldFrame.detail(
+      title: 'Tantangan',
+      slivers: [
+        SliverToBoxAdapter(
+          child: _buildHeaderSection(),
         ),
-        title: Text(
-          'Tantangan',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+        if (_isLoading)
+          const SliverFillRemaining(
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else if (_challenges.isEmpty)
+          SliverFillRemaining(
+            child: _buildEmptyState(),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => _buildChallengeItem(_challenges[index]),
+                childCount: _challenges.length,
+              ),
+            ),
           ),
-        ),
-      ),
-      body: Column(
-        children: [
-          // Header
-          _buildHeaderSection(),
-          
-          // Challenges list
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _challenges.isEmpty
-                    ? _buildEmptyState()
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _challenges.length,
-                        itemBuilder: (context, index) {
-                          return _buildChallengeItem(_challenges[index]);
-                        },
-                      ),
-          ),
-        ],
-      ),
+      ],
     );
   }
 

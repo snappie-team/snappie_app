@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/core/constants/font_size.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../controllers/home_controller.dart';
 import '../../../core/constants/app_colors.dart';
-import 'package:snappie_app/app/modules/shared/widgets/_navigation_widgets/button_widget.dart';
 import '../../shared/widgets/index.dart';
-import '../../shared/widgets/_card_widgets/promotional_banner.dart';
-import '../../shared/layout/views/scaffold_frame.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/time_formatter.dart';
 import '../../../core/services/auth_service.dart';
@@ -84,36 +85,36 @@ class _PostDetailViewState extends State<PostDetailView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundContainer,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Get.back(),
+    if (_errorMessage.isNotEmpty) {
+      return Scaffold(
+        body: _buildErrorState(),
+      );
+    }
+
+    return ScaffoldFrame.detail(
+      title: 'Postingan',
+      actions: [
+        IconButton(
+          icon: Icon(Icons.share_outlined, color: AppColors.primary),
+          onPressed: _sharePost,
         ),
-        title: Text(
-          'Postingan',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.share_outlined, color: AppColors.textPrimary),
-            onPressed: _sharePost,
-          ),
-        ],
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage.isNotEmpty
-              ? _buildErrorState()
-              : _buildContent(),
-      bottomNavigationBar: _post != null ? _buildCommentInput() : null,
+      ],
+      onRefresh: _loadPost,
+      slivers: [
+        _isLoading
+            ? const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()),
+              )
+            : SliverFillRemaining(
+                hasScrollBody: false,
+                child: Column(
+                  children: [
+                    Expanded(child: _buildContent()),
+                    if (_post != null) _buildCommentInput(),
+                  ],
+                ),
+              ),
+      ],
     );
   }
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
-import '../layout/views/detail_layout.dart';
+import '../layout/views/scaffold_frame.dart';
 
 class TncView extends StatefulWidget {
   const TncView({Key? key}) : super(key: key);
@@ -15,18 +15,38 @@ class _TncViewState extends State<TncView> {
 
   @override
   Widget build(BuildContext context) {
-    return DetailLayout(
-      isCard: true,
+    return ScaffoldFrame.detail(
       title: _currentPage == 0 ? 'Syarat dan Ketentuan' : 'Kebijakan Privasi',
-      body: _currentPage == 0 ? _buildTermsPage() : _buildPrivacyPage(),
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverToBoxAdapter(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: _currentPage == 0 ? _buildTermsPage() : _buildPrivacyPage()
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildTermsPage() {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
           Text(
             'Syarat dan Ketentuan',
             style: TextStyle(
@@ -108,15 +128,13 @@ class _TncViewState extends State<TncView> {
           const SizedBox(height: 32),
           _buildNavigationButtons(),
         ],
-      ),
     );
   }
 
   Widget _buildPrivacyPage() {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
           Text(
             'Kebijakan Privasi',
             style: TextStyle(
@@ -198,7 +216,6 @@ class _TncViewState extends State<TncView> {
           const SizedBox(height: 32),
           _buildNavigationButtons(),
         ],
-      ),
     );
   }
 

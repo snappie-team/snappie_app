@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:characters/characters.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';

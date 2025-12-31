@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:snappie_app/app/core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/logger_service.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/profile_controller.dart';
 import '../../shared/widgets/index.dart';
@@ -236,7 +237,7 @@ class SettingsView extends StatelessWidget {
 
   void _showAvatarPicker(BuildContext context, ProfileController controller) {
     final gender = controller.userData?.userDetail?.gender?.toLowerCase();
-    print('debug gender = $gender');
+    Logger.debug('Gender for avatar picker: $gender', 'Settings');
     final isMale = gender == 'male';
 
     final avatars = isMale

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/services/logger_service.dart';
 import '../../../data/models/social_model.dart';
 import '../../../data/repositories/social_repository_impl.dart';
 import '../../../routes/app_pages.dart';
@@ -79,11 +80,9 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
       _followers = followData.followers ?? [];
       _following = followData.following ?? [];
 
-      print("✅ Loaded ${_followers.length} followers and ${_following.length} following");
-      print("   - Followers: ${_followers.map((e) => {e.follower?.username, e.follower?.isFollowed}).toList()}");
-      print("   - Following: ${_following.map((e) => {e.following?.username, e.following?.isFollowed}).toList()}");
+      Logger.debug('Loaded ${_followers.length} followers and ${_following.length} following', 'Social');
     } catch (e) {
-      print('❌ Error loading follow data: $e');
+      Logger.error('Error loading follow data', e, null, 'Social');
     }
 
     setState(() => _isLoading = false);

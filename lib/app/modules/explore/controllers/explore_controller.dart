@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
 import 'package:snappie_app/app/core/constants/food_type.dart';
 import 'package:snappie_app/app/core/constants/place_value.dart';
+import '../../../core/services/logger_service.dart';
 import '../../../data/models/place_model.dart';
 import '../../../data/models/review_model.dart';
 import '../../../data/models/checkin_model.dart';
@@ -152,7 +153,7 @@ class ExploreController extends GetxController {
     super.onInit();
     // Set default filter - use valid category from backend
     _selectedCategory.value = '';
-    print('🔍 ExploreController created (not initialized yet)');
+    Logger.debug('ExploreController created (not initialized yet)', 'ExploreController');
   }
 
   @override
@@ -166,30 +167,30 @@ class ExploreController extends GetxController {
   void initializeIfNeeded() {
     if (!_isInitialized.value) {
       _isInitialized.value = true;
-      print('🔍 ExploreController initializing...');
+      Logger.debug('ExploreController initializing...', 'ExploreController');
       initializeExploreData();
     }
   }
 
   // Call this method when user is authenticated and navigates to explore
   Future<void> initializeExploreData() async {
-    print('🚀 INITIALIZING EXPLORE DATA:');
-    print('Auth Status: ${authService.isLoggedIn}');
-    print('Token: ${authService.token}');
-    print('User Email: ${authService.userEmail}');
+    Logger.debug('INITIALIZING EXPLORE DATA:', 'ExploreController');
+    Logger.debug('Auth Status: ${authService.isLoggedIn}', 'ExploreController');
+    Logger.debug('Token: ${authService.token}', 'ExploreController');
+    Logger.debug('User Email: ${authService.userEmail}', 'ExploreController');
 
     if (authService.isLoggedIn) {
-      print('✅ User authenticated, loading explore data...');
+      Logger.debug('User authenticated, loading explore data...', 'ExploreController');
       await loadExploreData();
     } else {
-      print('❌ User not authenticated, skipping data load');
+      Logger.debug('User not authenticated, skipping data load', 'ExploreController');
     }
   }
 
   Future<void> loadExploreData() async {
     // Check if user is authenticated
     if (!authService.isLoggedIn) {
-      print('User not authenticated, cannot load explore data');
+      Logger.debug('User not authenticated, cannot load explore data', 'ExploreController');
       _setError('Please login to view places and categories');
       return;
     }
@@ -222,12 +223,12 @@ class ExploreController extends GetxController {
     _clearError();
 
     try {
-      print("Load Places with filters: "
+      Logger.debug("Load Places with filters: "
           "selectedCategory='${_selectedCategory.value}', "
           "selectedRating=${_selectedRating.value}, "
           "selectedPriceRange='${_selectedPriceRange.value}', "
           "selectedFilter='${_selectedFilter.value}', "
-          "selectedLocation=${_selectedLocation.value}");
+          "selectedLocation=${_selectedLocation.value}", 'ExploreController');
       
       // Load places from repository - don't include search query (local search)
       final placesList = await placeRepository.getPlaces(
@@ -241,22 +242,22 @@ class ExploreController extends GetxController {
         foodTypes: _selectedFilter.value == 'foodTypes' ? _selectedFoodTypes.toList() : null,
       );
 
-      print('🎯 PLACES LOADED SUCCESSFULLY:');
-      print('Places Count: ${placesList.length}');
-      print(
-          'First Place: ${placesList.isNotEmpty ? placesList.first.name : "None"}');
-      print(
-          'First Place Additional Info: ${placesList.isNotEmpty ? placesList.first.placeAttributes : "None"}');
+      Logger.debug('PLACES LOADED SUCCESSFULLY:', 'ExploreController');
+      Logger.debug('Places Count: ${placesList.length}', 'ExploreController');
+      Logger.debug(
+          'First Place: ${placesList.isNotEmpty ? placesList.first.name : "None"}', 'ExploreController');
+      Logger.debug(
+          'First Place Additional Info: ${placesList.isNotEmpty ? placesList.first.placeAttributes : "None"}', 'ExploreController');
 
       if (refresh || _currentPage.value == 1) {
-        print('🔄 Assigning all places to _allPlaces');
+        Logger.debug('Assigning all places to _allPlaces', 'ExploreController');
         _allPlaces.assignAll(placesList);
       } else {
-        print('➕ Adding places to existing _allPlaces');
+        Logger.debug('Adding places to existing _allPlaces', 'ExploreController');
         _allPlaces.addAll(placesList);
       }
 
-      print('📱 _allPlaces length after update: ${_allPlaces.length}');
+      Logger.debug('_allPlaces length after update: ${_allPlaces.length}', 'ExploreController');
 
       if (placesList.isEmpty) {
         _hasMoreData.value = false;
@@ -268,7 +269,7 @@ class ExploreController extends GetxController {
       _applyLocalSearch();
     } catch (e) {
       _setError('Failed to load places: $e');
-      print('❌ Error loading places: $e');
+      Logger.error('Error loading places', e, null, 'ExploreController');
     }
 
     _setLoading(false);
@@ -277,7 +278,7 @@ class ExploreController extends GetxController {
   Future<void> loadCategories() async {
     // Check authentication before loading
     if (!authService.isLoggedIn) {
-      print('User not authenticated, cannot load categories');
+      Logger.debug('User not authenticated, cannot load categories', 'ExploreController');
       return;
     }
 
@@ -288,10 +289,10 @@ class ExploreController extends GetxController {
       // For now, use hardcoded categories
       _categories
           .assignAll(['Semua', 'Restoran', 'Kafe', 'Street Food', 'Fast Food']);
-      print('📋 Categories loaded');
+      Logger.debug('Categories loaded', 'ExploreController');
     } catch (e) {
       // Handle error silently for categories
-      print('Error loading categories: $e');
+      Logger.error('Error loading categories', e, null, 'ExploreController');
     }
 
     _isLoadingCategories.value = false;
@@ -318,7 +319,7 @@ class ExploreController extends GetxController {
     }
 
     _filteredPlaces.value = result;
-    print('🔍 Filtered places: ${result.length} of ${_allPlaces.length}');
+    Logger.debug('Filtered places: ${result.length} of ${_allPlaces.length}', 'ExploreController');
   }
 
   /// Handle search input with debounce (local search)
@@ -352,24 +353,24 @@ class ExploreController extends GetxController {
   void togglePlaceValueSelection(String placeValue) {
     if (_selectedPlaceValues.contains(placeValue)) {
       _selectedPlaceValues.remove(placeValue);
-      print('❌ Place value removed: $placeValue');
+      Logger.debug('Place value removed: $placeValue', 'ExploreController');
     } else {
       _selectedPlaceValues.add(placeValue);
-      print('✅ Place value selected: $placeValue');
+      Logger.debug('Place value selected: $placeValue', 'ExploreController');
     }
-    print('📍 Total selected: ${_selectedPlaceValues.length} - ${_selectedPlaceValues.join(", ")}');
+    Logger.debug('Total selected: ${_selectedPlaceValues.length} - ${_selectedPlaceValues.join(", ")}', 'ExploreController');
   }
 
     void toggleFoodTypeSelection(String foodType) {
     if (_selectedFoodTypes.contains(foodType)) {
       _selectedFoodTypes.remove(foodType);
-      print('❌ Food type removed: $foodType');
+      Logger.debug('Food type removed: $foodType', 'ExploreController');
     } else {
       _selectedFoodTypes.add(foodType);
-      print('✅ Food type selected: $foodType');
+      Logger.debug('Food type selected: $foodType', 'ExploreController');
     }
-    print(
-        '📋 Total selected: ${_selectedFoodTypes.length} - ${_selectedFoodTypes.join(", ")}');
+    Logger.debug(
+        'Total selected: ${_selectedFoodTypes.length} - ${_selectedFoodTypes.join(", ")}', 'ExploreController');
   }
 
   void filterByCategory(String category) {
@@ -410,7 +411,7 @@ class ExploreController extends GetxController {
     final position = await locationService.getCurrentPosition();
     if (position == null) return;
 
-    print('📍 Current Position: Lat ${position.latitude}, Lon ${position.longitude}');
+    Logger.debug('Current Position: Lat ${position.latitude}, Lon ${position.longitude}', 'ExploreController');
     _selectedFilter.value = 'nearby';
     _selectedLocation.value = [position.latitude, position.longitude];
     await loadPlaces(refresh: true);
@@ -463,10 +464,10 @@ class ExploreController extends GetxController {
       // Also load reviews for this place
       await loadPlaceReviews(placeId);
 
-      print('🎯 Place loaded by ID: ${place.name}');
+      Logger.debug('Place loaded by ID: ${place.name}', 'ExploreController');
     } catch (e) {
       _setError('Failed to load place: $e');
-      print('❌ Error loading place by ID: $e');
+      Logger.error('Error loading place by ID', e, null, 'ExploreController');
     }
 
     _setLoading(false);
@@ -489,10 +490,10 @@ class ExploreController extends GetxController {
       // Load reviews from repository
       final reviewsList = await reviewRepository.getPlaceReviews(placeId);
       _reviews.assignAll(reviewsList);
-      print('📝 Reviews loaded: ${reviewsList.length}');
+      Logger.debug('Reviews loaded: ${reviewsList.length}', 'ExploreController');
     } catch (e) {
       _setError('Failed to load reviews: $e');
-      print('❌ Error loading reviews: $e');
+      Logger.error('Error loading reviews', e, null, 'ExploreController');
     }
 
     _isLoadingReviews.value = false;
@@ -624,9 +625,9 @@ class ExploreController extends GetxController {
     try {
       final checkins = await checkinRepository.getCheckinsByPlaceId(placeId);
       _galleryCheckins.assignAll(checkins);
-      print('📸 Gallery checkins loaded: ${checkins.length}');
+      Logger.debug('Gallery checkins loaded: ${checkins.length}', 'ExploreController');
     } catch (e) {
-      print('❌ Error loading gallery checkins: $e');
+      Logger.error('Error loading gallery checkins', e, null, 'ExploreController');
       // Silent fail - gallery will show empty state
     }
 
@@ -641,9 +642,9 @@ class ExploreController extends GetxController {
     try {
       final posts = await postRepository.getPostsByPlaceId(placeId);
       _galleryPosts.assignAll(posts);
-      print('📝 Gallery posts loaded: ${posts.length}');
+      Logger.debug('Gallery posts loaded: ${posts.length}', 'ExploreController');
     } catch (e) {
-      print('❌ Error loading gallery posts: $e');
+      Logger.error('Error loading gallery posts', e, null, 'ExploreController');
       // Silent fail - gallery will show empty state
     }
 
@@ -684,10 +685,10 @@ class ExploreController extends GetxController {
           .map((p) => p.id!)
           .toList() ?? [];
       _savedPlaces.assignAll(placeIds);
-      print('⭐ Loaded saved places: ${_savedPlaces.length}');
-      print('⭐ Saved place IDs: ${_savedPlaces.join(", ")}');
+      Logger.debug('Loaded saved places: ${_savedPlaces.length}', 'ExploreController');
+      Logger.debug('Saved place IDs: ${_savedPlaces.join(", ")}', 'ExploreController');
     } catch (e) {
-      print('❌ Error loading saved places: $e');
+      Logger.error('Error loading saved places', e, null, 'ExploreController');
       // Silent fail - will show as not saved
     } finally {
       _isLoadingSavedPlaces.value = false;
@@ -708,7 +709,7 @@ class ExploreController extends GetxController {
     try {
       // Check if already saved locally
       final isCurrentlySaved = _savedPlaces.contains(placeId);
-      print('⭐ Toggling saved place: $placeId (currently saved: $isCurrentlySaved)');
+      Logger.debug('Toggling saved place: $placeId (currently saved: $isCurrentlySaved)', 'ExploreController');
       
       if (isCurrentlySaved) {
         // Remove from local state first (optimistic)
@@ -720,18 +721,18 @@ class ExploreController extends GetxController {
       
       // Call toggle API - returns list of IDs directly
       final updatedPlaceIds = await userRepository.toggleSavedPlace(_savedPlaces);
-      print('⭐ Toggled saved place on server $updatedPlaceIds');
+      Logger.debug('Toggled saved place on server $updatedPlaceIds', 'ExploreController');
       
       // Sync with server response
       _savedPlaces.assignAll(updatedPlaceIds);
       
       final isNowSaved = _savedPlaces.contains(placeId);
-      print('⭐ Place ${isNowSaved ? "saved" : "unsaved"}: $placeId');
+      Logger.debug('Place ${isNowSaved ? "saved" : "unsaved"}: $placeId', 'ExploreController');
       return isNowSaved;
     } catch (e) {
       // Revert optimistic update on error - reload from server
       await loadSavedPlaces();
-      print('❌ Error toggling saved place: $e');
+      Logger.error('Error toggling saved place', e, null, 'ExploreController');
       rethrow;
     } finally {
       _isTogglingFavorite.value = false;

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:snappie_app/app/core/constants/food_type.dart';
 import 'package:snappie_app/app/core/constants/place_value.dart';
 import 'package:snappie_app/app/core/services/google_auth_service.dart';
+import 'package:snappie_app/app/core/services/logger_service.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/constants/remote_assets.dart';
@@ -129,7 +130,7 @@ class AuthController extends GetxController {
         }
       }
     } catch (e) {
-      print('❌ Error loading Google user data: $e');
+      Logger.error('Error loading Google user data', e, null, 'AuthController');
       Get.snackbar(
         'Error',
         'Google Sign In failed. Please try again.',
@@ -166,7 +167,7 @@ class AuthController extends GetxController {
 
       switch (result.errorType ?? AuthErrorType.unknown) {
         case AuthErrorType.userNotFound:
-          print('🔍 User not found, navigating to registration');
+          Logger.debug('User not found, navigating to registration', 'AuthController');
           _loadGoogleUserData();
           Get.toNamed(AppPages.REGISTER);
           break;
@@ -338,8 +339,7 @@ class AuthController extends GetxController {
         );
       }
     } catch (e, stackTrace) {
-      print('❌ Registration error: $e');
-      print('❌ Stack trace: $stackTrace');
+      Logger.error('Registration error', e, stackTrace, 'AuthController');
       Get.snackbar(
         'Error',
         'Server membutuhkan waktu lama atau koneksi bermasalah. Silakan coba lagi.',
@@ -518,62 +518,62 @@ class AuthController extends GetxController {
 
   void setGender(Gender gender) {
     _selectedGender.value = gender.toString().split('.').last;
-    print('✅ Gender selected: $gender');
+    Logger.debug('Gender selected: $gender', 'AuthController');
   }
 
   void setAvatar(String avatar) {
     _selectedAvatar.value = avatar;
-    print('✅ Avatar selected: $avatar');
+    Logger.debug('Avatar selected: $avatar', 'AuthController');
   }
 
   void toggleAvatarPicker() {
     _showAvatarPicker.value = !_showAvatarPicker.value;
-    print('🎨 Avatar picker toggled: ${_showAvatarPicker.value}');
+    Logger.debug('Avatar picker toggled: ${_showAvatarPicker.value}', 'AuthController');
   }
 
   void nextPage() {
     if (_selectedPageIndex.value < 2) {
       _selectedPageIndex.value++;
-      print('📄 Moving to page: ${_selectedPageIndex.value}');
+      Logger.debug('Moving to page: ${_selectedPageIndex.value}', 'AuthController');
     }
   }
 
   void previousPage() {
     if (_selectedPageIndex.value > 0) {
       _selectedPageIndex.value--;
-      print('📄 Moving to page: ${_selectedPageIndex.value}');
+      Logger.debug('Moving to page: ${_selectedPageIndex.value}', 'AuthController');
     }
   }
 
   void goToPage(int index) {
     if (index >= 0 && index <= 2) {
       _selectedPageIndex.value = index;
-      print('📄 Going to page: ${_selectedPageIndex.value}');
+      Logger.debug('Going to page: ${_selectedPageIndex.value}', 'AuthController');
     }
   }
 
   void toggleFoodTypeSelection(String foodType) {
     if (_selectedFoodTypes.contains(foodType)) {
       _selectedFoodTypes.remove(foodType);
-      print('❌ Food type removed: $foodType');
+      Logger.debug('Food type removed: $foodType', 'AuthController');
     } else {
       _selectedFoodTypes.add(foodType);
-      print('✅ Food type selected: $foodType');
+      Logger.debug('Food type selected: $foodType', 'AuthController');
     }
-    print(
-        '📋 Total selected: ${_selectedFoodTypes.length} - ${_selectedFoodTypes.join(", ")}');
+    Logger.debug(
+        'Total selected: ${_selectedFoodTypes.length} - ${_selectedFoodTypes.join(", ")}', 'AuthController');
   }
 
   void togglePlaceValueSelection(String placeValue) {
     if (_selectedPlaceValues.contains(placeValue)) {
       _selectedPlaceValues.remove(placeValue);
-      print('❌ Place value removed: $placeValue');
+      Logger.debug('Place value removed: $placeValue', 'AuthController');
     } else {
       _selectedPlaceValues.add(placeValue);
-      print('✅ Place value selected: $placeValue');
+      Logger.debug('Place value selected: $placeValue', 'AuthController');
     }
-    print(
-        '📍 Total selected: ${_selectedPlaceValues.length} - ${_selectedPlaceValues.join(", ")}');
+    Logger.debug(
+        'Total selected: ${_selectedPlaceValues.length} - ${_selectedPlaceValues.join(", ")}', 'AuthController');
   }
 
   List<Map<String, dynamic>> getAvatarOptions(String gender) {

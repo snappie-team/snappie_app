@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/services/logger_service.dart';
 import '../../../../data/models/articles_model.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/time_formatter.dart';
@@ -187,7 +188,7 @@ class ArticleCardWidget extends StatelessWidget {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
         }
       } catch (e) {
-        debugPrint('Error opening URL: $e');
+        Logger.error('Error opening URL', e, null, 'ArticleCardWidget');
       }
     }
   }

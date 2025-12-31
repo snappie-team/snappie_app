@@ -7,6 +7,7 @@ import 'package:snappie_app/app/core/constants/app_colors.dart';
 import 'package:snappie_app/app/core/services/cloudinary_service.dart';
 import 'package:snappie_app/app/core/services/gamification_handler_service.dart';
 import 'package:snappie_app/app/core/services/location_service.dart';
+import 'package:snappie_app/app/core/services/logger_service.dart';
 import '../../../data/models/place_model.dart';
 import '../../../data/models/checkin_model.dart';
 import '../../../data/models/review_model.dart';
@@ -192,7 +193,7 @@ class MissionController extends GetxController {
       final cloudinaryService = Get.find<CloudinaryService>();
       final file = File(capturedImagePath.value!);
 
-      print('[MissionController] Uploading to Cloudinary...');
+      Logger.debug('Uploading to Cloudinary...', 'MissionController');
       final uploadResult = await cloudinaryService.uploadCheckinImage(file);
 
       if (!uploadResult.success || uploadResult.secureUrl == null) {
@@ -204,9 +205,9 @@ class MissionController extends GetxController {
       final imageUrl = uploadResult.secureUrl!;
       uploadedImageUrl.value = imageUrl;
 
-      print(
-          '[MissionController] Position: ${position.latitude}, ${position.longitude}');
-      print('[MissionController] Uploaded image URL: $imageUrl');
+      Logger.debug(
+          'Position: ${position.latitude}, ${position.longitude}', 'MissionController');
+      Logger.debug('Uploaded image URL: $imageUrl', 'MissionController');
 
       // Create checkin
       final response = await _checkinRepository.createCheckin(
@@ -223,7 +224,7 @@ class MissionController extends GetxController {
 
       // Handle gamification if present
       if (response.hasGamification) {
-        print('[MissionController] Gamification data received, processing...');
+        Logger.debug('Gamification data received, processing...', 'MissionController');
         await GamificationHandlerService.handleGamificationResult(
           response.gamification!,
         );

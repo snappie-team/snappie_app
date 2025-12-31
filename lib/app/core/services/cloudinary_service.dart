@@ -5,6 +5,7 @@ import 'package:cloudinary_api/src/request/model/uploader_params.dart';
 import 'package:cloudinary_api/uploader/uploader.dart';
 import 'package:cloudinary_url_gen/cloudinary.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'logger_service.dart';
 
 /// Cloudinary folder structure
 class CloudinaryFolder {
@@ -86,7 +87,7 @@ class CloudinaryService {
     _cloudinary = Cloudinary.fromStringUrl(cloudinaryUrl);
     _uploader = _cloudinary.uploader();
 
-    print('[CloudinaryService] Initialized with cloud: $cloudName');
+    Logger.debug('Initialized with cloud: $cloudName', 'CloudinaryService');
   }
 
   /// Upload an image file to Cloudinary
@@ -104,10 +105,10 @@ class CloudinaryService {
     int quality = 85,
   }) async {
     try {
-      print('[CloudinaryService] Uploading image: ${file.path}');
-      print('[CloudinaryService] Folder: $folder');
-      print('[CloudinaryService] Quality: $quality');
-      print('[CloudinaryService] Upload preset: $_uploadPreset');
+      Logger.debug('Uploading image: ${file.path}', 'CloudinaryService');
+      Logger.debug('Folder: $folder', 'CloudinaryService');
+      Logger.debug('Quality: $quality', 'CloudinaryService');
+      Logger.debug('Upload preset: $_uploadPreset', 'CloudinaryService');
 
       final response = await _uploader.upload(
         file,
@@ -122,7 +123,7 @@ class CloudinaryService {
       );
 
       if (response?.error != null) {
-        print('[CloudinaryService] Upload error: ${response?.error?.message}');
+        Logger.error('Upload error: ${response?.error?.message}', null, null, 'CloudinaryService');
         return CloudinaryUploadResult.error(
           response?.error?.message ?? 'Unknown upload error',
         );
@@ -135,7 +136,7 @@ class CloudinaryService {
 
       // Generate optimized URL with quality transformation
       final optimizedUrl = _generateOptimizedUrl(result.secureUrl, quality);
-      print('[CloudinaryService] Upload success: $optimizedUrl');
+      Logger.debug('Upload success: $optimizedUrl', 'CloudinaryService');
 
       // Update the result with optimized URL
       final optimizedResult = CloudinaryUploadResult(
@@ -151,8 +152,7 @@ class CloudinaryService {
 
       return optimizedResult;
     } catch (e, stackTrace) {
-      print('[CloudinaryService] Upload exception: $e');
-      print('[CloudinaryService] Stack trace: $stackTrace');
+      Logger.error('Upload exception', e, stackTrace, 'CloudinaryService');
       return CloudinaryUploadResult.error(e.toString());
     }
   }

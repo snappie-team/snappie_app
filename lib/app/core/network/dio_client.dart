@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' as getx;
 import '../services/auth_service.dart';
+import '../services/logger_service.dart';
 import '../constants/app_constants.dart';
 import '../constants/environment_config.dart';
 import '../../routes/app_pages.dart';
@@ -57,7 +58,7 @@ class _AuthInterceptor extends Interceptor {
       options.headers.addAll(authHeaders);
     } catch (e) {
       // AuthService not available, continue without auth
-      print('AuthService not available: $e');
+      Logger.warning('AuthService not available: $e', 'Network');
     }
     
     handler.next(options);
@@ -68,20 +69,20 @@ class _AuthInterceptor extends Interceptor {
 class _LoggingInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    print('REQUEST[${options.method}] => PATH: ${options.path}');
+    Logger.debug('REQUEST[${options.method}] => PATH: ${options.path}', 'Network');
     handler.next(options);
   }
   
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    print('RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
+    Logger.debug('RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}', 'Network');
     handler.next(response);
   }
   
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    print('ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path}');
-    print('Error: ${err.message}');
+    Logger.warning('ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.path}', 'Network');
+    Logger.warning('Error: ${err.message}', 'Network');
     handler.next(err);
   }
 }
@@ -123,11 +124,11 @@ class _ErrorInterceptor extends Interceptor {
     if (err.response?.statusCode == 401) {
       final authService = _tryGetAuthService();
       if (authService != null && authService.hasValidRefreshToken) {
-        print('🔄 Token expired, attempting refresh...');
+        Logger.info('Token expired, attempting refresh...', 'Auth');
         final refreshed = await authService.refreshToken();
         
         if (refreshed && authService.token != null) {
-          print('✅ Token refreshed, retrying request...');
+          Logger.info('Token refreshed, retrying request...', 'Auth');
           requestOptions.extra[DioClient.retryAttemptedKey] = true;
           requestOptions.headers['Authorization'] =
               'Bearer ${authService.token}';
@@ -136,17 +137,17 @@ class _ErrorInterceptor extends Interceptor {
             handler.resolve(response);
             return;
           } on DioException catch (retryError) {
-            print('❌ Retry failed after refresh');
+            Logger.error('Retry failed after refresh', retryError, null, 'Auth');
             handler.next(retryError);
             return;
           }
         } else {
-          print('❌ Token refresh failed, logging out user');
+          Logger.warning('Token refresh failed, logging out user', 'Auth');
           await authService.logout();
           getx.Get.offAllNamed(AppPages.LOGIN);
         }
       } else if (authService != null) {
-        print('⚠️ No valid refresh token, logging out user');
+        Logger.warning('No valid refresh token, logging out user', 'Auth');
         await authService.logout();
         getx.Get.offAllNamed(AppPages.LOGIN);
       }
@@ -161,16 +162,16 @@ class _ErrorInterceptor extends Interceptor {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        print('Timeout error: ${err.message}');
+        Logger.warning('Timeout error: ${err.message}', 'Network');
         break;
       case DioExceptionType.badResponse:
-        print('Bad response: ${err.response?.statusCode}');
+        Logger.warning('Bad response: ${err.response?.statusCode}', 'Network');
         break;
       case DioExceptionType.cancel:
-        print('Request cancelled');
+        Logger.info('Request cancelled', 'Network');
         break;
       default:
-        print('Network error: ${err.message}');
+        Logger.warning('Network error: ${err.message}', 'Network');
     }
   }
 
@@ -207,7 +208,7 @@ class _ErrorInterceptor extends Interceptor {
   Future<Response?> _attemptFallbackRequest(
       RequestOptions requestOptions, DioException originalError) async {
     try {
-      print('⚠️ Server error detected, attempting fallback to local URL...');
+      Logger.warning('Server error detected, attempting fallback to local URL...', 'Network');
       
       // Enable fallback mode
       EnvironmentConfig.enableFallback();
@@ -223,21 +224,21 @@ class _ErrorInterceptor extends Interceptor {
       // Mark as fallback retry attempted
       fallbackOptions.extra[DioClient.fallbackRetryKey] = true;
       
-      print('🔄 Retrying request with local URL: $localBaseUrl${fallbackOptions.path}');
+      Logger.info('Retrying request with local URL: $localBaseUrl${fallbackOptions.path}', 'Network');
       
       // Attempt the request with local URL
       final response = await _dio.fetch(fallbackOptions);
       
-      print('✅ Fallback request successful!');
+      Logger.info('Fallback request successful!', 'Network');
       return response;
       
     } on DioException catch (e) {
-      print('❌ Fallback request failed: ${e.message}');
+      Logger.error('Fallback request failed: ${e.message}', e, null, 'Network');
       // Disable fallback if it didn't work
       EnvironmentConfig.disableFallback();
       return null;
     } catch (e) {
-      print('❌ Unexpected error during fallback: $e');
+      Logger.error('Unexpected error during fallback', e, null, 'Network');
       EnvironmentConfig.disableFallback();
       return null;
     }

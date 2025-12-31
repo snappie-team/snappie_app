@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/data/models/reward_model.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/services/logger_service.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../data/repositories/achievement_repository_impl.dart';
 import '../controllers/profile_controller.dart';
@@ -42,7 +43,7 @@ class _RewardsViewState extends State<RewardsView> {
         });
       }
     } catch (e) {
-      print('❌ Error loading rewards: $e');
+      Logger.error('Error loading rewards', e, null, 'RewardsView');
     }
     
     setState(() => _isLoading = false);

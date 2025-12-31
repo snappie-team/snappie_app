@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:snappie_app/app/core/utils/api_response.dart';
 import '../../../core/errors/exceptions.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/services/logger_service.dart';
 import '../../../routes/api_endpoints.dart';
 import '../../../core/helpers/api_response_helper.dart';
 import '../../../data/models/achievement_model.dart';
@@ -62,7 +63,7 @@ class AchievementRemoteDataSourceImpl implements AchievementRemoteDataSource {
   Future<List<UserAchievement>> getUserAchievements() async {
     try {
       final resp = await dioClient.dio.get(ApiEndpoints.userAchievementsProgress);
-      print('Response data: ${resp.data}');
+      Logger.debug('Response data: ${resp.data}', 'AchievementRemoteDataSource');
       final rawList = extractApiResponseListData<UserAchievement>(
         resp,
         (json) => UserAchievement.fromJson(json),

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/errors/exceptions.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/services/logger_service.dart';
 import '../../../routes/api_endpoints.dart';
 import '../../../core/helpers/api_response_helper.dart';
 import '../../models/checkin_model.dart';
@@ -46,14 +47,14 @@ class CheckinRemoteDataSourceImpl implements CheckinRemoteDataSource {
         payload['additional_info'] = additionalInfo;
       }
 
-      print('⭐ createCheckin payload: $payload');
+      Logger.debug('createCheckin payload: $payload', 'CheckinRemoteDataSource');
 
       final response = await dioClient.dio.post(
         ApiEndpoints.createCheckin,
         data: payload,
       );
 
-      print('⭐ createCheckin response: $response');
+      Logger.debug('createCheckin response: $response', 'CheckinRemoteDataSource');
 
       final data = response.data['data'] as Map<String, dynamic>;
       
@@ -68,9 +69,9 @@ class CheckinRemoteDataSourceImpl implements CheckinRemoteDataSource {
           gamification = GamificationResult.fromJson(
             data['gamification'] as Map<String, dynamic>,
           );
-          print('⭐ Gamification data found: achievements=${gamification.achievementsUnlocked?.length}, challenges=${gamification.challengesCompleted?.length}');
+          Logger.debug('Gamification data found: achievements=${gamification.achievementsUnlocked?.length}, challenges=${gamification.challengesCompleted?.length}', 'CheckinRemoteDataSource');
         } catch (e) {
-          print('⚠️ Failed to parse gamification data: $e');
+          Logger.warning('Failed to parse gamification data: $e', 'CheckinRemoteDataSource');
         }
       }
       

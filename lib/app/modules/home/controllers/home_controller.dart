@@ -6,6 +6,7 @@ import '../../../data/repositories/post_repository_impl.dart';
 import '../../../data/repositories/social_repository_impl.dart';
 import '../../../data/repositories/user_repository_impl.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/logger_service.dart';
 
 enum PostFollowState {
   friend,
@@ -82,14 +83,14 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     // Tidak load data di sini - akan di-trigger dari view
-    print('🏠 HomeController created (not initialized yet)');
+    Logger.debug('HomeController created (not initialized yet)', 'Home');
   }
 
   /// Initialize data hanya saat tab pertama kali dibuka
   void initializeIfNeeded() {
     if (!_isInitialized.value) {
       _isInitialized.value = true;
-      print('🏠 HomeController initializing...');
+      Logger.debug('HomeController initializing...', 'Home');
       loadHomeData();
     }
   }
@@ -109,7 +110,7 @@ class HomeController extends GetxController {
         final userData = authService.userData;
         if (userData != null) {
           _userData.value = userData;
-          print('👤 Home: User data loaded - ${userData.name}');
+          Logger.debug('Home: User data loaded - ${userData.name}', 'Home');
         }
       }
 
@@ -125,7 +126,7 @@ class HomeController extends GetxController {
         final followData = await followDataFuture;
         _hydrateFollowSets(followData);
       } catch (e) {
-        print('⚠️ Home: Failed to load follow data: $e');
+        Logger.warning('Home: Failed to load follow data: $e', 'Home');
       }
 
       try {
@@ -136,13 +137,13 @@ class HomeController extends GetxController {
             .toList();
         _savedPostIds.assignAll(ids);
       } catch (e) {
-        print('⚠️ Home: Failed to load saved posts: $e');
+        Logger.warning('Home: Failed to load saved posts: $e', 'Home');
       }
 
-      print('🏠 Home: Loaded ${loadedPosts.length} posts');
+      Logger.info('Home: Loaded ${loadedPosts.length} posts', 'Home');
     } catch (e) {
       _errorMessage.value = 'Failed to load posts: $e';
-      print('❌ Error loading home data: $e');
+      Logger.error('Error loading home data', e, null, 'Home');
     }
 
     _setLoading(false);

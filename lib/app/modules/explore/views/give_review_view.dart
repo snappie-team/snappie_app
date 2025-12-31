@@ -8,6 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/food_type.dart';
 import '../../../core/constants/place_value.dart';
 import '../../../core/services/cloudinary_service.dart';
+import '../../../core/services/logger_service.dart';
 import '../../../data/models/place_model.dart';
 import '../controllers/explore_controller.dart';
 
@@ -974,20 +975,20 @@ class _GiveReviewViewState extends State<GiveReviewView> {
         
         for (int i = 0; i < _selectedImages.length; i++) {
           final file = _selectedImages[i];
-          print('[GiveReviewView] Uploading image ${i + 1}/${_selectedImages.length}...');
+          Logger.debug('Uploading image ${i + 1}/${_selectedImages.length}...', 'GiveReviewView');
           
           final result = await cloudinaryService.uploadReviewImage(file);
           
           if (result.success && result.secureUrl != null) {
             imageUrls.add(result.secureUrl!);
-            print('[GiveReviewView] Image ${i + 1} uploaded: ${result.secureUrl}');
+            Logger.debug('Image ${i + 1} uploaded: ${result.secureUrl}', 'GiveReviewView');
           } else {
-            print('[GiveReviewView] Failed to upload image ${i + 1}: ${result.error}');
+            Logger.warning('Failed to upload image ${i + 1}: ${result.error}', 'GiveReviewView');
             // Continue with other images even if one fails
           }
         }
         
-        print('[GiveReviewView] Successfully uploaded ${imageUrls.length}/${_selectedImages.length} images');
+        Logger.debug('Successfully uploaded ${imageUrls.length}/${_selectedImages.length} images', 'GiveReviewView');
       }
 
       // Prepare additional info

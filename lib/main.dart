@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:snappie_app/app/core/dependencies/core_dependencies.dart';
 import 'package:snappie_app/app/core/dependencies/data_dependencies.dart';
+import 'package:snappie_app/app/core/services/logger_service.dart';
 import 'firebase_options.dart';
 import 'app/routes/app_pages.dart';
 import 'app/core/services/auth_service.dart';
@@ -21,7 +22,7 @@ Future<String> initAuthService() async {
     }
     return AppPages.INITIAL;
   } catch (e) {
-    print('Error initializing auth service: $e');
+    Logger.error('Error initializing auth service', e, null, 'Auth');
     return AppPages.INITIAL;
   }
 }

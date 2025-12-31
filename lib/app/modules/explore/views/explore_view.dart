@@ -5,6 +5,7 @@ import 'package:snappie_app/app/routes/app_pages.dart';
 import '../controllers/explore_controller.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/services/logger_service.dart';
 import '../../shared/widgets/index.dart';
 
 class ExploreView extends GetView<ExploreController> {
@@ -582,10 +583,10 @@ class ExploreView extends GetView<ExploreController> {
 
   Widget _buildDefaultContent() {
     return Obx(() {
-      print('🎨 BUILDING PLACES GRID:');
-      print('Controller places length: ${controller.places.length}');
-      print('Controller isLoading: ${controller.isLoading}');
-      print('Controller places isEmpty: ${controller.places.isEmpty}');
+      Logger.debug('BUILDING PLACES GRID:', 'ExploreView');
+      Logger.debug('Controller places length: ${controller.places.length}', 'ExploreView');
+      Logger.debug('Controller isLoading: ${controller.isLoading}', 'ExploreView');
+      Logger.debug('Controller places isEmpty: ${controller.places.isEmpty}', 'ExploreView');
 
       if (controller.isLoading && controller.places.isEmpty) {
         return SizedBox(
@@ -884,10 +885,10 @@ class ExploreView extends GetView<ExploreController> {
     // Show all places in vertical scrollable list
     final displayPlaces = controller.places;
 
-    print('🎯 _buildFilteredPlacesList called');
-    print('📱 displayPlaces.length: ${displayPlaces.length}');
-    print('📱 controller.isLoading: ${controller.isLoading}');
-    print('📱 controller.places.isEmpty: ${controller.places.isEmpty}');
+    Logger.debug('_buildFilteredPlacesList called', 'ExploreView');
+    Logger.debug('displayPlaces.length: ${displayPlaces.length}', 'ExploreView');
+    Logger.debug('controller.isLoading: ${controller.isLoading}', 'ExploreView');
+    Logger.debug('controller.places.isEmpty: ${controller.places.isEmpty}', 'ExploreView');
 
     return Container(
       // decoration: BoxDecoration(
@@ -904,7 +905,7 @@ class ExploreView extends GetView<ExploreController> {
         scrollDirection: Axis.vertical,
         itemCount: displayPlaces.length,
         itemBuilder: (context, index) {
-          print('🏗️ Building place card for index: $index');
+          Logger.debug('Building place card for index: $index', 'ExploreView');
           return PlaceCardWidget(
             place: displayPlaces[index],
             cardSize: CardSize.fullWidth,
@@ -921,7 +922,7 @@ class ExploreView extends GetView<ExploreController> {
         .take(4)
         .toList();
 
-    print("displayPlaces bro: $displayPlaces");
+    Logger.debug('displayPlaces for isPartnership=$isPartnership: $displayPlaces', 'ExploreView');
 
     return Container(
       // decoration: BoxDecoration(

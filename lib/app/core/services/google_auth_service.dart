@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
+import 'logger_service.dart';
 
 class GoogleAuthService extends GetxService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -39,19 +40,19 @@ class GoogleAuthService extends GetxService {
       
       if (googleUser == null) {
         if (kDebugMode) {
-          print('🔐 Google Sign In canceled by user');
+          Logger.debug('Google Sign In canceled by user', 'GoogleAuthService');
         }
         return null;
       }
 
       if (kDebugMode) {
-        print('🔐 Google user selected: ${googleUser.email}');
+        Logger.debug('Google user selected: ${googleUser.email}', 'GoogleAuthService');
       }
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
       if (kDebugMode) {
-        print('🔐 Google authentication tokens obtained');
+        Logger.debug('Google authentication tokens obtained', 'GoogleAuthService');
       }
 
       final credential = GoogleAuthProvider.credential(
@@ -62,15 +63,15 @@ class GoogleAuthService extends GetxService {
       final UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
       
       if (kDebugMode) {
-        print('🔐 Firebase sign in successful: ${userCredential.user?.email}');
-        print('🔐 User display name: ${userCredential.user?.displayName}');
-        print('🔐 User photo URL: ${userCredential.user?.photoURL}');
+        Logger.debug('Firebase sign in successful: ${userCredential.user?.email}', 'GoogleAuthService');
+        Logger.debug('User display name: ${userCredential.user?.displayName}', 'GoogleAuthService');
+        Logger.debug('User photo URL: ${userCredential.user?.photoURL}', 'GoogleAuthService');
       }
 
       return userCredential;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Google Sign In error: $e');
+        Logger.error('Google Sign In error', e, null, 'GoogleAuthService');
       }
       rethrow;
     } finally {
@@ -85,11 +86,11 @@ class GoogleAuthService extends GetxService {
       await _firebaseAuth.signOut();
       
       if (kDebugMode) {
-        print('🔐 Sign out successful');
+        Logger.debug('Sign out successful', 'GoogleAuthService');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Sign out error: $e');
+        Logger.error('Sign out error', e, null, 'GoogleAuthService');
       }
       rethrow;
     }

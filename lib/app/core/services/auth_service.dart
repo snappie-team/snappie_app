@@ -8,6 +8,7 @@ import 'package:snappie_app/app/core/network/dio_client.dart';
 import 'package:snappie_app/app/data/models/user_model.dart';
 import 'package:snappie_app/app/data/datasources/local/user_local_datasource.dart';
 import 'package:snappie_app/app/core/errors/auth_result.dart';
+import 'package:snappie_app/app/core/services/logger_service.dart';
 import '../constants/app_constants.dart';
 import '../constants/environment_config.dart';
 import '../../routes/api_endpoints.dart';
@@ -71,7 +72,7 @@ class AuthService extends GetxService {
 
   Future<bool> refreshToken() async {
     if (!hasValidRefreshToken) {
-      print('⚠️ Cannot refresh token: refresh token missing or expired');
+      Logger.warning('Cannot refresh token: refresh token missing or expired', 'Auth');
       return false;
     }
 
@@ -101,8 +102,7 @@ class AuthService extends GetxService {
       final requestUrl = ApiEndpoints.getFullUrl(endpoint);
 
       try {
-        print(
-            '🔄 Attempting refresh with token: ${_refreshToken?.substring(0, 10)}...');
+        Logger.debug('Attempting refresh with token: ${_refreshToken?.substring(0, 10)}...', 'Auth');
         final response = await dioClient.dio.post(
           requestUrl,
           data: {'refresh_token': _refreshToken},
@@ -148,9 +148,7 @@ class AuthService extends GetxService {
         }
       } on dio_lib.DioException catch (e) {
         if (e.response?.statusCode == 404 && !isLast) {
-          print(
-            '⚠️ Refresh endpoint $requestUrl not found. Trying fallback...',
-          );
+          Logger.warning('Refresh endpoint $requestUrl not found. Trying fallback...', 'Auth');
           continue;
         }
         _logRefreshError(e);
@@ -165,18 +163,18 @@ class AuthService extends GetxService {
   }
 
   void _logRefreshError(Object error) {
-    print('❌ REFRESH TOKEN ERROR: $error');
+    Logger.error('REFRESH TOKEN ERROR', error, null, 'Auth');
     if (error is dio_lib.DioException) {
-      print('DioError Type: ${error.type}');
-      print('DioError Message: ${error.message}');
-      print('DioError Response: ${error.response?.data}');
-      print('DioError Status: ${error.response?.statusCode}');
+      Logger.debug('DioError Type: ${error.type}', 'Auth');
+      Logger.debug('DioError Message: ${error.message}', 'Auth');
+      Logger.debug('DioError Response: ${error.response?.data}', 'Auth');
+      Logger.debug('DioError Status: ${error.response?.statusCode}', 'Auth');
     }
   }
 
   Future<void> _loadAuthData() async {
     try {
-      print('📱 LOADING AUTH DATA FROM STORAGE...');
+      Logger.debug('LOADING AUTH DATA FROM STORAGE...', 'Auth');
       final prefs = await SharedPreferences.getInstance();
       _token = prefs.getString(_tokenKey);
       _userEmail = prefs.getString(_userEmailKey);
@@ -185,10 +183,9 @@ class AuthService extends GetxService {
       _refreshTokenExpiry =
           _parseStoredDate(prefs.getString(_refreshTokenExpiryKey));
 
-      print(
-          '🔑 Loaded refresh token: ${_refreshToken != null ? "${_refreshToken!.substring(0, 10)}..." : "null"}');
-      print('⏰ Token expiry: $_tokenExpiry');
-      print('⏰ Refresh token expiry: $_refreshTokenExpiry');
+      Logger.debug('Loaded refresh token: ${_refreshToken != null ? "${_refreshToken!.substring(0, 10)}..." : "null"}', 'Auth');
+      Logger.debug('Token expiry: $_tokenExpiry', 'Auth');
+      Logger.debug('Refresh token expiry: $_refreshTokenExpiry', 'Auth');
       final userDataString = prefs.getString(_userDataKey);
 
       if (userDataString != null && userDataString.isNotEmpty) {
@@ -199,14 +196,14 @@ class AuthService extends GetxService {
 
       _isLoggedIn.value = _token != null && _token!.isNotEmpty;
     } catch (e) {
-      print('❌ Error loading auth data: $e');
+      Logger.error('Error loading auth data', e, null, 'Auth');
     }
   }
 
   // TODO: replace /auth/login email-only with Firebase-ID-token check before public release.
   Future<AuthResult> loginWithEmail(String email) async {
     /// Backend login with email only (without Google Sign In)
-    print('🔐 Login with email: $email');
+    Logger.info('Login with email: $email', 'Auth');
     try {
       final dioClient = DioClient();
       final requestUrl = ApiEndpoints.getFullUrl(ApiEndpoints.login);
@@ -227,7 +224,7 @@ class AuthService extends GetxService {
         final data = extractApiResponseData(response,
             (json) => Map<String, dynamic>.from(json as Map<String, dynamic>));
 
-        print('🔐 LOGIN RESPONSE DATA KEYS: ${data.keys.toList()}');
+        Logger.debug('LOGIN RESPONSE DATA KEYS: ${data.keys.toList()}', 'Auth');
 
         final Map<String, dynamic>? userData = data['user'] == null
             ? null
@@ -236,7 +233,7 @@ class AuthService extends GetxService {
         final refreshTokenFromResponse = data['refresh_token'] as String?;
 
         if (token == null || token.isEmpty) {
-          print('❌ No token received from server');
+          Logger.error('No token received from server', null, null, 'Auth');
           return AuthResult.fail(
             AuthErrorType.unknown,
             message: 'No token received from server',
@@ -244,9 +241,8 @@ class AuthService extends GetxService {
           );
         }
 
-        print('🔐 Token received: ${token.substring(0, 10)}...');
-        print(
-            '🔐 Refresh token received: ${refreshTokenFromResponse != null ? "${refreshTokenFromResponse.substring(0, 10)}..." : "NULL"}');
+        Logger.debug('Token received: ${token.substring(0, 10)}...', 'Auth');
+        Logger.debug('Refresh token received: ${refreshTokenFromResponse != null ? "${refreshTokenFromResponse.substring(0, 10)}..." : "NULL"}', 'Auth');
 
         await _saveAuthSession(
           token: token,
@@ -260,7 +256,7 @@ class AuthService extends GetxService {
         _isLoggedIn.value = true;
         return AuthResult.ok(message: 'Login successful');
       } else {
-        print('❌ Unexpected status code: ${response.statusCode}');
+        Logger.error('Unexpected status code: ${response.statusCode}', null, null, 'Auth');
         return AuthResult.fail(
           AuthErrorType.unknown,
           message: 'Unexpected status code: ${response.statusCode}',
@@ -268,8 +264,8 @@ class AuthService extends GetxService {
         );
       }
     } on dio_lib.DioException catch (e) {
-      print('❌ LOGIN DIO ERROR: ${e.response?.statusCode}');
-      print('DioError Response: ${e.response?.data}');
+      Logger.error('LOGIN DIO ERROR: ${e.response?.statusCode}', e, null, 'Auth');
+      Logger.debug('DioError Response: ${e.response?.data}', 'Auth');
 
       final statusCode = e.response?.statusCode;
 
@@ -280,7 +276,7 @@ class AuthService extends GetxService {
           await googleAuthService.signOut();
         }
       } catch (signOutError) {
-        print('❌ Error signing out from Google: $signOutError');
+        Logger.error('Error signing out from Google', signOutError, null, 'Auth');
       }
 
       // Status-code based auth failures
@@ -295,7 +291,7 @@ class AuthService extends GetxService {
       }
 
       if (statusCode == 409) {
-        print('❌ Conflict error during login');
+        Logger.warning('Conflict error during login', 'Auth');
         return AuthResult.fail(
           AuthErrorType.hasActiveSession,
           message: 'Has active session',
@@ -326,7 +322,7 @@ class AuthService extends GetxService {
         cause: e,
       );
     } catch (e) {
-      print('❌ LOGIN ERROR: $e');
+      Logger.error('LOGIN ERROR', e, null, 'Auth');
       return AuthResult.fail(
         AuthErrorType.unknown,
         message: 'Login failed',
@@ -342,7 +338,7 @@ class AuthService extends GetxService {
     final userCredential = await googleAuthService.signInWithGoogle();
 
     if (userCredential == null) {
-      print('🔐 Google Sign In was cancelled');
+      Logger.info('Google Sign In was cancelled', 'Auth');
       return AuthResult.fail(
         AuthErrorType.unknown,
         message: 'Google Sign In was cancelled',
@@ -351,7 +347,7 @@ class AuthService extends GetxService {
 
     final user = userCredential.user;
     if (user == null || user.email == null) {
-      print('❌ No user data from Google Sign In');
+      Logger.error('No user data from Google Sign In', null, null, 'Auth');
       return AuthResult.fail(
         AuthErrorType.unknown,
         message: 'No user data from Google Sign In',
@@ -409,7 +405,7 @@ class AuthService extends GetxService {
           .timeout(
         const Duration(seconds: 60),
         onTimeout: () {
-          print('⏱️ REGISTER REQUEST TIMEOUT after 60 seconds');
+          Logger.error('REGISTER REQUEST TIMEOUT after 60 seconds', null, null, 'Auth');
           throw dio_lib.DioException(
             requestOptions: dio_lib.RequestOptions(path: requestUrl),
             type: dio_lib.DioExceptionType.connectionTimeout,
@@ -438,13 +434,13 @@ class AuthService extends GetxService {
         return false;
       }
     } catch (e) {
-      print('❌ REGISTRATION ERROR: $e');
+      Logger.error('REGISTRATION ERROR', e, null, 'Auth');
 
       if (e is dio_lib.DioException) {
-        print('DioError Type: ${e.type}');
-        print('DioError Message: ${e.message}');
-        print('DioError Response: ${e.response?.data}');
-        print('DioError Status: ${e.response?.statusCode}');
+        Logger.debug('DioError Type: ${e.type}', 'Auth');
+        Logger.debug('DioError Message: ${e.message}', 'Auth');
+        Logger.debug('DioError Response: ${e.response?.data}', 'Auth');
+        Logger.debug('DioError Status: ${e.response?.statusCode}', 'Auth');
       }
 
       return false;
@@ -475,10 +471,10 @@ class AuthService extends GetxService {
           await googleAuthService.signOut();
         }
       } catch (e) {
-        print('❌ Error signing out from Google: $e');
+        Logger.error('Error signing out from Google', e, null, 'Auth');
       }
     } catch (e) {
-      print('Logout API error: $e');
+      Logger.debug('Logout API error: $e', 'Auth');
     } finally {
       // Clear local data regardless of API call success
       _token = null;
@@ -506,9 +502,9 @@ class AuthService extends GetxService {
         final userLocalDataSource = Get.find<UserLocalDataSource>();
         await userLocalDataSource.clearCachedUser();
         await userLocalDataSource.clearAuthToken();
-        print('🗑️ Cleared local user cache');
+        Logger.info('Cleared local user cache', 'Auth');
       } catch (e) {
-        print('❌ Error clearing local cache: $e');
+        Logger.error('Error clearing local cache', e, null, 'Auth');
       }
     }
   }
@@ -567,10 +563,10 @@ class AuthService extends GetxService {
 
     if (refreshToken != null && refreshToken.isNotEmpty) {
       await prefs.setString(_refreshTokenKey, refreshToken);
-      print('🔑 Saved refresh token: ${refreshToken.substring(0, 10)}...');
+      Logger.debug('Saved refresh token: ${refreshToken.substring(0, 10)}...', 'Auth');
     } else {
       await prefs.remove(_refreshTokenKey);
-      print('⚠️ No refresh token to save');
+      Logger.warning('No refresh token to save', 'Auth');
     }
 
     await _persistDateTime(prefs, _tokenExpiryKey, tokenExpiry);

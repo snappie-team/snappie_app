@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:snappie_app/app/data/models/leaderboard_model.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/services/logger_service.dart';
 import '../controllers/profile_controller.dart';
 import '../../shared/widgets/index.dart';
 
@@ -39,11 +40,11 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
       
       // Make a copy of the list to ensure state updates correctly
       final entries = List<LeaderboardEntry>.from(_profileController.leaderboard);
-      print('📊 Loaded ${entries.length} leaderboard entries for ${_selectedTab == 0 ? "weekly" : "monthly"}');
+      Logger.debug('Loaded ${entries.length} leaderboard entries for ${_selectedTab == 0 ? "weekly" : "monthly"}', 'Leaderboard');
       
       setState(() => _leaderboardData = entries);
     } catch (e) {
-      print('❌ Error loading leaderboard: $e');
+      Logger.error('Error loading leaderboard', e, null, 'Leaderboard');
       setState(() => _leaderboardData = []);
     }
 

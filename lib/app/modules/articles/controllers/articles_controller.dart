@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/services/logger_service.dart';
 import '../../../data/models/articles_model.dart';
 import '../../../data/repositories/articles_repository_impl.dart';
 
@@ -35,7 +36,7 @@ class ArticlesController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    print('📰 ArticlesController created (not initialized yet)');
+    Logger.debug('ArticlesController created (not initialized yet)', 'ArticlesController');
   }
   
   @override
@@ -49,7 +50,7 @@ class ArticlesController extends GetxController {
   void initializeIfNeeded() {
     if (!_isInitialized.value) {
       _isInitialized.value = true;
-      print('📰 ArticlesController initializing...');
+      Logger.debug('ArticlesController initializing...', 'ArticlesController');
       loadArticles();
       loadCategories();
     }
@@ -62,10 +63,10 @@ class ArticlesController extends GetxController {
       final articles = await articlesRepository.getArticles();
       _allArticles.value = articles;
       _applyFilters(); // Apply any existing filters
-      print('📰 Loaded ${articles.length} articles');
+      Logger.debug('Loaded ${articles.length} articles', 'ArticlesController');
     } catch (e) {
       // Handle error silently
-      print('Error loading articles: $e');
+      Logger.error('Error loading articles', e, null, 'ArticlesController');
       _allArticles.clear();
       _filteredArticles.clear();
     }
@@ -82,7 +83,7 @@ class ArticlesController extends GetxController {
       // For now, show empty state until API endpoints are implemented
     } catch (e) {
       // Handle error silently
-      print('Error loading categories: $e');
+      Logger.error('Error loading categories', e, null, 'ArticlesController');
     }
   }
 
@@ -137,7 +138,7 @@ class ArticlesController extends GetxController {
     }
 
     _filteredArticles.value = result;
-    print('📰 Filtered articles: ${result.length} of ${_allArticles.length}');
+    Logger.debug('Filtered articles: ${result.length} of ${_allArticles.length}', 'ArticlesController');
   }
 
   void clearFilters() {

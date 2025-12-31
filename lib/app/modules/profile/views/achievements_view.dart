@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/modules/shared/widgets/_state_widgets/empty_state_widget.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/services/logger_service.dart';
 import '../../../data/models/achievement_model.dart';
 import '../../../data/repositories/achievement_repository_impl.dart';
 import '../controllers/profile_controller.dart';
@@ -40,7 +41,7 @@ class _AchievementsViewState extends State<AchievementsView> {
         });
       }
     } catch (e) {
-      print('❌ Error loading achievements: $e');
+      Logger.error('Error loading achievements', e, null, 'AchievementsView');
     }
     
     setState(() => _isLoading = false);

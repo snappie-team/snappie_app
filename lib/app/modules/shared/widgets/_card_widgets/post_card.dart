@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
 import 'package:snappie_app/app/core/constants/font_size.dart';
+import 'package:snappie_app/app/core/services/logger_service.dart';
 import 'package:snappie_app/app/data/repositories/place_repository_impl.dart';
 import 'package:snappie_app/app/data/repositories/post_repository_impl.dart';
 import 'package:snappie_app/app/modules/shared/widgets/_form_widgets/rectangle_button_widget.dart';
@@ -262,7 +263,7 @@ class PostCard extends StatelessWidget {
   Widget _buildImageSection(BuildContext context, PostModel? post) {
     double imageHeight = 300;
     final imageUrls = post?.imageUrls ?? [];
-    print("imageUrls: $imageUrls");
+    Logger.debug('imageUrls: $imageUrls', 'PostCard');
 
     // If no images, show placeholder
     if (imageUrls.isEmpty) {

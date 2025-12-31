@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import '../services/logger_service.dart';
+
 class JsonFormatter {
   // JSON utilities for handling unstructured data
   /// Converts a Map<String, dynamic> to JSON string for storage
@@ -9,7 +11,7 @@ class JsonFormatter {
     try {
       return jsonEncode(map);
     } catch (e) {
-      print('Error converting map to JSON string: $e');
+      Logger.warning('Error converting map to JSON string: $e', 'JsonFormatter');
       return null;
     }
   }
@@ -23,7 +25,7 @@ class JsonFormatter {
     try {
       return jsonEncode(value);
     } catch (e) {
-      print('Error converting value to JSON string: $e');
+      Logger.warning('Error converting value to JSON string: $e', 'JsonFormatter');
       return null;
     }
   }
@@ -39,7 +41,7 @@ class JsonFormatter {
       }
       return null;
     } catch (e) {
-      print('Error parsing JSON string to map: $e');
+      Logger.warning('Error parsing JSON string to map: $e', 'JsonFormatter');
       return null;
     }
   }
@@ -50,7 +52,7 @@ class JsonFormatter {
     try {
       return jsonDecode(jsonString);
     } catch (e) {
-      print('Error parsing JSON string to dynamic: $e');
+      Logger.warning('Error parsing JSON string to dynamic: $e', 'JsonFormatter');
       return null;
     }
   }

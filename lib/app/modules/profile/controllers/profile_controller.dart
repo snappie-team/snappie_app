@@ -7,6 +7,7 @@ import 'package:snappie_app/app/data/repositories/post_repository_impl.dart';
 import 'package:snappie_app/app/data/repositories/achievement_repository_impl.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/logger_service.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/models/post_model.dart';
 
@@ -81,7 +82,7 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    print('👤 ProfileController created (not initialized yet)');
+    Logger.debug('ProfileController created (not initialized yet)', 'Profile');
     
     // Listen for auth status changes
     ever(authService.isLoggedInObs, (isLoggedIn) {
@@ -95,7 +96,7 @@ class ProfileController extends GetxController {
   void initializeIfNeeded() {
     if (!_isInitialized.value) {
       _isInitialized.value = true;
-      print('👤 ProfileController initializing...');
+      Logger.debug('ProfileController initializing...', 'Profile');
       _loadAllData();
     }
   }
@@ -121,16 +122,16 @@ class ProfileController extends GetxController {
       final userData = await userRepository.getUserProfile();
       _userData.value = userData;
       
-      print('👤 User profile loaded from API: ${userData.name}');
-      print('   - Image: ${userData.imageUrl}');
-      print('   - Email: ${userData.email}');
-      print('   - XP: ${userData.totalExp}');
-      print('   - Coins: ${userData.totalCoin}');
-      print('   - Checkins: ${userData.totalCheckin}');
-      print('   - Reviews: ${userData.totalReview}');
-      print('   - Posts: ${userData.totalPost}');
+      Logger.info('User profile loaded from API: ${userData.name}', 'Profile');
+      Logger.debug('   - Image: ${userData.imageUrl}', 'Profile');
+      Logger.debug('   - Email: ${userData.email}', 'Profile');
+      Logger.debug('   - XP: ${userData.totalExp}', 'Profile');
+      Logger.debug('   - Coins: ${userData.totalCoin}', 'Profile');
+      Logger.debug('   - Checkins: ${userData.totalCheckin}', 'Profile');
+      Logger.debug('   - Reviews: ${userData.totalReview}', 'Profile');
+      Logger.debug('   - Posts: ${userData.totalPost}', 'Profile');
     } catch (e) {
-      print('❌ Error loading user profile: $e');
+      Logger.error('Error loading user profile', e, null, 'Profile');
       _userData.value = null;
     }
     
@@ -140,7 +141,7 @@ class ProfileController extends GetxController {
   Future<void> loadUserPosts() async {
     final userId = _userData.value?.id;
     if (userId == null) {
-      print('❌ Cannot load posts: User ID not available');
+      Logger.warning('Cannot load posts: User ID not available', 'Profile');
       return;
     }
     
@@ -152,9 +153,9 @@ class ProfileController extends GetxController {
         perPage: 50,
       );
       _userPosts.assignAll(posts);
-      print('📝 User posts loaded: ${posts.length} posts');
+      Logger.info('User posts loaded: ${posts.length} posts', 'Profile');
     } catch (e) {
-      print('❌ Error loading user posts: $e');
+      Logger.error('Error loading user posts', e, null, 'Profile');
       _userPosts.clear();
     }
     
@@ -172,9 +173,9 @@ class ProfileController extends GetxController {
       _savedPlaces.assignAll(userSaved.savedPlaces ?? []);
       _savedPosts.assignAll(userSaved.savedPosts ?? []);
       
-      print('📌 Loaded ${_savedPlaces.length} saved places, ${_savedPosts.length} saved posts');
+      Logger.info('Loaded ${_savedPlaces.length} saved places, ${_savedPosts.length} saved posts', 'Profile');
     } catch (e) {
-      print('❌ Error loading saved items: $e');
+      Logger.error('Error loading saved items', e, null, 'Profile');
       _savedPlaces.clear();
       _savedPosts.clear();
     }
@@ -201,9 +202,9 @@ class ProfileController extends GetxController {
         _userRank.value = userEntry?.rank;
       }
       
-      print('🏆 Weekly Leaderboard loaded: ${entries.length} entries, user rank: ${_userRank.value}');
+      Logger.info('Weekly Leaderboard loaded: ${entries.length} entries, user rank: ${_userRank.value}', 'Profile');
     } catch (e) {
-      print('❌ Error loading weekly leaderboard: $e');
+      Logger.error('Error loading weekly leaderboard', e, null, 'Profile');
       _leaderboard.clear();
       _userRank.value = null;
     }
@@ -225,9 +226,9 @@ class ProfileController extends GetxController {
         _userRank.value = userEntry?.rank;
       }
       
-      print('🏆 Monthly Leaderboard loaded: ${entries.length} entries, user rank: ${_userRank.value}');
+      Logger.info('Monthly Leaderboard loaded: ${entries.length} entries, user rank: ${_userRank.value}', 'Profile');
     } catch (e) {
-      print('❌ Error loading monthly leaderboard: $e');
+      Logger.error('Error loading monthly leaderboard', e, null, 'Profile');
       _leaderboard.clear();
       _userRank.value = null;
     }
@@ -349,13 +350,13 @@ class ProfileController extends GetxController {
   /// Increment completed challenges badge counter
   void incrementCompletedChallenges(int count) {
     _completedChallengesCount.value += count;
-    print('👤 Profile: Completed challenges badge incremented by $count, total: ${_completedChallengesCount.value}');
+    Logger.debug('Profile: Completed challenges badge incremented by $count, total: ${_completedChallengesCount.value}', 'Profile');
   }
 
   /// Reset completed challenges badge (called when user opens challenges page)
   void resetCompletedChallengesBadge() {
     _completedChallengesCount.value = 0;
-    print('👤 Profile: Completed challenges badge reset');
+    Logger.debug('Profile: Completed challenges badge reset', 'Profile');
   }
 
   /// Load challenges data in background
@@ -366,9 +367,9 @@ class ProfileController extends GetxController {
     try {
       // Refresh user challenges data
       await achievementRepository.getChallenges(userId);
-      print('👤 Profile: Challenges data refreshed');
+      Logger.debug('Profile: Challenges data refreshed', 'Profile');
     } catch (e) {
-      print('❌ Error loading challenges: $e');
+      Logger.error('Error loading challenges', e, null, 'Profile');
     }
   }
 
@@ -392,7 +393,7 @@ class ProfileController extends GetxController {
         ..totalAchievement = _userData.value!.totalAchievement
         ..totalChallenge = _userData.value!.totalChallenge;
       
-      print('👤 Profile: Added $amount coins, new total: ${_userData.value!.totalCoin}');
+      Logger.debug('Profile: Added $amount coins, new total: ${_userData.value!.totalCoin}', 'Profile');
     }
   }
 
@@ -416,7 +417,7 @@ class ProfileController extends GetxController {
         ..totalAchievement = _userData.value!.totalAchievement
         ..totalChallenge = _userData.value!.totalChallenge;
       
-      print('👤 Profile: Added $amount XP, new total: ${_userData.value!.totalExp}');
+      Logger.debug('Profile: Added $amount XP, new total: ${_userData.value!.totalExp}', 'Profile');
     }
   }
 }

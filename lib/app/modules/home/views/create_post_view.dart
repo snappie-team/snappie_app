@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
 import 'package:snappie_app/app/core/services/cloudinary_service.dart';
+import 'package:snappie_app/app/core/services/logger_service.dart';
 import 'package:snappie_app/app/data/models/place_model.dart';
 import 'package:snappie_app/app/data/models/user_model.dart';
 import 'package:snappie_app/app/data/repositories/place_repository_impl.dart';
@@ -51,9 +52,9 @@ class _CreatePostViewState extends State<CreatePostView> {
     _userRepository = Get.find<UserRepository>();
     try {
       _cloudinaryService = Get.find<CloudinaryService>();
-      print('[CreatePostView] CloudinaryService found and initialized');
+      Logger.debug('CloudinaryService found and initialized', 'CreatePostView');
     } catch (e) {
-      print('[CreatePostView] ERROR: CloudinaryService not found: $e');
+      Logger.error('CloudinaryService not found', e, null, 'CreatePostView');
       // Show error to user
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Get.snackbar(
@@ -87,7 +88,7 @@ class _CreatePostViewState extends State<CreatePostView> {
         _places = placeData;
       });
     } catch (e) {
-      print('Error loading user data: $e');
+      Logger.error('Error loading user data', e, null, 'CreatePostView');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -582,27 +583,27 @@ class _CreatePostViewState extends State<CreatePostView> {
       // Upload images to Cloudinary if any
       List<String> imageUrls = [];
       if (_imageFiles.isNotEmpty) {
-        print(
-            '[CreatePostView] Starting upload of ${_imageFiles.length} images...');
+        Logger.debug(
+            'Starting upload of ${_imageFiles.length} images...', 'CreatePostView');
 
         for (int i = 0; i < _imageFiles.length; i++) {
           final file = _imageFiles[i];
-          print(
-              '[CreatePostView] Uploading image ${i + 1}/${_imageFiles.length}...');
-          print('[CreatePostView] File path: ${file.path}');
-          print('[CreatePostView] File exists: ${await file.exists()}');
-          print('[CreatePostView] File size: ${await file.length()} bytes');
+          Logger.debug(
+              'Uploading image ${i + 1}/${_imageFiles.length}...', 'CreatePostView');
+          Logger.debug('File path: ${file.path}', 'CreatePostView');
+          Logger.debug('File exists: ${await file.exists()}', 'CreatePostView');
+          Logger.debug('File size: ${await file.length()} bytes', 'CreatePostView');
 
           try {
             final result = await _cloudinaryService.uploadPostImage(file);
 
             if (result.success && result.secureUrl != null) {
               imageUrls.add(result.secureUrl!);
-              print(
-                  '[CreatePostView] Image ${i + 1} uploaded successfully: ${result.secureUrl}');
+              Logger.debug(
+                  'Image ${i + 1} uploaded successfully: ${result.secureUrl}', 'CreatePostView');
             } else {
-              print(
-                  '[CreatePostView] Upload failed for image ${i + 1}: ${result.error}');
+              Logger.warning(
+                  'Upload failed for image ${i + 1}: ${result.error}', 'CreatePostView');
               // Show error to user
               Get.snackbar(
                 'Warning',
@@ -614,8 +615,8 @@ class _CreatePostViewState extends State<CreatePostView> {
               );
             }
           } catch (uploadError) {
-            print(
-                '[CreatePostView] Exception uploading image ${i + 1}: $uploadError');
+            Logger.error(
+                'Exception uploading image ${i + 1}', uploadError, null, 'CreatePostView');
             Get.snackbar(
               'Warning',
               'Error upload gambar ${i + 1}: $uploadError',
@@ -627,8 +628,8 @@ class _CreatePostViewState extends State<CreatePostView> {
           }
         }
 
-        print(
-            '[CreatePostView] Upload complete. Successfully uploaded ${imageUrls.length}/${_imageFiles.length} images');
+        Logger.debug(
+            'Upload complete. Successfully uploaded ${imageUrls.length}/${_imageFiles.length} images', 'CreatePostView');
 
         if (imageUrls.isEmpty && _imageFiles.isNotEmpty) {
           Get.snackbar(
@@ -643,8 +644,8 @@ class _CreatePostViewState extends State<CreatePostView> {
         }
       }
 
-      print(
-          '[CreatePostView] Creating post with ${imageUrls.length} image URLs...');
+      Logger.debug(
+          'Creating post with ${imageUrls.length} image URLs...', 'CreatePostView');
       await _postRepository.createPost(
         placeId: _selectedPlace!.id!,
         content: _contentController.text.trim(),

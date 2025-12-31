@@ -9,6 +9,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/food_type.dart';
 import '../../../core/constants/place_value.dart';
 import '../../../core/services/cloudinary_service.dart';
+import '../../../core/services/logger_service.dart';
 import '../../../data/models/place_model.dart';
 import '../../../routes/app_pages.dart';
 import '../../shared/widgets/_dialog_widgets/mission_loading_modal.dart';
@@ -956,20 +957,20 @@ class _MissionReviewViewState extends State<MissionReviewView> {
         
         for (int i = 0; i < _selectedImages.length; i++) {
           final file = _selectedImages[i];
-          print('[MissionReviewView] Uploading image ${i + 1}/${_selectedImages.length}...');
+          Logger.debug('Uploading image ${i + 1}/${_selectedImages.length}...', 'MissionReviewView');
           
           final result = await cloudinaryService.uploadReviewImage(file);
           
           if (result.success && result.secureUrl != null) {
             imageUrls.add(result.secureUrl!);
             controller.addReviewMedia(result.secureUrl!);
-            print('[MissionReviewView] Image ${i + 1} uploaded: ${result.secureUrl}');
+            Logger.debug('Image ${i + 1} uploaded: ${result.secureUrl}', 'MissionReviewView');
           } else {
-            print('[MissionReviewView] Failed to upload image ${i + 1}: ${result.error}');
+            Logger.warning('Failed to upload image ${i + 1}: ${result.error}', 'MissionReviewView');
           }
         }
         
-        print('[MissionReviewView] Successfully uploaded ${imageUrls.length}/${_selectedImages.length} images');
+        Logger.debug('Successfully uploaded ${imageUrls.length}/${_selectedImages.length} images', 'MissionReviewView');
       } catch (e) {
         MissionLoadingModal.hide();
         Get.snackbar(
@@ -1002,7 +1003,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
 
     final success = await controller.submitReview();
 
-    print('Review submission success: $success');
+    Logger.debug('Review submission success: $success', 'MissionReviewView');
 
     // Hide loading modal
     MissionLoadingModal.hide();

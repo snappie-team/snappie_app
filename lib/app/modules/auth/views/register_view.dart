@@ -557,7 +557,7 @@ class RegisterView extends GetView<AuthController> {
             crossAxisCount: 3,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
-            childAspectRatio: 0.70,
+            childAspectRatio: 0.65,
           ),
           itemCount: controller.foodTypes.length,
           itemBuilder: (context, index) {

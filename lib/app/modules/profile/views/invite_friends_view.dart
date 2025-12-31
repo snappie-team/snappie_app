@@ -5,6 +5,7 @@ import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart'
 import 'package:snappie_app/app/modules/shared/widgets/_dialog_widgets/share_profile_modal.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/services/logger_service.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/repositories/user_repository_impl.dart';
 import '../../../data/repositories/social_repository_impl.dart';
@@ -177,9 +178,9 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
     try {
       final result = await _userRepository.searchUsers(query);
       setState(() => _searchResults = result.users ?? []);
-      print('✅ Found ${_searchResults.length} users for query: $query');
+      Logger.debug('Found ${_searchResults.length} users for query: $query', 'Search');
     } catch (e) {
-      print('❌ Error searching users: $e');
+      Logger.error('Error searching users', e, null, 'Search');
       setState(() => _searchResults = []);
     }
 

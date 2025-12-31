@@ -1,4 +1,6 @@
 // json_mapping_helpers.dart
+import '../services/logger_service.dart';
+
 typedef Json = Map<String, dynamic>;
 
 /// Flatten selected keys from a container (default: 'additional_info')
@@ -147,7 +149,7 @@ void _fixNumericFieldTypes(Json data) {
         }
       } catch (e) {
         // Keep original value if parsing fails
-        print('⚠️ Failed to parse numeric field $field: ${data[field]}');
+        Logger.warning('Failed to parse numeric field $field: ${data[field]}', 'JsonMappingHelper');
       }
     }
   }

@@ -6,6 +6,7 @@ import 'package:snappie_app/app/data/models/reward_model.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/services/logger_service.dart';
 import '../../../data/models/gamification_model.dart';
 import '../../../data/repositories/gamification_repository_impl.dart';
 import '../../../data/repositories/achievement_repository_impl.dart';
@@ -54,10 +55,10 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
       if (userId != null) {
         final result = await _achievementRepo.getUserRewards(userId);
         setState(() => _rewards = result.items ?? []);
-        print('✅ Loaded ${_rewards.length} rewards');
+        Logger.debug('Loaded ${_rewards.length} rewards', 'Coins');
       }
     } catch (e) {
-      print('❌ Error loading rewards: $e');
+      Logger.error('Error loading rewards', e, null, 'Coins');
     }
 
     setState(() => _isLoadingRewards = false);
@@ -69,9 +70,9 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
     try {
       final transactions = await _gamificationRepo.getCoinTransactions();
       setState(() => _transactions = transactions);
-      print('✅ Loaded ${transactions.length} coin transactions');
+      Logger.debug('Loaded ${transactions.length} coin transactions', 'Coins');
     } catch (e) {
-      print('❌ Error loading coin transactions: $e');
+      Logger.error('Error loading coin transactions', e, null, 'Coins');
     }
 
     setState(() => _isLoadingHistory = false);

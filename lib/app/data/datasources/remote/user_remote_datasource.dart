@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/errors/exceptions.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/services/logger_service.dart';
 import '../../../routes/api_endpoints.dart';
 import '../../../core/utils/api_response.dart';
 import '../../../core/helpers/api_response_helper.dart';
@@ -178,7 +179,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   Future<UserSaved> getUserSaved() async {
     try {
       final resp = await dioClient.dio.get(ApiEndpoints.userSaved);
-      print('⭐ getUserSaved response: $resp');
+      Logger.debug('getUserSaved response: $resp', 'UserRemoteDataSource');
       final raw = extractApiResponseData<Map<String, dynamic>>(
         resp,
         (json) => Map<String, dynamic>.from(json as Map<String, dynamic>),
@@ -200,7 +201,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         ApiEndpoints.userSaved,
         data: {'saved_places': placeIds},
       );
-      print('⭐ toggleSavedPlace response: $resp');
+      Logger.debug('toggleSavedPlace response: $resp', 'UserRemoteDataSource');
       // Response returns list of saved place IDs
       final raw = extractApiResponseData<Map<String, dynamic>>(
         resp,
@@ -224,7 +225,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         ApiEndpoints.userSaved,
         data: {'saved_posts': postIds},
       );
-      print('⭐ toggleSavedPost response: $resp');
+      Logger.debug('toggleSavedPost response: $resp', 'UserRemoteDataSource');
       final raw = extractApiResponseData<Map<String, dynamic>>(
         resp,
         (json) => Map<String, dynamic>.from(json as Map<String, dynamic>),

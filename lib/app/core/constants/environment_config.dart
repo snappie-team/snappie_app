@@ -1,4 +1,5 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../services/logger_service.dart';
 
 class EnvironmentConfig {
   // Fallback flag - when true, use local URL instead of production
@@ -53,12 +54,12 @@ class EnvironmentConfig {
   
   static void enableFallback() {
     _useFallbackUrl = true;
-    print('🔄 Fallback enabled: Now using local URL');
+    Logger.info('Fallback enabled: Now using local URL', 'EnvironmentConfig');
   }
   
   static void disableFallback() {
     _useFallbackUrl = false;
-    print('✅ Fallback disabled: Using configured environment URL');
+    Logger.info('Fallback disabled: Using configured environment URL', 'EnvironmentConfig');
   }
   
   static bool get isProduction => environmentType == 'production';

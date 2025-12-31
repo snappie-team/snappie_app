@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/detail_layout.dart';
+import '../../../core/services/logger_service.dart';
 import '../controllers/explore_controller.dart';
 import '../../../data/models/place_model.dart';
 import '../../shared/widgets/index.dart';
@@ -30,10 +31,10 @@ class PlaceView extends GetView<ExploreController> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (arguments is int) {
         // Load place by ID
-        print("Loading place with ID: $arguments");
+        Logger.debug('Loading place with ID: $arguments', 'PlaceView');
         controller.loadPlaceById(arguments);
       } else if (place != null) {
-        print("Place is ${place.id}");
+        Logger.debug('Place is ${place.id}', 'PlaceView');
         controller.selectPlace(place);
         controller.loadPlaceReviews(place.id!);
       }
@@ -105,8 +106,8 @@ class PlaceView extends GetView<ExploreController> {
   }
 
   Widget _buildPlaceInfo(PlaceModel? place) {
-    print('Place Value: ${place?.placeValue}');
-    print('Food Type: ${place?.foodType}');
+    Logger.debug('Place Value: ${place?.placeValue}', 'PlaceView');
+    Logger.debug('Food Type: ${place?.foodType}', 'PlaceView');
     return Column(
       children: [
         Card(
@@ -392,7 +393,7 @@ class PlaceView extends GetView<ExploreController> {
     double imageHeight = 300;
     // final imageUrls = ['https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/146/2024/04/30/Sagarmatha-3522761961.jpeg', 'https://sitimustiani.com/wp-content/uploads/2023/10/Kedai-Kopi-Lao-Kopitiam-Pontianak-1170x878.jpg',];
     final imageUrls = place?.imageUrls ?? [];
-    print("imageUrls: $imageUrls");
+    Logger.debug('imageUrls: $imageUrls', 'PlaceView');
     
     // If no images, show placeholder
     if (imageUrls.isEmpty) {
@@ -1096,7 +1097,7 @@ class PlaceView extends GetView<ExploreController> {
           borderRadius: BorderRadius.circular(20),
           onTap: () {
             // TODO: Implement WhatsApp launch
-            print('Opening WhatsApp for: $phoneNumber');
+            Logger.debug('Opening WhatsApp for: $phoneNumber', 'PlaceView');
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

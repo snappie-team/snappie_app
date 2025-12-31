@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'logger_service.dart';
 import '../../modules/profile/controllers/profile_controller.dart';
 import '../../data/models/gamification_response_model.dart';
 import '../../modules/shared/widgets/index.dart';
@@ -15,7 +16,7 @@ class GamificationHandlerService {
     GamificationResult gamification,
   ) async {
     try {
-      print('[GamificationHandler] Processing gamification result...');
+      Logger.debug('Processing gamification result...', 'GamificationHandler');
       
       // 1. Update user stats first
       await _updateUserStats(gamification.rewards);
@@ -30,9 +31,9 @@ class GamificationHandlerService {
         _handleChallengeUpdates(gamification.challengesCompleted!);
       }
       
-      print('[GamificationHandler] Processing complete');
+      Logger.debug('Processing complete', 'GamificationHandler');
     } catch (e) {
-      print('[GamificationHandler] Error processing gamification: $e');
+      Logger.error('Error processing gamification', e, null, 'GamificationHandler');
       // Don't throw - gamification errors should not break user flow
     }
   }
@@ -41,11 +42,11 @@ class GamificationHandlerService {
   static Future<void> _showAchievementPopups(
     List<AchievementSummary> achievements,
   ) async {
-    print('[GamificationHandler] Showing ${achievements.length} achievement popups');
+    Logger.debug('Showing ${achievements.length} achievement popups', 'GamificationHandler');
     
     for (var i = 0; i < achievements.length; i++) {
       final achievement = achievements[i];
-      print('[GamificationHandler] Showing achievement: ${achievement.name}');
+      Logger.debug('Showing achievement: ${achievement.name}', 'GamificationHandler');
       
       // Show popup
       await Get.dialog(
@@ -65,7 +66,7 @@ class GamificationHandlerService {
     List<ChallengeSummary> challenges,
   ) {
     final completedCount = challenges.where((c) => c.isCompleted).length;
-    print('[GamificationHandler] Processing $completedCount completed challenges');
+    Logger.debug('Processing $completedCount completed challenges', 'GamificationHandler');
     
     if (completedCount > 0) {
       try {
@@ -76,7 +77,7 @@ class GamificationHandlerService {
         // Refresh challenges data in background (non-blocking)
         profileController.loadChallenges();
       } catch (e) {
-        print('[GamificationHandler] Error updating challenges: $e');
+        Logger.error('Error updating challenges', e, null, 'GamificationHandler');
       }
     }
   }
@@ -91,16 +92,16 @@ class GamificationHandlerService {
       final profileController = Get.find<ProfileController>();
       
       if (rewards.coins != null && rewards.coins! > 0) {
-        print('[GamificationHandler] Adding ${rewards.coins} coins');
+        Logger.debug('Adding ${rewards.coins} coins', 'GamificationHandler');
         await profileController.addCoins(rewards.coins!);
       }
       
       if (rewards.xp != null && rewards.xp! > 0) {
-        print('[GamificationHandler] Adding ${rewards.xp} XP');
+        Logger.debug('Adding ${rewards.xp} XP', 'GamificationHandler');
         await profileController.addExp(rewards.xp!);
       }
     } catch (e) {
-      print('[GamificationHandler] Error updating user stats: $e');
+      Logger.error('Error updating user stats', e, null, 'GamificationHandler');
     }
   }
 }

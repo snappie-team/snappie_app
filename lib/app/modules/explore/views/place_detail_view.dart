@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snappie_app/app/core/constants/place_value.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
+import '../../../core/services/logger_service.dart';
 import '../controllers/explore_controller.dart';
 import '../../shared/widgets/index.dart';
 import '../../../data/models/place_model.dart';
@@ -130,7 +131,7 @@ class PlaceDetailView extends GetView<ExploreController> {
   Widget _buildImageSection(BuildContext context, PlaceModel? place) {
     double imageHeight = 300;
     final imageUrls = place?.imageUrls ?? [];
-    print("imageUrls: $imageUrls");
+    Logger.debug('imageUrls: $imageUrls', 'PlaceDetailView');
     
     // If no images, show placeholder
     if (imageUrls.isEmpty) {

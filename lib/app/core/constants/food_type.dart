@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:snappie_app/app/core/constants/app_assets.dart';
 
 enum FoodType {
   nonSup,
@@ -8,6 +8,7 @@ enum FoodType {
   menuCampuran,
   minumanDanTambahan,
   liwetan,
+  makanBersama,
   gayaPadang,
   gayaTionghoa,
   makananCepatSaji,
@@ -33,6 +34,8 @@ extension FoodTypeExtension on FoodType {
         return 'Minuman dan Tambahan';
       case FoodType.liwetan:
         return 'Liwetan';
+      case FoodType.makanBersama:
+        return 'Makan Bersama';
       case FoodType.gayaPadang:
         return 'Gaya Padang';
       case FoodType.gayaTionghoa:
@@ -48,48 +51,50 @@ extension FoodTypeExtension on FoodType {
     }
   }
 
-  IconData get icon {
+  String get imagePath {
     switch (this) {
       case FoodType.nonSup:
-        return Icons.restaurant;
+        return AppAssets.images.food1;
       case FoodType.miInstan:
-        return Icons.ramen_dining;
+        return AppAssets.images.food2;
       case FoodType.menuKomposit:
-        return Icons.dining;
+        return AppAssets.images.food3;
       case FoodType.supSoto:
-        return Icons.soup_kitchen;
+        return AppAssets.images.food4;
       case FoodType.menuCampuran:
-        return Icons.set_meal;
+        return AppAssets.images.food5;
       case FoodType.minumanDanTambahan:
-        return Icons.local_drink;
+        return AppAssets.images.food6;
       case FoodType.liwetan:
-        return Icons.rice_bowl;
+        return AppAssets.images.food7;
+      case FoodType.makanBersama:
+        return AppAssets.images.food8;
       case FoodType.gayaPadang:
-        return Icons.food_bank;
+        return AppAssets.images.food9;
       case FoodType.gayaTionghoa:
-        return Icons.restaurant_menu;
+        return AppAssets.images.food10;
       case FoodType.makananCepatSaji:
-        return Icons.fastfood;
+        return AppAssets.images.food11;
       case FoodType.makananTradisional:
-        return Icons.temple_hindu;
+        return AppAssets.images.food12;
       case FoodType.makananKemasan:
-        return Icons.inventory_2;
+        return AppAssets.images.food13;
       case FoodType.buahBuahan:
-        return Icons.apple;
+        return AppAssets.images.food14;
     }
   }
 
-  /// Get all labels as list
-  static List<String> get allLabels => FoodType.values.map((e) => e.label).toList();
-
-  /// Get icon by label
-  static IconData? getIconByLabel(String label) {
+  /// Get image path by label
+  static String? getImageByLabel(String label) {
     final normalizedLabel = label.toLowerCase().trim();
     for (final value in FoodType.values) {
       if (value.label.toLowerCase() == normalizedLabel) {
-        return value.icon;
+        return value.imagePath;
       }
     }
     return null;
   }
+
+  /// Get all labels as list
+  static List<String> get allLabels => FoodType.values.map((e) => e.label).toList();
 }

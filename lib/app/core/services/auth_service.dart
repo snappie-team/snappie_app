@@ -204,40 +204,16 @@ class AuthService extends GetxService {
   }
 
   // TODO: replace /auth/login email-only with Firebase-ID-token check before public release.
-  Future<AuthResult> login() async {
-    /* ---------- Step 1: Google Sign-In ---------- */
-    final googleAuthService = Get.find<GoogleAuthService>();
-    final userCredential = await googleAuthService.signInWithGoogle();
-
-    if (userCredential == null) {
-      print('🔐 Google Sign In was cancelled');
-      return AuthResult.fail(
-        AuthErrorType.unknown,
-        message: 'Google Sign In was cancelled',
-      );
-    }
-
-    final user = userCredential.user;
-    if (user == null || user.email == null) {
-      print('❌ No user data from Google Sign In');
-      return AuthResult.fail(
-        AuthErrorType.unknown,
-        message: 'No user data from Google Sign In',
-      );
-    }
-
-    // TODO: Using hardcoded email for testing purposes
-    _userEmail = user.email;
-    print('🔐 Google email: $_userEmail');
-
-    /* ---------- Step 2: Backend Login ---------- */
+  Future<AuthResult> loginWithEmail(String email) async {
+    /// Backend login with email only (without Google Sign In)
+    print('🔐 Login with email: $email');
     try {
       final dioClient = DioClient();
       final requestUrl = ApiEndpoints.getFullUrl(ApiEndpoints.login);
 
       final response = await dioClient.dio.post(
         requestUrl,
-        data: {'email': _userEmail},
+        data: {'email': email},
         options: dio_lib.Options(
           headers: getAuthHeaders(useRegistrationKey: true),
           extra: {
@@ -359,8 +335,34 @@ class AuthService extends GetxService {
     }
   }
 
+  /// Complete login flow: Google Sign In + Backend Login
+  Future<AuthResult> login() async {
+    /* ---------- Step 1: Google Sign-In ---------- */
+    final googleAuthService = Get.find<GoogleAuthService>();
+    final userCredential = await googleAuthService.signInWithGoogle();
+
+    if (userCredential == null) {
+      print('🔐 Google Sign In was cancelled');
+      return AuthResult.fail(
+        AuthErrorType.unknown,
+        message: 'Google Sign In was cancelled',
+      );
+    }
+
+    final user = userCredential.user;
+    if (user == null || user.email == null) {
+      print('❌ No user data from Google Sign In');
+      return AuthResult.fail(
+        AuthErrorType.unknown,
+        message: 'No user data from Google Sign In',
+      );
+    }
+
+    /* ---------- Step 2: Backend Login ---------- */
+    return await loginWithEmail(user.email!);
+  }
+
   // TODO: replace /auth/login email-only with Firebase-ID-token check before public release.
-  /// Register new user with backend API
   Future<bool> registerUser({
     required String name,
     required String username,
@@ -370,6 +372,8 @@ class AuthService extends GetxService {
     required List<String> foodTypes,
     required List<String> placeValues,
   }) async {
+    
+    /// Register new user with backend API
     try {
       final dio = dio_lib.Dio(
         dio_lib.BaseOptions(
@@ -419,7 +423,8 @@ class AuthService extends GetxService {
         final data = response.data;
 
         if (data['success'] == true && data['data'] != null) {
-          final loginResult = await login();
+          // Use loginWithEmail to avoid triggering Google Sign In popup again
+          final loginResult = await loginWithEmail(email);
 
           if (!loginResult.success) {
             return false;

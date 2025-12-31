@@ -45,6 +45,9 @@ class _AppImages {
   String get onboarding2 => '$_basePath/onboarding2.png';
   String get onboarding3 => '$_basePath/onboarding3.png';
   String get onboarding4 => '$_basePath/onboarding4.png';
+  
+  // === Mascot ===
+  String get mascot => '$_basePath/onboarding4-add.png';
 
   // === Icons / Illustrations ===
   String get coin => '$_basePath/coin.png';
@@ -80,6 +83,22 @@ class _AppImages {
   // === Challenge ===
   String challenge({bool isFemale = false}) =>
       '$_basePath/challenge_${isFemale ? 'f' : 'm'}.png';
+
+  // === Food Types ===
+  String get food1 => '$_basePath/food1.png';
+  String get food2 => '$_basePath/food2.png';
+  String get food3 => '$_basePath/food3.png';
+  String get food4 => '$_basePath/food4.png';
+  String get food5 => '$_basePath/food5.png';
+  String get food6 => '$_basePath/food6.png';
+  String get food7 => '$_basePath/food7.png';
+  String get food8 => '$_basePath/food8.png';
+  String get food9 => '$_basePath/food9.png';
+  String get food10 => '$_basePath/food10.png';
+  String get food11 => '$_basePath/food11.png';
+  String get food12 => '$_basePath/food12.png';
+  String get food13 => '$_basePath/food13.png';
+  String get food14 => '$_basePath/food14.png';
 }
 
 /// Asset logo di folder assets/logo/

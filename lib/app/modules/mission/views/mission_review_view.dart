@@ -4,17 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:snappie_app/app/modules/mission/controllers/mission_controller.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/food_type.dart';
 import '../../../core/constants/place_value.dart';
 import '../../../core/services/cloudinary_service.dart';
 import '../../../data/models/place_model.dart';
 import '../../../routes/app_pages.dart';
-import '../widgets/mission_loading_modal.dart';
-import '../widgets/mission_success_modal.dart';
-import '../widgets/mission_failed_modal.dart';
-import '../widgets/mission_next_modal.dart';
-import '../widgets/mission_feedback_modal.dart';
+import '../../shared/widgets/_dialog_widgets/mission_loading_modal.dart';
+import '../../shared/widgets/_dialog_widgets/mission_success_modal.dart';
+import '../../shared/widgets/_dialog_widgets/mission_failed_modal.dart';
+import '../../shared/widgets/_dialog_widgets/mission_next_modal.dart';
+import '../../shared/widgets/_dialog_widgets/mission_feedback_modal.dart';
 
 /// Halaman untuk menulis ulasan dari reviews_view
 class MissionReviewView extends StatefulWidget {
@@ -54,99 +55,67 @@ class _MissionReviewViewState extends State<MissionReviewView> {
   @override
   Widget build(BuildContext context) {
     if (place == null) {
-      return Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.background,
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
-            onPressed: () => Get.back(),
+      return ScaffoldFrame.detail(
+        title: 'Tulis Ulasan',
+        slivers: [
+          const SliverFillRemaining(
+            child: Center(
+              child: Text('Data tidak ditemukan'),
+            ),
           ),
-        ),
-        body: const Center(
-          child: Text('Data tidak ditemukan'),
-        ),
+        ],
       );
     }
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => _showExitConfirmation(),
+    return ScaffoldFrame.detail(
+      title: 'Tulis Ulasan',
+      slivers: [
+        SliverToBoxAdapter(
+          child: _buildRewardBanner(),
         ),
-        title: Text(
-          'Tulis Ulasan',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
-        ),
-        centerTitle: false,
-      ),
-      body: Column(
-        children: [
-          // Content
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Green banner with reward info
-                  _buildRewardBanner(),
-          
-                  // Place info card
-                  Container(
-                    margin: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.shadowDark.withAlpha(20),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        _buildPlaceInfoCard(),
-                                  
-                        // Rating section
-                        _buildRatingSection(),
-                                  
-                        // Photo/Video section
-                        _buildPhotoVideoSection(),
-                                  
-                        // Food catalog section
-                        _buildFoodCatalogSection(),
-                                  
-                        // Place value section
-                        _buildPlaceValueSection(),
-                                  
-                        // Review text section
-                        _buildReviewTextSection(),
-                                  
-                        // Hide username checkbox
-                        _buildHideUsernameSection(),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+        SliverToBoxAdapter(
+          child: Container(
+            margin: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadowDark.withAlpha(20),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                _buildPlaceInfoCard(),
+                          
+                // Rating section
+                _buildRatingSection(),
+                          
+                // Photo/Video section
+                _buildPhotoVideoSection(),
+                          
+                // Food catalog section
+                _buildFoodCatalogSection(),
+                          
+                // Place value section
+                _buildPlaceValueSection(),
+                          
+                // Review text section
+                _buildReviewTextSection(),
+                          
+                // Hide username checkbox
+                _buildHideUsernameSection(),
+              ],
             ),
           ),
-
-          // Submit button
-          _buildSubmitButton(),
-        ],
-      ),
+        ),
+        SliverToBoxAdapter(
+          child: _buildSubmitButton(),
+        ),
+      ],
     );
   }
 
@@ -1108,47 +1077,5 @@ class _MissionReviewViewState extends State<MissionReviewView> {
         Get.until((route) => route.settings.name == AppPages.PLACE_DETAIL);
       }
     }
-  }
-
-  void _showExitConfirmation() {
-    // If form is empty, just go back
-    if (_rating == 0 && 
-        _reviewController.text.isEmpty && 
-        _selectedFoodTypes.isEmpty && 
-        _selectedPlaceValues.isEmpty &&
-        _selectedImages.isEmpty) {
-      Get.back();
-      return;
-    }
-
-    Get.dialog(
-      AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: Text(
-          'Batalkan Ulasan?',
-          style: TextStyle(color: AppColors.textPrimary),
-        ),
-        content: Text(
-          'Ulasan yang sudah ditulis akan hilang jika kamu keluar sekarang.',
-          style: TextStyle(color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Lanjutkan Menulis'),
-          ),
-          TextButton(
-            onPressed: () {
-              Get.back(); // Close dialog
-              Get.back(); // Go back from review page
-            },
-            child: Text(
-              'Keluar',
-              style: TextStyle(color: AppColors.error),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

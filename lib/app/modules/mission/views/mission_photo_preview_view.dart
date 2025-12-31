@@ -4,10 +4,10 @@ import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/mission_controller.dart';
-import '../widgets/mission_loading_modal.dart';
-import '../widgets/mission_success_modal.dart';
-import '../widgets/mission_failed_modal.dart';
-import '../widgets/mission_next_modal.dart';
+import '../../shared/widgets/_dialog_widgets/mission_loading_modal.dart';
+import '../../shared/widgets/_dialog_widgets/mission_success_modal.dart';
+import '../../shared/widgets/_dialog_widgets/mission_failed_modal.dart';
+import '../../shared/widgets/_dialog_widgets/mission_next_modal.dart';
 
 /// Halaman preview foto sebelum submit
 class MissionPhotoPreviewView extends GetView<MissionController> {

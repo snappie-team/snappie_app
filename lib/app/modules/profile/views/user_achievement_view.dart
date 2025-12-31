@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/modules/shared/widgets/index.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
@@ -48,75 +49,62 @@ class _UserAchievementViewState extends State<UserAchievementView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundContainer,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Get.back(),
+    return ScaffoldFrame.detail(
+      title: 'Penghargaan Saya',
+      slivers: [
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 12),
         ),
-        title: Text(
-          'Penghargaan Saya',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+        SliverToBoxAdapter(
+          child: PromotionalBanner(
+            title: 'Penghargaan Baru',
+            subtitle: 'Lihat penghargaan yang telah Anda kumpulkan',
           ),
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 12),
-            // Header
-            // _buildHeaderSection(),
-            PromotionalBanner(
-                title: 'Penghargaan Baru',
-                subtitle: 'Lihat penghargaan yang telah Anda kumpulkan'),
-
-            // Achievements list
-            _isLoading
-                ? const Padding(
-                    padding: EdgeInsets.all(32),
-                    child: CircularProgressIndicator(),
-                  )
-                : _achievements.isEmpty
-                    ? _buildEmptyState()
-                    : Container(
-                        margin: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.backgroundContainer,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.shadowDark,
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 8,
-                            mainAxisSpacing: 8,
-                            childAspectRatio: 0.9,
-                          ),
-                          itemCount: _achievements.length,
-                          itemBuilder: (context, index) {
-                            return _buildAchievementItem(_achievements[index]);
-                          },
-                        ),
-                      ),
-          ],
-        ),
-      ),
+        if (_isLoading)
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(32),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          )
+        else if (_achievements.isEmpty)
+          SliverFillRemaining(
+            child: _buildEmptyState(),
+          )
+        else
+          SliverToBoxAdapter(
+            child: Container(
+              margin: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.backgroundContainer,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.shadowDark,
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                  childAspectRatio: 0.9,
+                ),
+                itemCount: _achievements.length,
+                itemBuilder: (context, index) {
+                  return _buildAchievementItem(_achievements[index]);
+                },
+              ),
+            ),
+          ),
+      ],
     );
   }
 

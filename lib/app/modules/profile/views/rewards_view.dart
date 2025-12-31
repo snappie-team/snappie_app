@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/data/models/reward_model.dart';
 import '../../../core/constants/app_colors.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../data/repositories/achievement_repository_impl.dart';
 import '../controllers/profile_controller.dart';
 
@@ -49,46 +50,31 @@ class _RewardsViewState extends State<RewardsView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundContainer,
-      appBar: AppBar(
-        backgroundColor: Colors.orange,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Get.back(),
+    return ScaffoldFrame.detail(
+      title: 'Koin & Kupon',
+      slivers: [
+        SliverToBoxAdapter(
+          child: _buildHeaderSection(),
         ),
-        title: const Text(
-          'Koin & Kupon',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+        if (_isLoading)
+          const SliverFillRemaining(
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else if (_rewards.isEmpty)
+          SliverFillRemaining(
+            child: _buildEmptyState(),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => _buildRewardItem(_rewards[index]),
+                childCount: _rewards.length,
+              ),
+            ),
           ),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          // Header with coins
-          _buildHeaderSection(),
-          
-          // Rewards list
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _rewards.isEmpty
-                    ? _buildEmptyState()
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _rewards.length,
-                        itemBuilder: (context, index) {
-                          return _buildRewardItem(_rewards[index]);
-                        },
-                      ),
-          ),
-        ],
-      ),
+      ],
     );
   }
 

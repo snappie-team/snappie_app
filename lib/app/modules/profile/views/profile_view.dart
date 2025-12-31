@@ -7,7 +7,6 @@ import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/user_model.dart';
 import '../../shared/widgets/index.dart';
-import '../widgets/share_profile_modal.dart';
 
 // Route aliases for cleaner navigation
 typedef Routes = AppPages;

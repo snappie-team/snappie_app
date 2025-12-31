@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../controllers/profile_controller.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/repositories/place_repository_impl.dart';
 import '../../../routes/app_pages.dart';
@@ -13,68 +13,61 @@ class SavedPlacesView extends GetView<ProfileController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundContainer,
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundContainer,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Get.back(),
-        ),
-        title: Text(
-          'Tempat Tersimpan',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: false,
-      ),
-      body: Obx(() {
-        if (controller.isLoadingSaved) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    return ScaffoldFrame.detail(
+      title: 'Tempat Tersimpan',
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: Obx(() {
+            if (controller.isLoadingSaved) {
+              return const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
 
-        if (controller.savedPlaces.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.bookmark_border,
-                  size: 64,
-                  color: Colors.grey[400],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Belum ada tempat tersimpan',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 16,
+            if (controller.savedPlaces.isEmpty) {
+              return SliverFillRemaining(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.bookmark_border,
+                        size: 64,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Belum ada tempat tersimpan',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          );
-        }
+              );
+            }
 
-        return GridView.builder(
-          padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 0.75,
-          ),
-          itemCount: controller.savedPlaces.length,
-          itemBuilder: (context, index) {
-            final place = controller.savedPlaces[index];
-            return _buildPlaceCard(place);
-          },
-        );
-      }),
+            return SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.75,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final place = controller.savedPlaces[index];
+                  return _buildPlaceCard(place);
+                },
+                childCount: controller.savedPlaces.length,
+              ),
+            );
+          }),
+        ),
+      ],
     );
   }
 

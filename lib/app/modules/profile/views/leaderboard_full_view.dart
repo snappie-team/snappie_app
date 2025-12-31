@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/data/models/leaderboard_model.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
 import '../controllers/profile_controller.dart';
 import '../../shared/widgets/index.dart';
@@ -58,47 +59,32 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundContainer,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Get.back(),
+    return ScaffoldFrame.detail(
+      title: 'Papan Peringkat',
+      slivers: [
+        SliverToBoxAdapter(
+          child: _buildHeader(),
         ),
-        title: Text(
-          'Papan Peringkat',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 4),
         ),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Header with user info
-          _buildHeader(),
-
-          const SizedBox(height: 4),
-
-          // Tab selector
-          _buildTabSelector(),
-
-          const SizedBox(height: 4),
-
-          // Content
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _leaderboardData.isEmpty
-                    ? _buildEmptyState()
-                    : _buildLeaderboardContent(),
-          ),
-        ],
-      ),
+        SliverToBoxAdapter(
+          child: _buildTabSelector(),
+        ),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 4),
+        ),
+        if (_isLoading)
+          const SliverFillRemaining(
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else if (_leaderboardData.isEmpty)
+          SliverFillRemaining(
+            child: _buildEmptyState(),
+          )
+        else
+          _buildLeaderboardContent(),
+      ],
     );
   }
 

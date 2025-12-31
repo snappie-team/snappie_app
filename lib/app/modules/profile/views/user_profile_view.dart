@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/post_model.dart';
 import '../../../data/repositories/user_repository_impl.dart';
@@ -106,32 +107,24 @@ class _UserProfileViewState extends State<UserProfileView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundContainer,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Get.back(),
-        ),
-        title: Text(
-          'Profil',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      body: RefreshIndicator(
-        onRefresh: _loadUserProfile,
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _errorMessage.isNotEmpty
-                ? _buildErrorState()
-                : _buildContent(),
-      ),
+    if (_errorMessage.isNotEmpty) {
+      return Scaffold(
+        body: _buildErrorState(),
+      );
+    }
+
+    return ScaffoldFrame.detail(
+      title: 'Profil',
+      onRefresh: _loadUserProfile,
+      slivers: [
+        _isLoading
+            ? const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()),
+              )
+            : SliverToBoxAdapter(
+                child: _buildContent(),
+              ),
+      ],
     );
   }
 

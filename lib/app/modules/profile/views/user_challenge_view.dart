@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/modules/shared/widgets/_state_widgets/empty_state_widget.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/achievement_model.dart';
@@ -47,67 +48,59 @@ class _UserChallengesViewState extends State<UserChallengesView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundContainer,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Get.back(),
+    return ScaffoldFrame.detail(
+      title: 'Tantangan',
+      slivers: [
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 12),
         ),
-        title: Text(
-          'Tantangan',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 12),
-            // Challenges list grouped by resetSchedule
-            _isLoading
-                ? const Padding(
-                    padding: EdgeInsets.all(32),
-                    child: CircularProgressIndicator(),
-                  )
-                : _challenges.isEmpty
-                    ? _buildEmptyState()
-                    : Column(
-                        children: [
-                          // Harian (daily)
-                          if (_getChallengesBySchedule(ResetSchedule.daily)
-                              .isNotEmpty)
-                            _buildListChallenge(
-                                'Tantangan Harian', ResetSchedule.daily),
-
-                          const SizedBox(height: 12),
-
-                          // Mingguan (weekly)
-                          if (_getChallengesBySchedule(ResetSchedule.weekly)
-                              .isNotEmpty)
-                            _buildListChallenge(
-                                'Tantangan Mingguan', ResetSchedule.weekly),
-
-                          const SizedBox(height: 12),
-
-                          // Sekali Saja (none)
-                          if (_getChallengesBySchedule(ResetSchedule.none)
-                              .isNotEmpty)
-                            _buildListChallenge(
-                                'Tantangan Sekali Saja', ResetSchedule.none),
-                        ],
-                      ),
-          ],
-        ),
-      ),
+        if (_isLoading)
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(32),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          )
+        else if (_challenges.isEmpty)
+          SliverFillRemaining(
+            child: _buildEmptyState(),
+          )
+        else ..._buildChallengeSliversBySchedule(),
+      ],
     );
+  }
+
+  List<Widget> _buildChallengeSliversBySchedule() {
+    final List<Widget> slivers = [];
+
+    // Harian (daily)
+    if (_getChallengesBySchedule(ResetSchedule.daily).isNotEmpty) {
+      slivers.add(SliverToBoxAdapter(
+        child: _buildListChallenge('Tantangan Harian', ResetSchedule.daily),
+      ));
+      slivers.add(const SliverToBoxAdapter(
+        child: SizedBox(height: 12),
+      ));
+    }
+
+    // Mingguan (weekly)
+    if (_getChallengesBySchedule(ResetSchedule.weekly).isNotEmpty) {
+      slivers.add(SliverToBoxAdapter(
+        child: _buildListChallenge('Tantangan Mingguan', ResetSchedule.weekly),
+      ));
+      slivers.add(const SliverToBoxAdapter(
+        child: SizedBox(height: 12),
+      ));
+    }
+
+    // Sekali Saja (none)
+    if (_getChallengesBySchedule(ResetSchedule.none).isNotEmpty) {
+      slivers.add(SliverToBoxAdapter(
+        child: _buildListChallenge('Tantangan Sekali Saja', ResetSchedule.none),
+      ));
+    }
+
+    return slivers;
   }
 
   Widget _buildEmptyState() {

@@ -236,3 +236,203 @@ The simplified architecture makes testing straightforward:
 4. Update documentation when adding new modules
 
 For more information about Flutter development, visit the [official documentation](https://docs.flutter.dev/).
+
+## Application Logic & Data Flow (Deep Dive)
+
+Bagian ini menjelaskan “logika kerja” aplikasi dari sudut pandang alur pengguna dan alur data, tanpa perlu membaca kode satu per satu.
+
+### 1) Model mental aplikasi
+
+Aplikasi ini bisa dipahami sebagai gabungan 3 hal besar:
+
+1. **Identitas & sesi** (login Google/Firebase, lalu sesi backend dengan token).
+2. **Eksplorasi & sosial** (tempat, posting, interaksi like/save/follow).
+3. **Gamification** (check-in + review menghasilkan XP/koin + achievement/challenge).
+
+Semua itu dibungkus ke dalam 4 tab utama:
+
+- **Beranda**: feed sosial (post, like, save, follow).
+- **Jelajahi**: discovery tempat (filter, detail tempat, review, check-in, galeri).
+- **Artikel**: browsing artikel (pencarian/filter lokal, buka link eksternal).
+- **Akun**: profil user (profil, saved items, leaderboard, pengaturan, logout).
+
+### 2) Alur startup (ketika aplikasi dibuka)
+
+Tujuan startup adalah: menyiapkan fondasi aplikasi, lalu memutuskan user masuk ke login atau langsung ke tab utama.
+
+Urutannya secara logika:
+
+1. **Inisialisasi framework & Firebase** agar Google Sign-In siap.
+2. **Load environment** dari `.env` untuk menentukan base URL API dan API key khusus registrasi.
+3. **Siapkan dependency & service inti** (HTTP client, auth service, lokasi, upload, dll) agar semua modul bisa memakainya.
+4. **Load session** dari penyimpanan lokal.
+5. Jika **token ada** → masuk ke **Main (tab)**. Jika tidak → masuk ke **Login**.
+
+Intinya: aplikasi berusaha membuat “cold start” tetap cepat, dan hanya melanjutkan ke fetch data fitur tertentu ketika tab itu benar-benar dibuka.
+
+### 3) Konsep sesi & autentikasi (2 tahap)
+
+Autentikasi di aplikasi ini bersifat “hybrid”, karena ada dua kebutuhan:
+
+1. **Google/Firebase**: memverifikasi user memang akun Google valid.
+2. **Backend aplikasi**: memberi akses ke data aplikasi (post, tempat, profile, gamification) dengan **access token**.
+
+Alur login yang paling umum:
+
+1. User menekan “Sign in with Google”.
+2. Google Sign-In menghasilkan identitas user (terutama email).
+3. Aplikasi mengirim email tersebut ke backend untuk login.
+4. Backend mengembalikan **token** (dan biasanya refresh token + masa berlaku).
+5. Aplikasi menyimpan sesi ke penyimpanan lokal agar user tidak perlu login ulang saat buka aplikasi lagi.
+
+Jika backend menjawab “user belum terdaftar”, aplikasi mengarahkan user ke flow registrasi untuk mengisi profil awal (misalnya username, gender, avatar, preferensi). Setelah registrasi berhasil, aplikasi akan mencoba login kembali agar sesi terbentuk.
+
+### 4) Siklus request API (yang terjadi di balik layar)
+
+Semua call ke backend lewat satu HTTP client yang konsisten. Yang penting dipahami: aplikasi mencoba membuat request “tahan banting” terhadap token kedaluwarsa.
+
+Siklus umum sebuah request:
+
+1. Controller meminta data/aksi (misalnya ambil post atau toggle like).
+2. Repository mengecek koneksi internet (untuk beberapa fitur) dan meneruskan ke remote datasource.
+3. HTTP client menambahkan header auth.
+   - Jika user sudah login, pakai access token.
+   - Jika belum login / khusus endpoint tertentu, pakai registration API key.
+4. Jika backend membalas sukses, data diparse dan dikembalikan.
+5. Jika backend membalas **401 (token expired)**:
+   - Aplikasi mencoba **refresh token** (kalau refresh token masih valid).
+   - Jika refresh sukses, request semula **diulang** otomatis.
+   - Jika refresh gagal, aplikasi melakukan **logout** dan mengarahkan user kembali ke login.
+
+Dengan pola ini, sebagian besar “token expired” terasa transparan bagi user.
+
+### 5) Alur data: UI → Controller → Repository → API
+
+Arsitektur datanya sengaja dibuat sederhana untuk kecepatan pengembangan.
+
+Secara konsep, alurnya seperti ini:
+
+```text
+[UI/View]
+   |  (user tap, scroll, submit form)
+   v
+[Controller]
+   |  (state: loading/error/data, validasi, debounce, optimistic update)
+   v
+[Repository]
+   |  (cek network, pilih sumber data, normalisasi error)
+   v
+[DataSource Remote]
+   |  (call HTTP ke endpoint)
+   v
+[Backend API]
+```
+
+Lalu responsnya kembali ke atas (API → datasource → repository → controller → UI) untuk menampilkan data atau status.
+
+Catatan penting: aplikasi ini cenderung memakai **exception** untuk error (network/server/validation/auth) dan controller memilih reaksi UI (snackbar, empty state, dll).
+
+### 6) Penyimpanan lokal & cache
+
+Ada dua jenis penyimpanan yang dipakai untuk kebutuhan berbeda:
+
+1. **SharedPreferences**: cocok untuk data kecil dan sangat sering dibaca saat startup, seperti token, refresh token, expiry, dan payload user.
+2. **Isar (database lokal)**: cocok untuk cache model (misalnya profil user) agar:
+   - bisa tampil ketika offline,
+   - tidak perlu fetch berulang,
+   - data lebih terstruktur.
+
+Strategi sederhananya: untuk beberapa data yang krusial seperti profil user, saat online aplikasi akan fetch dari API lalu cache. Saat offline, aplikasi mencoba mengambil cache; jika cache tidak ada, baru dianggap gagal.
+
+### 7) Logika per fitur (empat tab utama)
+
+#### 7.1 Beranda (social feed)
+
+Tujuan Beranda adalah menampilkan feed post dan membuat interaksi terasa cepat.
+
+Yang biasa terjadi saat tab Beranda pertama kali dibuka:
+
+1. Aplikasi memuat daftar post dari API.
+2. Aplikasi memuat data pendukung seperti relasi follow dan daftar post yang disimpan.
+3. UI menampilkan post dengan state interaksi (misalnya sudah di-like atau belum, sudah di-save atau belum).
+
+Untuk aksi seperti like/save/follow, aplikasi memakai pendekatan “optimistic update”: UI langsung berubah dulu, lalu request dikirim ke backend. Jika backend gagal, UI dibatalkan agar konsisten.
+
+#### 7.2 Jelajahi (places discovery)
+
+Tujuan Jelajahi adalah membantu user menemukan tempat dan masuk ke aksi bernilai tinggi (review/check-in).
+
+Logika yang menonjol:
+
+- Data tempat biasanya diambil dari API lalu difilter di sisi client untuk pencarian cepat.
+- Filter bisa berupa rating, popular/partner, nearby (butuh lokasi), dan preferensi kategori tertentu.
+- Dari detail tempat, user bisa masuk ke review, check-in, dan galeri konten terkait.
+
+Karena Jelajahi punya aksi yang berkaitan dengan user (saved, review, check-in), fitur ini umumnya mengharuskan user sudah login.
+
+#### 7.3 Artikel
+
+Tujuan tab Artikel adalah browsing konten informatif.
+
+Polanya:
+
+- Aplikasi memuat daftar artikel dari API.
+- Search dan filter cenderung dilakukan lokal agar responsif.
+- Saat user membuka artikel, aplikasi biasanya membuka link eksternal.
+
+#### 7.4 Akun/Profil
+
+Tujuan tab Akun adalah menampilkan identitas, progres, dan kontrol user.
+
+Yang dimuat umumnya mencakup:
+
+- Profil user terbaru.
+- Post milik user.
+- Saved places dan saved posts.
+- Leaderboard (mingguan/bulanan).
+
+Profil juga menjadi “titik sinkronisasi” setelah aktivitas gamification, karena XP/koin dan badge challenge/achievement biasanya perlu ikut ter-update.
+
+### 8) Mission (check-in + review + feedback) dan gamification
+
+Mission adalah alur yang paling “bernilai” karena menggabungkan beberapa komponen penting aplikasi.
+
+Contoh alur mission yang umum:
+
+1. User memilih suatu tempat dan mulai mission.
+2. Step foto/check-in:
+   - Aplikasi mengambil lokasi user.
+   - Foto diunggah dulu ke storage (Cloudinary) agar backend cukup menerima URL.
+   - Aplikasi mengirim request check-in dengan koordinat + URL foto.
+3. Step review:
+   - User memberi rating dan menulis ulasan.
+   - Backend menyimpan review dan menghitung reward.
+4. Step feedback:
+   - User menjawab beberapa pertanyaan feedback.
+
+Setelah check-in atau review sukses, backend dapat mengembalikan “paket gamification”, misalnya:
+
+- Reward XP/koin.
+- Achievement yang baru terbuka (perlu ditampilkan sebagai popup).
+- Challenge yang progresnya berubah (badge/indikator).
+
+Handler gamification dibuat terpusat agar perilakunya konsisten: reward di-update, popup achievement tampil berurutan (tidak menumpuk), lalu challenge di-refresh tanpa mengganggu flow utama.
+
+### 9) Contoh perjalanan user end-to-end
+
+Berikut contoh perjalanan user yang menggambarkan “benang merah” aplikasi:
+
+**User baru** → login Google → backend bilang belum terdaftar → isi registrasi → login ulang → masuk tab → jelajahi tempat → check-in + review → dapat XP/koin + achievement → profil/leaderboard ikut berubah.
+
+**User lama** → buka aplikasi → sesi masih ada → langsung masuk tab → scroll feed → like/save/follow (optimistic) → buka profil untuk melihat progres.
+
+### 10) Panduan memahami dan mengubah flow
+
+Kalau Anda ingin mengubah perilaku aplikasi, biasanya Anda akan memilih “titik kontrol” ini:
+
+- Perubahan aturan login/sesi: ada di layanan autentikasi dan mekanisme refresh.
+- Perubahan cara request & error: ada di HTTP client (interceptor) dan datasource.
+- Perubahan data yang ditampilkan: ada di controller (cara load, debounce, optimistic update) dan repository.
+- Perubahan gamification: ada di handler gamification dan alur mission.
+
+Dengan memahami hubungan antar titik kontrol itu, Anda bisa menambah fitur baru tanpa harus mengubah banyak bagian aplikasi.

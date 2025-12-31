@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:snappie_app/app/core/dependencies/core_dependencies.dart';
 import 'package:snappie_app/app/core/dependencies/data_dependencies.dart';
 import 'firebase_options.dart';
@@ -43,7 +44,17 @@ void main() async {
   // Initialize data layer (datasources & repositories)
   await DataDependencies.init();
 
-  runApp(MainApp(route: await initAuthService()));
+  // Initialize easy_localization
+  await EasyLocalization.ensureInitialized();
+
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('en'), Locale('id')],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('id'),
+      child: MainApp(route: await initAuthService()),
+    ),
+  );
 }
 
 class MainApp extends StatelessWidget {
@@ -71,6 +82,11 @@ class MainApp extends StatelessWidget {
           // Apply custom theme with Material Design color system
           theme: AppTheme.lightTheme,
           themeMode: ThemeMode.light,
+
+          // Easy Localization configuration
+          localizationsDelegates: context.localizationDelegates,
+          supportedLocales: context.supportedLocales,
+          locale: context.locale,
         );
       },
     );

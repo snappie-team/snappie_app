@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/place_model.dart';
 import '../../../data/models/review_model.dart';
@@ -16,7 +17,7 @@ class ReviewsView extends StatefulWidget {
 
 class _ReviewsViewState extends State<ReviewsView> {
   final ExploreController controller = Get.find<ExploreController>();
-  
+
   // Filter state
   String _selectedFilter = 'all'; // 'all', 'with_media'
   int? _selectedRating; // null = semua, 1-5 = rating tertentu
@@ -34,22 +35,26 @@ class _ReviewsViewState extends State<ReviewsView> {
 
   List<ReviewModel> get _filteredReviews {
     List<ReviewModel> reviews = controller.reviews.toList();
-    
+
     // Filter by media
     if (_selectedFilter == 'with_media') {
-      reviews = reviews.where((r) => r.imageUrls != null && r.imageUrls!.isNotEmpty).toList();
+      reviews = reviews
+          .where((r) => r.imageUrls != null && r.imageUrls!.isNotEmpty)
+          .toList();
     }
-    
+
     // Filter by rating
     if (_selectedRating != null) {
       reviews = reviews.where((r) => r.rating == _selectedRating).toList();
     }
-    
+
     return reviews;
   }
 
   int get _reviewsWithMediaCount {
-    return controller.reviews.where((r) => r.imageUrls != null && r.imageUrls!.isNotEmpty).length;
+    return controller.reviews
+        .where((r) => r.imageUrls != null && r.imageUrls!.isNotEmpty)
+        .length;
   }
 
   Map<int, int> get _ratingCounts {
@@ -63,84 +68,29 @@ class _ReviewsViewState extends State<ReviewsView> {
     return counts;
   }
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   final PlaceModel? place = Get.arguments as PlaceModel?;
-
-  //   return Scaffold(
-  //     backgroundColor: AppColors.background,
-  //     appBar: AppBar(
-  //       backgroundColor: AppColors.background,
-  //       elevation: 0,
-  //       leading: IconButton(
-  //         icon: Icon(Icons.arrow_back, color: AppColors.primary),
-  //         onPressed: () => Get.back(),
-  //       ),
-  //       title: Text(
-  //         'Ulasan',
-  //         style: TextStyle(
-  //           color: AppColors.textPrimary,
-  //           fontWeight: FontWeight.w600,
-  //         ),
-  //       ),
-  //       centerTitle: false,
-  //     ),
-  //     body: place == null
-  //         ? _buildEmptyState('Data tidak ditemukan')
-  //         : _buildContent(context, place),
-  //   );
-  // }
-    @override
+  @override
   Widget build(BuildContext context) {
     final PlaceModel? place = Get.arguments as PlaceModel?;
 
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      body: Builder(
-        builder: (context) {
-          // if (place == null) {
-          //   return _buildEmptyState('Data tidak ditemukan');
-          // } 
+    if (place == null) {
+      return Scaffold(
+        body: Center(
+          child: _buildEmptyState('Data tidak ditemukan'),
+        ),
+      );
+    }
 
-          return Stack(
-            clipBehavior: Clip.none,
-            children: [
-              CustomScrollView(
-                slivers: [
-                  // Custom App Bar with Image
-                  SliverAppBar(
-                    pinned: true,
-                    backgroundColor: AppColors.background,
-                    elevation: 0,
-                    leading: IconButton(
-                      icon: Icon(Icons.arrow_back, color: AppColors.primary),
-                      onPressed: () => Get.back(),
-                    ),
-                    title: Text(
-                      'Ulasan',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    centerTitle: false,
-                  ),
-
-                  // Content
-                  SliverToBoxAdapter(
-                    child: Container(
-                      color: AppColors.background,
-                      child: place == null
-                          ? _buildEmptyState('Data tidak ditemukan')
-                          : Obx(() => _buildContent(context, place)),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          );
-        },
-      )
+    return ScaffoldFrame.detail(
+      title: 'Ulasan',
+      onRefresh: () async {
+        await controller.loadPlaceReviews(place.id!);
+      },
+      slivers: [
+        // Content
+        SliverToBoxAdapter(
+          child: Obx(() => _buildContent(context, place)),
+        ),
+      ],
     );
   }
 
@@ -176,13 +126,13 @@ class _ReviewsViewState extends State<ReviewsView> {
       children: [
         // Filter chips
         _buildFilterChips(place),
-        
+
         // CTA Berikan Ulasan
         _buildGiveReviewCTA(),
-        
+
         // Rating summary
         _buildRatingSummary(place),
-        
+
         // Reviews list
         if (controller.reviews.isEmpty)
           const Padding(
@@ -205,42 +155,42 @@ class _ReviewsViewState extends State<ReviewsView> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-          // Semua chip
-          Expanded(
-            child: _buildFilterChip(
-              label: 'Semua',
-              count: controller.reviews.length,
-              isSelected: _selectedFilter == 'all' && _selectedRating == null,
-              onTap: () {
-                setState(() {
-                  _selectedFilter = 'all';
-                  _selectedRating = null;
-                });
-              },
+            // Semua chip
+            Expanded(
+              child: _buildFilterChip(
+                label: 'Semua',
+                count: controller.reviews.length,
+                isSelected: _selectedFilter == 'all' && _selectedRating == null,
+                onTap: () {
+                  setState(() {
+                    _selectedFilter = 'all';
+                    _selectedRating = null;
+                  });
+                },
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          
-          // Dengan Foto/Video chip
-          Expanded(
-            child: _buildFilterChip(
-              label: 'Dengan Foto/Video',
-              count: _reviewsWithMediaCount,
-              isSelected: _selectedFilter == 'with_media',
-              onTap: () {
-                setState(() {
-                  _selectedFilter = 'with_media';
-                });
-              },
+            const SizedBox(width: 8),
+
+            // Dengan Foto/Video chip
+            Expanded(
+              child: _buildFilterChip(
+                label: 'Dengan Foto/Video',
+                count: _reviewsWithMediaCount,
+                isSelected: _selectedFilter == 'with_media',
+                onTap: () {
+                  setState(() {
+                    _selectedFilter = 'with_media';
+                  });
+                },
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          
-          // Bintang dropdown
-          Expanded(
-            child: _buildRatingDropdown(),
-          ),
-        ],
+            const SizedBox(width: 8),
+
+            // Bintang dropdown
+            Expanded(
+              child: _buildRatingDropdown(),
+            ),
+          ],
         ),
       ),
     );
@@ -283,7 +233,8 @@ class _ReviewsViewState extends State<ReviewsView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        color: _selectedRating != null ? AppColors.primary : AppColors.background,
+        color:
+            _selectedRating != null ? AppColors.primary : AppColors.background,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: AppColors.primary,
@@ -304,7 +255,9 @@ class _ReviewsViewState extends State<ReviewsView> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: _selectedRating != null ? Colors.white : AppColors.primary,
+                  color: _selectedRating != null
+                      ? Colors.white
+                      : AppColors.primary,
                   height: 1.2,
                 ),
               ),
@@ -312,7 +265,8 @@ class _ReviewsViewState extends State<ReviewsView> {
               Icon(
                 Icons.keyboard_arrow_down,
                 size: 16,
-                color: _selectedRating != null ? Colors.white : AppColors.primary,
+                color:
+                    _selectedRating != null ? Colors.white : AppColors.primary,
               ),
             ],
           ),
@@ -328,10 +282,16 @@ class _ReviewsViewState extends State<ReviewsView> {
               value: rating,
               child: Row(
                 children: [
-                  ...List.generate(rating, (_) => Icon(Icons.star, color: AppColors.warning, size: 16)),
-                  ...List.generate(5 - rating, (_) => Icon(Icons.star_border, color: AppColors.textTertiary, size: 16)),
+                  ...List.generate(
+                      rating,
+                      (_) =>
+                          Icon(Icons.star, color: AppColors.warning, size: 16)),
+                  ...List.generate(
+                      5 - rating,
+                      (_) => Icon(Icons.star_border,
+                          color: AppColors.textTertiary, size: 16)),
                   const SizedBox(width: 8),
-                  Text('(${ _ratingCounts[rating] ?? 0})'),
+                  Text('(${_ratingCounts[rating] ?? 0})'),
                 ],
               ),
             );
@@ -341,7 +301,8 @@ class _ReviewsViewState extends State<ReviewsView> {
           setState(() {
             _selectedRating = value;
             if (value != null) {
-              _selectedFilter = 'all'; // Reset media filter when selecting rating
+              _selectedFilter =
+                  'all'; // Reset media filter when selecting rating
             }
           });
         },
@@ -421,7 +382,7 @@ class _ReviewsViewState extends State<ReviewsView> {
   Widget _buildRatingSummary(PlaceModel place) {
     final totalReviews = controller.reviews.length;
     final avgRating = place.avgRating ?? 0.0;
-    
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -436,7 +397,7 @@ class _ReviewsViewState extends State<ReviewsView> {
             ),
           ),
           const SizedBox(height: 4),
-          
+
           // Stars
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -445,14 +406,16 @@ class _ReviewsViewState extends State<ReviewsView> {
               if (avgRating >= starValue) {
                 return Icon(Icons.star, color: AppColors.warning, size: 28);
               } else if (avgRating >= starValue - 0.5) {
-                return Icon(Icons.star_half, color: AppColors.warning, size: 28);
+                return Icon(Icons.star_half,
+                    color: AppColors.warning, size: 28);
               } else {
-                return Icon(Icons.star_border, color: AppColors.warning, size: 28);
+                return Icon(Icons.star_border,
+                    color: AppColors.warning, size: 28);
               }
             }),
           ),
           const SizedBox(height: 4),
-          
+
           // Total reviews
           Text(
             '($totalReviews Ulasan)',
@@ -462,13 +425,13 @@ class _ReviewsViewState extends State<ReviewsView> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Rating breakdown bars
           ...List.generate(5, (index) {
             final rating = 5 - index;
             final count = _ratingCounts[rating] ?? 0;
             final percentage = totalReviews > 0 ? count / totalReviews : 0.0;
-            
+
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
@@ -491,7 +454,8 @@ class _ReviewsViewState extends State<ReviewsView> {
                         value: percentage,
                         minHeight: 8,
                         backgroundColor: AppColors.surfaceContainer,
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(AppColors.primary),
                       ),
                     ),
                   ),
@@ -514,7 +478,7 @@ class _ReviewsViewState extends State<ReviewsView> {
 
   Widget _buildReviewsList() {
     final reviews = _filteredReviews;
-    
+
     if (reviews.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(32),
@@ -529,7 +493,7 @@ class _ReviewsViewState extends State<ReviewsView> {
         ),
       );
     }
-    
+
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -603,7 +567,7 @@ class _ReviewsViewState extends State<ReviewsView> {
               ),
             ],
           ),
-          
+
           // Review content
           if (review.content != null && review.content!.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -615,7 +579,7 @@ class _ReviewsViewState extends State<ReviewsView> {
               ),
             ),
           ],
-          
+
           // Review images
           if (review.imageUrls != null && review.imageUrls!.isNotEmpty) ...[
             const SizedBox(height: 12),

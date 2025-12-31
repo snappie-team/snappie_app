@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../controllers/explore_controller.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../shared/layout/views/scaffold_frame.dart';
 import '../../shared/widgets/index.dart';
 
 class ExploreView extends GetView<ExploreController> {
@@ -19,7 +19,7 @@ class ExploreView extends GetView<ExploreController> {
 
     return ScaffoldFrame(
       controller: controller,
-      headerHeight: 75,
+      headerHeight: 45,
       headerContent: SearchBarWidget(
         hintText: 'Mau makan di mana hari ini?',
         enableGlassmorphism: true,

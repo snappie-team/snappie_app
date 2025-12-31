@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/place_model.dart';
 
@@ -138,27 +139,27 @@ class _FacilitiesViewState extends State<FacilitiesView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Get.back(),
-        ),
-        title: Text(
-          'Fasilitas',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
+    return ScaffoldFrame.detail(
+      title: 'Fasilitas',
+      slivers: [
+        _allFacilities.isEmpty
+            ? SliverFillRemaining(
+                child: _buildEmptyState(),
+              )
+            : SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    // Filter chips
+                    _buildFilterChips(),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+        if (_allFacilities.isNotEmpty)
+          SliverFillRemaining(
+            child: _buildFacilitiesList(),
           ),
-        ),
-        centerTitle: false,
-      ),
-      body: _allFacilities.isEmpty
-          ? _buildEmptyState()
-          : _buildContent(),
+      ],
     );
   }
 
@@ -182,20 +183,6 @@ class _FacilitiesViewState extends State<FacilitiesView> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildContent() {
-    return Column(
-      children: [
-        // Filter chips
-        _buildFilterChips(),
-        const SizedBox(height: 8),
-        // Facilities list
-        Expanded(
-          child: _buildFacilitiesList(),
-        ),
-      ],
     );
   }
 

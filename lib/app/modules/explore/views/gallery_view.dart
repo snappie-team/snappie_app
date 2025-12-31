@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/place_model.dart';
 import '../../shared/widgets/index.dart';
@@ -33,25 +34,32 @@ class _GalleryViewState extends State<GalleryView> {
   Widget build(BuildContext context) {
     if (place == null) {
       return Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: _buildAppBar('Galeri'),
         body: const Center(
           child: Text('Data tidak ditemukan'),
         ),
       );
     }
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: _buildAppBar('Galeri ${place!.name ?? ""}'),
-      body: Column(
-        children: [
-          _buildTabBar(),
-          Expanded(
-            child: _buildSelectedTab(),
+    return ScaffoldFrame.detail(
+      title: 'Galeri ${place!.name ?? ""}',
+      onRefresh: () async {
+        if (place?.id != null) {
+          await controller.loadGalleryCheckins(place!.id!);
+          await controller.loadGalleryPosts(place!.id!);
+        }
+      },
+      slivers: [
+        SliverToBoxAdapter(
+          child: Column(
+            children: [
+              _buildTabBar(),
+            ],
           ),
-        ],
-      ),
+        ),
+        SliverFillRemaining(
+          child: _buildSelectedTab(),
+        ),
+      ],
     );
   }
 
@@ -66,25 +74,6 @@ class _GalleryViewState extends State<GalleryView> {
       default:
         return _buildGaleriKamiTab();
     }
-  }
-
-  PreferredSizeWidget _buildAppBar(String title) {
-    return AppBar(
-      backgroundColor: AppColors.background,
-      elevation: 0,
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: AppColors.primary),
-        onPressed: () => Get.back(),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: AppColors.textPrimary,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      centerTitle: false,
-    );
   }
 
   Widget _buildTabBar() {

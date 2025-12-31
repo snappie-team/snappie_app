@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snappie_app/app/core/constants/place_value.dart';
@@ -10,7 +11,7 @@ import '../../../data/models/place_model.dart';
 import '../../../data/models/review_model.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../mission/controllers/mission_controller.dart';
-import '../../mission/widgets/mission_confirm_modal.dart';
+import '../../shared/widgets/_dialog_widgets/mission_confirm_modal.dart';
 
 class PlaceDetailView extends GetView<ExploreController> {
   const PlaceDetailView({super.key});
@@ -30,119 +31,99 @@ class PlaceDetailView extends GetView<ExploreController> {
       }
     });
 
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      body: Builder(
-        builder: (context) {
-          if (place == null) {
-            return const Center(
-              child: Text('Place not found'),
-            );
-          }
+    if (place == null) {
+      return Scaffold(
+        body: const Center(
+          child: Text('Place not found'),
+        ),
+      );
+    }
 
-          return Stack(
-            clipBehavior: Clip.none,
-            children: [
-              CustomScrollView(
-                slivers: [
-                  // Custom App Bar with Image
-                  SliverAppBar(
-                    pinned: true,
-                    backgroundColor: AppColors.background,
-                    elevation: 0,
-                    leading: Container(
-                      margin: const EdgeInsets.all(8),
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_back, color: AppColors.primary),
-                        onPressed: () => Get.back(),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        ScaffoldFrame.detail(
+          title: place.name ?? 'Place Name not available',
+          actions: [
+            Obx(() {
+              final isSaved = place.id != null && controller.isPlaceSaved(place.id!);
+              final isLoading = controller.isTogglingFavorite;
+              return IconButton(
+                icon: isLoading
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primary,
+                        ),
+                      )
+                    : Icon(
+                        isSaved ? Icons.bookmark : Icons.bookmark_outline,
+                        color: AppColors.primary,
                       ),
-                    ),
-                    title: Text(
-                      place.name ?? 'Place Name not available',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                onPressed: isLoading ? null : () => _toggleFavorite(place),
+              );
+            }),
+            IconButton(
+              icon: Icon(Icons.share, color: AppColors.primary),
+              onPressed: () => _showShareDialog(place),
+            ),
+          ],
+          onRefresh: () async {
+            if (place.id != null) {
+              await controller.loadPlaceReviews(place.id!);
+              await controller.loadSavedPlaces();
+            }
+          },
+          slivers: [
+            // Content
+            SliverToBoxAdapter(
+              child: Container(
+                color: AppColors.background,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 4),
+                    _buildImageSection(context, place),
+                    _buildPlaceHeaderCard(place),
+                    if ((place.placeValue?.isNotEmpty ?? false))
+                      _buildChipSection(
+                        title: 'Cocok Untuk',
+                        chips: place.placeValue!,
                       ),
-                    ),
-                    actions: [
-                      Obx(() {
-                        final isSaved = place.id != null && controller.isPlaceSaved(place.id!);
-                        final isLoading = controller.isTogglingFavorite;
-                        return IconButton(
-                          icon: isLoading
-                              ? SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.primary,
-                                  ),
-                                )
-                              : Icon(
-                                  isSaved ? Icons.bookmark : Icons.bookmark_outline,
-                                  color: AppColors.primary,
-                                ),
-                          onPressed: isLoading ? null : () => _toggleFavorite(place),
-                        );
-                      }),
-                      IconButton(
-                        icon: Icon(Icons.share, color: AppColors.primary),
-                        onPressed: () => _showShareDialog(place),
+                    if ((place.foodType?.isNotEmpty ?? false))
+                      _buildChipSection(
+                        title: 'Tipe Kuliner',
+                        chips: place.foodType!,
                       ),
-                      SizedBox(width: 8),
-                    ],
-                  ),
-
-                  // Content
-                  SliverToBoxAdapter(
-                    child: Container(
-                      color: AppColors.background,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 4),
-                          _buildImageSection(context, place),
-                          _buildPlaceHeaderCard(place),
-                          if ((place.placeValue?.isNotEmpty ?? false))
-                            _buildChipSection(
-                              title: 'Cocok Untuk',
-                              chips: place.placeValue!,
-                            ),
-                          if ((place.foodType?.isNotEmpty ?? false))
-                            _buildChipSection(
-                              title: 'Tipe Kuliner',
-                              chips: place.foodType!,
-                            ),
-                          _buildInfoCard(place),
-                          if ((place.menu?.isNotEmpty ?? false))
-                            _buildMenuSection(context, place),
-                          if (_getFacilityChips(place).isNotEmpty)
-                            _buildFacilitySection(place, _getFacilityChips(place)),
-                          _buildGallerySection(context, place),
-                          _buildReviewPreviewSection(place),
-                          _buildSimilarPlacesSection(place),
-                          const SizedBox(height: 160),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                    _buildInfoCard(place),
+                    if ((place.menu?.isNotEmpty ?? false))
+                      _buildMenuSection(context, place),
+                    if (_getFacilityChips(place).isNotEmpty)
+                      _buildFacilitySection(place, _getFacilityChips(place)),
+                    _buildGallerySection(context, place),
+                    _buildReviewPreviewSection(place),
+                    _buildSimilarPlacesSection(place),
+                    const SizedBox(height: 160),
+                  ],
+                ),
               ),
-              Obx(() {
-                if (!controller.showMissionCta) {
-                  return const SizedBox.shrink();
-                }
-                return Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: _buildMissionCtaCard(place),
-                );
-              }),
-            ],
+            ),
+          ],
+        ),
+        Obx(() {
+          if (!controller.showMissionCta) {
+            return const SizedBox.shrink();
+          }
+          return Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _buildMissionCtaCard(place),
           );
-        },
-      ),
+        }),
+      ],
     );
   }
 

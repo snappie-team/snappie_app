@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/food_type.dart';
 import '../../../core/constants/place_value.dart';
@@ -50,54 +51,31 @@ class _GiveReviewViewState extends State<GiveReviewView> {
   Widget build(BuildContext context) {
     if (place == null) {
       return Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.background,
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
-            onPressed: () => Get.back(),
-          ),
-        ),
         body: const Center(
           child: Text('Data tidak ditemukan'),
         ),
       );
     }
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => _showExitConfirmation(),
-        ),
-        title: Text(
-          'Tulis Ulasan',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
-        ),
-        centerTitle: false,
-      ),
-      body: Column(
-        children: [
-          // Content
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Green banner with reward info
-                  _buildRewardBanner(),
-          
-                  // Place info card
-                  Container(
-                    margin: const EdgeInsets.all(16),
+    return ScaffoldFrame.detail(
+      title: 'Tulis Ulasan',
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Column(
+            children: [
+              // Content
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Green banner with reward info
+                      _buildRewardBanner(),
+              
+                      // Place info card
+                      Container(
+                        margin: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: AppColors.background,
                       borderRadius: BorderRadius.circular(12),
@@ -141,7 +119,9 @@ class _GiveReviewViewState extends State<GiveReviewView> {
           // Submit button
           _buildSubmitButton(),
         ],
-      ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1048,47 +1028,5 @@ class _GiveReviewViewState extends State<GiveReviewView> {
         _isSubmitting = false;
       });
     }
-  }
-
-  void _showExitConfirmation() {
-    // If form is empty, just go back
-    if (_rating == 0 && 
-        _reviewController.text.isEmpty && 
-        _selectedFoodTypes.isEmpty && 
-        _selectedPlaceValues.isEmpty &&
-        _selectedImages.isEmpty) {
-      Get.back();
-      return;
-    }
-
-    Get.dialog(
-      AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: Text(
-          'Batalkan Ulasan?',
-          style: TextStyle(color: AppColors.textPrimary),
-        ),
-        content: Text(
-          'Ulasan yang sudah ditulis akan hilang jika kamu keluar sekarang.',
-          style: TextStyle(color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Lanjutkan Menulis'),
-          ),
-          TextButton(
-            onPressed: () {
-              Get.back(); // Close dialog
-              Get.back(); // Go back from review page
-            },
-            child: Text(
-              'Keluar',
-              style: TextStyle(color: AppColors.error),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

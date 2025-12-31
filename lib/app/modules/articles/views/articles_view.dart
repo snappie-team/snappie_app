@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
 import '../controllers/articles_controller.dart';
 import '../../shared/widgets/index.dart';
-import '../../shared/layout/views/scaffold_frame.dart';
 
 class ArticlesView extends GetView<ArticlesController> {
   const ArticlesView({super.key});
@@ -17,7 +17,7 @@ class ArticlesView extends GetView<ArticlesController> {
 
     return ScaffoldFrame(
       controller: controller,
-      headerHeight: 75,
+      headerHeight: 45,
       headerContent: SearchBarWidget(
         hintText: 'Cari artikel menarik...',
         enableGlassmorphism: true,

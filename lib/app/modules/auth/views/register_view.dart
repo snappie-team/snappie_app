@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
-import 'package:snappie_app/app/modules/shared/layout/views/detail_layout.dart';
+import 'package:snappie_app/app/core/constants/food_type.dart';
+import 'package:snappie_app/app/core/localization/locale_keys.g.dart';
+import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../controllers/auth_controller.dart';
 
 class RegisterView extends GetView<AuthController> {
@@ -9,129 +12,54 @@ class RegisterView extends GetView<AuthController> {
 
   @override
   Widget build(BuildContext context) {
-    return DetailLayout(
-      isCard: true,
-      title: 'Snappie',
-      onBackPressed: () {
-        if (controller.selectedPageIndex > 0) {
-          controller.previousPage();
-        } else {
-          controller.cancelRegistration();
-        }
-      },
-      body: Column(
-        children: [
-          // Content
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Header Section
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Gabung dengan Kami',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Eksplorasi tempat kuliner hidden gems, nikmati pengalaman kuliner yang tak terlupakan',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade700,
-                            height: 1.5,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        // Progress Indicator
-                        Obx(
-                          () => Container(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(3, (index) {
-                                return Container(
-                                  margin:
-                                      const EdgeInsets.symmetric(horizontal: 4),
-                                  height: 8,
-                                  width: 90,
-                                  decoration: BoxDecoration(
-                                    color: index <= controller.selectedPageIndex
-                                        ? AppColors.accent
-                                        : AppColors.accent.withAlpha(75),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                );
-                              }),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+    return ScaffoldFrame.detail(title: tr(LocaleKeys.register_title), slivers: [
+      SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverToBoxAdapter(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                // crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHeaderSection(),
 
-                    const SizedBox(height: 32),
+                  const SizedBox(height: 16),
 
-                    // Page Content
-                    Obx(() {
-                      switch (controller.selectedPageIndex) {
-                        case 0:
-                          return _buildInputDataUser();
-                        case 1:
-                          return _buildInputFoodType();
-                        case 2:
-                          return _buildInputPlaceValue();
-                        default:
-                          return _buildInputDataUser();
-                      }
-                    }),
+                  // Page Content
+                  Obx(() {
+                    switch (controller.selectedPageIndex) {
+                      case 0:
+                        return _buildInputDataUser();
+                      case 1:
+                        return _buildInputFoodType();
+                      case 2:
+                        return _buildInputPlaceValue();
+                      default:
+                        return _buildInputDataUser();
+                    }
+                  }),
 
-                    const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                    // Navigation Buttons
-                    Obx(() => Row(
-                          children: [
-                            if (controller.selectedPageIndex > 0)
-                              Expanded(
-                                child: OutlinedButton(
-                                  onPressed: controller.previousPage,
-                                  style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 16),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(50),
-                                    ),
-                                    side: BorderSide(color: AppColors.primary),
-                                  ),
-                                  child: Text(
-                                    'Kembali',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            if (controller.selectedPageIndex > 0)
-                              const SizedBox(width: 16),
+                  // Navigation Buttons
+                  Obx(() => Row(
+                        children: [
+                          if (controller.selectedPageIndex > 0)
                             Expanded(
                               child: ElevatedButton(
-                                onPressed: () {
-                                  if (controller.selectedPageIndex < 2) {
-                                    controller.nextPage();
-                                  } else {
-                                    controller.register();
-                                  }
-                                },
+                                onPressed: controller.previousPage,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.accent,
                                   foregroundColor: Colors.white,
@@ -143,9 +71,7 @@ class RegisterView extends GetView<AuthController> {
                                   disabledBackgroundColor: Colors.grey.shade300,
                                 ),
                                 child: Text(
-                                  controller.selectedPageIndex < 2
-                                      ? 'Lanjut'
-                                      : 'Daftar',
+                                  tr(LocaleKeys.register_back),
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -153,29 +79,142 @@ class RegisterView extends GetView<AuthController> {
                                 ),
                               ),
                             ),
-                          ],
-                        )),
+                          if (controller.selectedPageIndex > 0)
+                            const SizedBox(width: 16),
+                          Expanded(
+                            child: Obx(() {
+                              // Reactive validation for each page
+                              bool canProceed = false;
 
-                    const SizedBox(height: 24),
-                  ],
-                ),
+                              switch (controller.selectedPageIndex) {
+                                case 0:
+                                  // Page 1: Check if all fields are filled
+                                  canProceed =
+                                      controller.isFirstnameValid.value &&
+                                          controller.isLastnameValid.value &&
+                                          controller.selectedGender.value
+                                              .isNotEmpty &&
+                                          controller.selectedGender.value !=
+                                              'others' &&
+                                          controller.selectedAvatar.value
+                                              .isNotEmpty &&
+                                          controller.isUsernameValid.value;
+                                  break;
+                                case 1:
+                                  // Page 2: Check if at least 3 food types selected
+                                  canProceed =
+                                      controller.selectedFoodTypes.length >= 3;
+                                  break;
+                                case 2:
+                                  // Page 3: Check if at least 3 place values selected
+                                  canProceed =
+                                      controller.selectedPlaceValues.length >=
+                                          3;
+                                  break;
+                              }
+
+                              return ElevatedButton(
+                                onPressed: canProceed
+                                    ? () {
+                                        if (controller.selectedPageIndex < 2) {
+                                          controller.nextPage();
+                                        } else {
+                                          controller.register();
+                                        }
+                                      }
+                                    : null,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.accent,
+                                  foregroundColor: Colors.white,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(50),
+                                  ),
+                                  disabledBackgroundColor: Colors.grey.shade300,
+                                  disabledForegroundColor: Colors.grey.shade600,
+                                ),
+                                child: Text(
+                                  controller.selectedPageIndex < 2
+                                      ? tr(LocaleKeys.register_next)
+                                      : tr(LocaleKeys.register_submit),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              );
+                            }),
+                          ),
+                        ],
+                      )),
+
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
+          ))
+    ]);
+  }
+
+  Widget _buildHeaderSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          tr(LocaleKeys.register_join_us),
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
           ),
-        ],
-      ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          tr(LocaleKeys.register_subtitle),
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey.shade700,
+            height: 1.5,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        // Progress Indicator
+        Obx(
+          () => Container(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(3, (index) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  height: 8,
+                  width: 90,
+                  decoration: BoxDecoration(
+                    color: index <= controller.selectedPageIndex
+                        ? AppColors.accent
+                        : AppColors.accent.withAlpha(75),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildInputDataUser() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // Form Section Title
-        const Text(
-          'Lengkapi profil kamu',
-          style: TextStyle(
+        Text(
+          tr(LocaleKeys.register_complete_profile),
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -184,9 +223,9 @@ class RegisterView extends GetView<AuthController> {
         const SizedBox(height: 16),
 
         // Email field (read-only, from Google)
-        const Text(
-          'Email',
-          style: TextStyle(
+        Text(
+          tr(LocaleKeys.register_email),
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: Colors.black,
@@ -197,7 +236,7 @@ class RegisterView extends GetView<AuthController> {
           controller: controller.registerEmailController,
           enabled: false,
           decoration: InputDecoration(
-            hintText: 'Email dari akun Google',
+            hintText: tr(LocaleKeys.register_email_hint),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(color: Colors.grey),
@@ -220,9 +259,9 @@ class RegisterView extends GetView<AuthController> {
         const SizedBox(height: 16),
 
         // First Name and Last Name Row
-        const Text(
-          'Nama Lengkap',
-          style: TextStyle(
+        Text(
+          tr(LocaleKeys.register_full_name),
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: Colors.black,
@@ -235,7 +274,7 @@ class RegisterView extends GetView<AuthController> {
               child: TextField(
                 controller: controller.firstnameController,
                 decoration: InputDecoration(
-                  hintText: 'Nama Depan',
+                  hintText: tr(LocaleKeys.register_first_name),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: const BorderSide(color: Colors.grey),
@@ -259,7 +298,7 @@ class RegisterView extends GetView<AuthController> {
               child: TextField(
                 controller: controller.lastnameController,
                 decoration: InputDecoration(
-                  hintText: 'Nama Belakang',
+                  hintText: tr(LocaleKeys.register_last_name),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: const BorderSide(color: Colors.grey),
@@ -283,15 +322,14 @@ class RegisterView extends GetView<AuthController> {
         const SizedBox(height: 16),
 
         // Gender Selection
-        const Text(
-          'Jenis Kelamin',
-          style: TextStyle(
+        Text(
+          tr(LocaleKeys.register_gender),
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: Colors.black,
           ),
         ),
-        const SizedBox(height: 8),
         Obx(
           () => RadioGroup<Gender>(
             groupValue: controller.selectedGenderEnum,
@@ -308,7 +346,7 @@ class RegisterView extends GetView<AuthController> {
                       Radio<Gender>(
                         value: Gender.male,
                       ),
-                      const Text('Laki-laki'),
+                      Text(tr(LocaleKeys.register_male)),
                     ],
                   ),
                 ),
@@ -320,7 +358,7 @@ class RegisterView extends GetView<AuthController> {
                       Radio<Gender>(
                         value: Gender.female,
                       ),
-                      const Text('Perempuan'),
+                      Text(tr(LocaleKeys.register_female)),
                     ],
                   ),
                 ),
@@ -345,11 +383,11 @@ class RegisterView extends GetView<AuthController> {
                             : 0,
                         child: controller.selectedGender.value.isNotEmpty
                             ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Pilih Avatar',
+                                    tr(LocaleKeys.register_choose_avatar),
                                     style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
@@ -358,13 +396,13 @@ class RegisterView extends GetView<AuthController> {
                                   const SizedBox(height: 16),
                                   GridView.builder(
                                     shrinkWrap: true,
+                                    padding: const EdgeInsets.only(top: 0),
                                     physics:
                                         const NeverScrollableScrollPhysics(),
                                     gridDelegate:
                                         const SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: 4,
                                       crossAxisSpacing: 12,
-                                      mainAxisSpacing: 12,
                                     ),
                                     itemCount: controller
                                         .getAvatarOptions(
@@ -402,24 +440,35 @@ class RegisterView extends GetView<AuthController> {
                                               child: Image.network(
                                                 avatar['path'],
                                                 fit: BoxFit.contain,
-                                                loadingBuilder: (context, child, loadingProgress) {
-                                                  if (loadingProgress == null) return child;
+                                                loadingBuilder: (context, child,
+                                                    loadingProgress) {
+                                                  if (loadingProgress == null)
+                                                    return child;
                                                   return Center(
-                                                    child: CircularProgressIndicator(
-                                                      value: loadingProgress.expectedTotalBytes != null
-                                                          ? loadingProgress.cumulativeBytesLoaded /
-                                                              loadingProgress.expectedTotalBytes!
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      value: loadingProgress
+                                                                  .expectedTotalBytes !=
+                                                              null
+                                                          ? loadingProgress
+                                                                  .cumulativeBytesLoaded /
+                                                              loadingProgress
+                                                                  .expectedTotalBytes!
                                                           : null,
                                                     ),
                                                   );
                                                 },
-                                                errorBuilder: (context, error, stackTrace) {
+                                                errorBuilder: (context, error,
+                                                    stackTrace) {
                                                   // Fallback to local asset if network fails
                                                   return Image.asset(
                                                     avatar['localPath'],
                                                     fit: BoxFit.contain,
-                                                    errorBuilder: (context, error, stackTrace) {
-                                                      return const Icon(Icons.person, size: 40);
+                                                    errorBuilder: (context,
+                                                        error, stackTrace) {
+                                                      return const Icon(
+                                                          Icons.person,
+                                                          size: 40);
                                                     },
                                                   );
                                                 },
@@ -442,9 +491,9 @@ class RegisterView extends GetView<AuthController> {
         const SizedBox(height: 16),
 
         // Username field
-        const Text(
-          'Nama Pengguna',
-          style: TextStyle(
+        Text(
+          tr(LocaleKeys.register_username),
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: Colors.black,
@@ -452,7 +501,7 @@ class RegisterView extends GetView<AuthController> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Minimal 8 kata dan mengandung karakter atau angka',
+          tr(LocaleKeys.register_username_validation),
           style: TextStyle(
             fontSize: 12,
             color: AppColors.primary,
@@ -462,7 +511,7 @@ class RegisterView extends GetView<AuthController> {
         TextField(
           controller: controller.usernameController,
           decoration: InputDecoration(
-            hintText: 'Contoh: marissa.ana_',
+            hintText: tr(LocaleKeys.register_username_hint),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(color: Colors.grey),
@@ -480,7 +529,6 @@ class RegisterView extends GetView<AuthController> {
           ),
           style: const TextStyle(fontSize: 14),
         ),
-        const SizedBox(height: 32),
       ],
     );
   }
@@ -490,9 +538,9 @@ class RegisterView extends GetView<AuthController> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        const Text(
-          'Pilih 3 atau lebih tipe kuliner yang kamu sukai',
-          style: TextStyle(
+        Text(
+          tr(LocaleKeys.register_choose_food_types),
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -500,85 +548,76 @@ class RegisterView extends GetView<AuthController> {
         ),
         const SizedBox(height: 16),
 
-          // Food type selection grid
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.0,
-            ),
-            itemCount: controller.foodTypes.length,
-            itemBuilder: (context, index) {
-              final foodType = controller.foodTypes[index];
-              
-              // Map food types to icons
-              final Map<String, String> foodIcons = {
-                'Nusantara': '🍜',
-                'Internasional': '🌍',
-                'Seafood': '🦞',
-                'Kafein': '☕',
-                'Non-Kafein': '🧃',
-                'Vegetarian': '🥗',
-                'Dessert': '🍰',
-                'Makanan Ringan': '🍿',
-                'Pastry': '🥐',
-              };
-              
-              return Obx(
-                () {
-                  final isSelected =
-                      controller.selectedFoodTypes.contains(foodType);
-                  
-                  return GestureDetector(
-                    onTap: () {
-                      controller.toggleFoodTypeSelection(foodType);
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primary.withAlpha(100)
-                            : Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color:
-                              isSelected ? AppColors.primary : Colors.transparent,
-                          width: 2,
-                        ),
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            foodIcons[foodType] ?? '🍴',
-                            style: const TextStyle(fontSize: 32),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            foodType,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: isSelected ? AppColors.primary : Colors.black87,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+        // Food type selection grid
+        GridView.builder(
+          padding: EdgeInsets.zero,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 0.70,
+          ),
+          itemCount: controller.foodTypes.length,
+          itemBuilder: (context, index) {
+            final foodType = controller.foodTypes[index];
+            final imagePath = FoodTypeExtension.getImageByLabel(foodType);
+
+            return Obx(
+              () {
+                final isSelected =
+                    controller.selectedFoodTypes.contains(foodType);
+
+                return GestureDetector(
+                  onTap: () {
+                    controller.toggleFoodTypeSelection(foodType);
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primary.withAlpha(50)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color:
+                            isSelected ? AppColors.primary : Colors.transparent,
+                        width: isSelected ? 2.5 : 1.5,
                       ),
                     ),
-                  );
-                },
-              );
-            },
-          ),
-          
-          const SizedBox(height: 16),
-        ],
+                    padding: const EdgeInsets.all(4),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Image.asset(
+                          imagePath!,
+                          fit: BoxFit.contain,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          foodType,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight:
+                                isSelected ? FontWeight.w600 : FontWeight.w500,
+                            color:
+                                isSelected ? AppColors.primary : Colors.black87,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+
+        const SizedBox(height: 16),
+      ],
     );
   }
 
@@ -587,72 +626,75 @@ class RegisterView extends GetView<AuthController> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        const Text(
-          'Pilih 3 atau lebih nilai tempat yang kamu cari',
-          style: TextStyle(
+        Text(
+          tr(LocaleKeys.register_choose_place_values),
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
         ),
         const SizedBox(height: 16),
-          
-          // Place value selection grid
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 2.5,
-            ),
-            itemCount: controller.placeValues.length,
-            itemBuilder: (context, index) {
-              final placeValue = controller.placeValues[index];
-              
-              return Obx(
-                () {
-                  final isSelected =
-                      controller.selectedPlaceValues.contains(placeValue);
-                  
-                  return GestureDetector(
-                    onTap: () {
-                      controller.togglePlaceValueSelection(placeValue);
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primary.withAlpha(100)
-                            : Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color:
-                              isSelected ? AppColors.primary : Colors.transparent,
-                          width: 2,
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                      child: Text(
-                        placeValue,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: isSelected ? AppColors.primary : Colors.black87,
-                        ),
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
+
+        // Place value selection grid
+        GridView.builder(
+          padding: EdgeInsets.zero,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.5,
+          ),
+          itemCount: controller.placeValues.length,
+          itemBuilder: (context, index) {
+            final placeValue = controller.placeValues[index];
+
+            return Obx(
+              () {
+                final isSelected =
+                    controller.selectedPlaceValues.contains(placeValue);
+
+                return GestureDetector(
+                  onTap: () {
+                    controller.togglePlaceValueSelection(placeValue);
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primary.withAlpha(100)
+                          : Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color:
+                            isSelected ? AppColors.primary : Colors.transparent,
+                        width: 2,
                       ),
                     ),
-                  );
-                },
-              );
-            },
-          ),
-          
-          const SizedBox(height: 16),
-        ],
+                    alignment: Alignment.center,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    child: Text(
+                      placeValue,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: isSelected ? AppColors.primary : Colors.black87,
+                      ),
+                      textAlign: TextAlign.center,
+                      // overflow: TextOverflow.ellipsis,
+                      // maxLines: 2,
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+
+        const SizedBox(height: 16),
+      ],
     );
   }
 }

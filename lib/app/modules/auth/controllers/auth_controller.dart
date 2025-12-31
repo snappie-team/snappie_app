@@ -38,6 +38,11 @@ class AuthController extends GetxController {
   final _selectedFoodTypes = <String>[].obs;
   final _selectedPlaceValues = <String>[].obs;
 
+  // Form validation observables
+  final _isFirstnameValid = false.obs;
+  final _isLastnameValid = false.obs;
+  final _isUsernameValid = false.obs;
+
   List<String> get foodTypes => FoodTypeExtension.allLabels;
   List<String> get placeValues => PlaceValueExtension.allLabels;
 
@@ -62,6 +67,11 @@ class AuthController extends GetxController {
   RxList<String> get selectedFoodTypes => _selectedFoodTypes;
   RxList<String> get selectedPlaceValues => _selectedPlaceValues;
 
+  // Form validation getters
+  RxBool get isFirstnameValid => _isFirstnameValid;
+  RxBool get isLastnameValid => _isLastnameValid;
+  RxBool get isUsernameValid => _isUsernameValid;
+
   // Keep controller alive during auth flow
   @override
   bool get isClosed => false;
@@ -72,6 +82,19 @@ class AuthController extends GetxController {
     // Check if user is already logged in
     _isLoggedIn.value = authService.isLoggedIn;
     _loadGoogleUserData();
+    
+    // Add listeners for form validation
+    firstnameController.addListener(() {
+      _isFirstnameValid.value = firstnameController.text.trim().isNotEmpty;
+    });
+    
+    lastnameController.addListener(() {
+      _isLastnameValid.value = lastnameController.text.trim().isNotEmpty;
+    });
+    
+    usernameController.addListener(() {
+      _isUsernameValid.value = usernameController.text.trim().length >= 8;
+    });
   }
 
   @override

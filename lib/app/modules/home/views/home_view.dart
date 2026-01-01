@@ -81,24 +81,24 @@ class HomeView extends GetView<HomeController> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
-            child: Text(
+            child: Obx(() => Text(
               'Hello, ${controller.userData?.name ?? 'User'}!',
               style: TextStyle(
                 color: AppColors.textOnPrimary,
                 fontSize: FontSize.getSize(FontSizeOption.xl),
                 fontWeight: FontWeight.bold,
               ),
-            ),
+            )),
           ),
           ButtonWidget(
             icon: Icons.person_add_outlined,
-            backgroundColor: AppColors.background,
+            backgroundColor: AppColors.backgroundContainer,
             onPressed: () => Get.toNamed(AppPages.INVITE_FRIENDS),
           ),
           const SizedBox(width: 8),
           ButtonWidget(
             icon: Icons.notifications_outlined,
-            backgroundColor: AppColors.background,
+            backgroundColor: AppColors.backgroundContainer,
             onPressed: () => Get.toNamed(AppPages.NOTIFICATIONS),
             hasNotification: true, // TODO: ganti dengan logika sebenarnya
           ),

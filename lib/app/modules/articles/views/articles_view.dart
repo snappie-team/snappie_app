@@ -17,7 +17,7 @@ class ArticlesView extends GetView<ArticlesController> {
 
     return ScaffoldFrame(
       controller: controller,
-      headerHeight: 45,
+      headerHeight: 75,
       headerContent: SearchBarWidget(
         hintText: 'Cari artikel menarik...',
         enableGlassmorphism: true,

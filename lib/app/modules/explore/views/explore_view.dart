@@ -20,7 +20,7 @@ class ExploreView extends GetView<ExploreController> {
 
     return ScaffoldFrame(
       controller: controller,
-      headerHeight: 45,
+      headerHeight: 75,
       headerContent: SearchBarWidget(
         hintText: 'Mau makan di mana hari ini?',
         enableGlassmorphism: true,

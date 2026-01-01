@@ -79,7 +79,7 @@ class ProfileView extends GetView<ProfileController> {
                       width: 75,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: AppColors.background,
+                        color: AppColors.backgroundContainer,
                         borderRadius: BorderRadius.circular(100),
                       ),
                       child: Center(
@@ -100,7 +100,7 @@ class ProfileView extends GetView<ProfileController> {
                       width: 75,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: AppColors.background,
+                        color: AppColors.backgroundContainer,
                         borderRadius: BorderRadius.circular(100),
                       ),
                     child: Center(
@@ -119,19 +119,19 @@ class ProfileView extends GetView<ProfileController> {
                 children: [
                   ButtonWidget(
                     icon: Icons.person_add_outlined,
-                    backgroundColor: AppColors.background,
+                    backgroundColor: AppColors.backgroundContainer,
                     onPressed: () => Get.toNamed(Routes.INVITE_FRIENDS),
                   ),
                   const SizedBox(width: 8),
                   ButtonWidget(
                     icon: Icons.share_outlined,
-                    backgroundColor: AppColors.background,
+                    backgroundColor: AppColors.backgroundContainer,
                     onPressed: () => _showShareProfileModal(),
                   ),
                   const SizedBox(width: 8),
                   ButtonWidget(
                     icon: Icons.settings_outlined,
-                    backgroundColor: AppColors.background,
+                    backgroundColor: AppColors.backgroundContainer,
                     onPressed: () => Get.toNamed(Routes.SETTINGS),
                   ),
                 ],
@@ -173,7 +173,7 @@ class ProfileView extends GetView<ProfileController> {
       
           Container(
             decoration: BoxDecoration(
-              color: AppColors.background,
+              color: AppColors.backgroundContainer,
               borderRadius: BorderRadius.circular(24),
             ),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),

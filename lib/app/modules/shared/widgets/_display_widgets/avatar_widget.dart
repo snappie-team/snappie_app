@@ -112,8 +112,12 @@ class AvatarWidget extends StatelessWidget {
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
         // Fallback to local asset if network fails
-        final filename = RemoteAssets.getExactFilename(frameUrl!);
-        final localFramePath = AppAssets.frames.byName(filename.replaceAll('.png', ''));
+        final filename = RemoteAssets.getExactFilename(frameUrl!).toLowerCase().replaceAll('.png', '').replaceAll('.webp', '');
+        final localFramePath = _getLocalFramePath(filename);
+        
+        if (localFramePath == null) {
+          return const SizedBox.shrink();
+        }
         
         return Image.asset(
           localFramePath,
@@ -127,6 +131,19 @@ class AvatarWidget extends StatelessWidget {
         );
       },
     );
+  }
+
+  String? _getLocalFramePath(String frameName) {
+    switch (frameName) {
+      case 'creator':
+        return AppAssets.frames.creator;
+      case 'first':
+        return AppAssets.frames.first;
+      case 'mvp':
+        return AppAssets.frames.mvp;
+      default:
+        return null;
+    }
   }
 
   Widget _buildLoadingPlaceholder() {

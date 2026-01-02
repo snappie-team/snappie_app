@@ -17,17 +17,17 @@ class AppAssets {
   /// Asset gambar (assets/images/)
   static const images = _AppImages();
 
-  /// Asset logo (assets/logo/)
+  /// Asset logo (assets/images/logo/)
   static const logo = _AppLogo();
 
-  /// Asset avatar (assets/avatar/)
+  /// Asset avatar (assets/images/avatar/)
   static const avatar = _AppAvatar();
 
-  /// Asset splash (assets/splash/)
-  static const splash = _AppSplash();
-
-  /// Asset frames (assets/frames/)
+  /// Asset frames (assets/images/frames/)
   static const frames = _AppFrames();
+
+  /// Asset icons (assets/icon/)
+  static const icons = _AppIcons();
 }
 
 /// Asset gambar di folder assets/images/
@@ -38,13 +38,13 @@ class _AppImages {
   static const String _basePath = 'assets/images';
 
   // === Background ===
-  String get background => '$_basePath/background.png';
+  String get background => '$_basePath/background/background.png';
 
   // === Onboarding ===
   String get onboarding1 => '$_basePath/onboarding1.png';
   String get onboarding2 => '$_basePath/onboarding2.png';
   String get onboarding3 => '$_basePath/onboarding3.png';
-  String get onboarding4 => '$_basePath/onboarding4.png';
+  String get onboarding4 => '$_basePath/background/onboarding4.webp';
   
   // === Mascot ===
   String get mascot => '$_basePath/onboarding4-add.png';
@@ -101,55 +101,108 @@ class _AppImages {
   String get food14 => '$_basePath/food14.png';
 }
 
-/// Asset logo di folder assets/logo/
+/// Asset logo di folder assets/images/logo/
 class _AppLogo {
   const _AppLogo();
 
-  static const String _basePath = 'assets/logo';
+  static const String _basePath = 'assets/images/logo';
 
-  /// Logo untuk dark mode dengan berbagai resolusi
-  String darkHdpi() => '$_basePath/dark-hdpi.png';
-  String darkMdpi() => '$_basePath/dark-mdpi.png';
-  String darkXhdpi() => '$_basePath/dark-xhdpi.png';
-  String darkXxhdpi() => '$_basePath/dark-xxhdpi.png';
-  String darkXxxhdpi() => '$_basePath/dark-xxxhdpi.png';
-
-  /// Mendapatkan logo yang sesuai berdasarkan pixel ratio
-  String getAppropriate(double pixelRatio) {
-    if (pixelRatio <= 1.0) return darkMdpi();
-    if (pixelRatio <= 1.5) return darkHdpi();
-    if (pixelRatio <= 2.0) return darkXhdpi();
-    if (pixelRatio <= 3.0) return darkXxhdpi();
-    return darkXxxhdpi();
-  }
+  /// Logo untuk dark mode
+  String get darkHdpi => '$_basePath/dark-hdpi.png';
 }
 
-/// Asset avatar di folder assets/avatar/
+/// Asset avatar di folder assets/images/avatar/
 class _AppAvatar {
   const _AppAvatar();
 
-  static const String _basePath = 'assets/avatar';
+  static const String _basePath = 'assets/images/avatar';
 
-  /// Default avatar placeholder
-  String get defaultAvatar => '$_basePath/default.png';
+  /// Selectable avatars untuk profile
+  String avatarMale(int number) => '$_basePath/avatar_m${number}_hdpi.png';
+  String avatarFemale(int number) => '$_basePath/avatar_f${number}_hdpi.png';
 }
 
-/// Asset splash di folder assets/splash/
-class _AppSplash {
-  const _AppSplash();
 
-  static const String _basePath = 'assets/splash';
-
-  /// Splash screen image
-  String get splash => '$_basePath/splash.png';
-}
-
-/// Asset frames di folder assets/frames/
+/// Asset frames di folder assets/images/frames/
 class _AppFrames {
   const _AppFrames();
 
-  static const String _basePath = 'assets/frames';
+  static const String _basePath = 'assets/images/frames';
 
   /// Frame by name
-  String byName(String name) => '$_basePath/$name.png';
+  String get creator => '$_basePath/creator.png';
+  String get first => '$_basePath/first.png';
+  String get mvp => '$_basePath/mvp.png';
+}
+
+/// Asset icons di folder assets/icon/
+class _AppIcons {
+  const _AppIcons();
+
+  static const String _basePath = 'assets/icon';
+
+  // === Navigation ===
+  String get homeActive => '$_basePath/Icon Home.png';
+  String get homeInactive => '$_basePath/Icon Home-1.png';
+  String get exploreActive => '$_basePath/Icon Explore.png';
+  String get exploreInactive => '$_basePath/Icon Explore-1.png';
+  String get articleActive => '$_basePath/Icon Article.png';
+  String get articleInactive => '$_basePath/Icon Article-1.png';
+  String get meTimeActive => '$_basePath/Icon Me Time.png';
+  String get nongkrong => '$_basePath/Icon Nongkrong.png';
+  String get pasangan => '$_basePath/Icon Pasangan.png';
+
+  // === Actions ===
+  String get back => '$_basePath/Back.png';
+  String get close => '$_basePath/Close.png';
+  String get search => '$_basePath/Search Active.png';
+  String get camera => '$_basePath/camera mini.png';
+  String get capture => '$_basePath/Capture.png';
+  String get download => '$_basePath/Download.png';
+  String get share => '$_basePath/Bagikan.png';
+  String get addFriend => '$_basePath/Tambah Teman.png';
+  String get moreOptions => '$_basePath/More.png';
+  String get moreOptions2 => '$_basePath/More-2.png';
+  String get moreOptions3 => '$_basePath/More-3.png';
+  String get moreOptionsDots => '$_basePath/more dots.png';
+
+  // === Features ===
+  String get checklist => '$_basePath/Icon Checklist.png';
+  String get comment => '$_basePath/Icon Comment.png';
+  String get laptop => '$_basePath/Icon Laptop.png';
+  String get notification => '$_basePath/Notifikasi.png';
+  String get leaderboard => '$_basePath/Papan Peringkat Fix.png';
+  String get achievement => '$_basePath/Penghargaan Fix.png';
+  String get coupon => '$_basePath/Tukar Kupon Fix.png';
+
+  // === Settings ===
+  String get profile => '$_basePath/Data Diri.png';
+  String get profileAlt => '$_basePath/Data Diri-1.png';
+  String get setting => '$_basePath/Setting.png';
+  String get location => '$_basePath/Lokasi.png';
+  String get faq => '$_basePath/FAQ.png';
+  String get language => '$_basePath/Ubah Bahasa.png';
+  String get changePassword => '$_basePath/Ubah Kata Sandi.png';
+  String get helpCenter => '$_basePath/Pusat Bantuan.png';
+  String get logout => '$_basePath/Logout.png';
+
+  // === Rating & Status ===
+  String get ratingEmpty => '$_basePath/Rating Empty.png';
+  String get ratingFilled => '$_basePath/Rating.png';
+  String get ratingAlt => '$_basePath/Rating-1.png';
+  String get success => '$_basePath/Success.png';
+  String get cursor => '$_basePath/cursor.png';
+  String get union => '$_basePath/Union.png';
+
+  // === Media ===
+  String get video => '$_basePath/video.png';
+
+  // === Generic Icons ===
+  String get icon1 => '$_basePath/Icon.png';
+  String get icon2 => '$_basePath/Icon-1.png';
+  String get icon3 => '$_basePath/Icon-2.png';
+  String get save => '$_basePath/Simpan.png';
+
+  /// Get icon by filename dynamically
+  String byName(String filename) => '$_basePath/$filename';
 }

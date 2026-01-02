@@ -2,7 +2,10 @@
 /// 
 /// This file contains URLs for remote assets stored in the cloud.
 /// Uses template-based approach for better maintainability.
+/// References AppAssets for local fallback paths to avoid duplication.
 library;
+
+import 'app_assets.dart';
 
 class RemoteAssets {
   RemoteAssets._();
@@ -33,11 +36,33 @@ class RemoteAssets {
   // https://res.cloudinary.com/deqnkuhbv/image/upload/v1761683559/places/01K8P8BHBW4P60YEG5T59GAMQ6.png
   static String image(String filename) => '$baseUrl/places/$filename';
 
-  // Local fallback paths
-  static String localAvatar(String filename) => 'assets/avatar/$filename';
-  static String localLogo(String filename) => 'assets/logo/$filename';
+  // Local fallback paths - reference AppAssets for consistency
+  /// Get local avatar path from filename (e.g., 'avatar_m1_hdpi.png' -> AppAssets.avatar path)
+  static String localAvatar(String filename) {
+    // Parse gender and number from filename (e.g., 'avatar_m1_hdpi.png' -> m, 1)
+    final regex = RegExp(r'avatar_([mf])(\d)');
+    final match = regex.firstMatch(filename);
+    
+    if (match != null) {
+      final gender = match.group(1); // 'm' or 'f'
+      final number = int.parse(match.group(2) ?? '1');
+      
+      if (gender == 'm') {
+        return AppAssets.avatar.avatarMale(number);
+      } else {
+        return AppAssets.avatar.avatarFemale(number);
+      }
+    }
+    
+    // Fallback if parsing fails
+    return AppAssets.avatar.avatarMale(1);
+  }
+  
+  /// Get local logo path
+  static String get localLogo => AppAssets.logo.darkHdpi;
+  
+  /// Get local icon path from filename
   static String localIcon(String filename) => 'assets/icon/$filename';
-  static String localSplash(String filename) => 'assets/splash/$filename';
 
   // Common predefined assets (for convenience)
   static String get defaultAvatar => avatar('avatar_m1_hdpi.png');

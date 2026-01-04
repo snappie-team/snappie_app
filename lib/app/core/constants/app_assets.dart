@@ -41,64 +41,64 @@ class _AppImages {
   String get background => '$_basePath/background/background.png';
 
   // === Onboarding ===
-  String get onboarding1 => '$_basePath/onboarding1.png';
-  String get onboarding2 => '$_basePath/onboarding2.png';
-  String get onboarding3 => '$_basePath/onboarding3.png';
+  String get onboarding1 => '$_basePath/onboarding/onboarding1.png';
+  String get onboarding2 => '$_basePath/onboarding/onboarding2.png';
+  String get onboarding3 => '$_basePath/onboarding/onboarding3.png';
   String get onboarding4 => '$_basePath/background/onboarding4.webp';
   
   // === Mascot ===
-  String get mascot => '$_basePath/onboarding4-add.png';
+  String get mascot => '$_basePath/onboarding/onboarding4-add.png';
 
   // === Icons / Illustrations ===
-  String get coin => '$_basePath/coin.png';
-  String get coins => '$_basePath/coins.png';
-  String get coupon => '$_basePath/coupon.png';
-  String get find => '$_basePath/find.png';
-  String get friends => '$_basePath/friends.png';
-  String get gift => '$_basePath/gift.png';
-  String get leaderboard => '$_basePath/leaderboard.png';
-  String get loading => '$_basePath/loading.png';
-  String get logout => '$_basePath/logout.png';
-  String get target => '$_basePath/target.png';
-  String get unlocked => '$_basePath/unlocked.png';
+  String get coin => '$_basePath/generals/coin.png';
+  String get coins => '$_basePath/generals/coins.png';
+  String get coupon => '$_basePath/generals/coupon.png';
+  String get find => '$_basePath/generals/find.png';
+  String get friends => '$_basePath/generals/friends.png';
+  String get gift => '$_basePath/generals/gift.png';
+  String get leaderboard => '$_basePath/generals/leaderboard.png';
+  String get loading => '$_basePath/generals/loading.png';
+  String get logout => '$_basePath/generals/logout.png';
+  String get target => '$_basePath/generals/target.png';
+  String get unlocked => '$_basePath/generals/unlocked.png';
 
   // === Mission ===
-  String get mission => '$_basePath/mission.png';
-  String get missionSuccess => '$_basePath/mission_success.png';
-  String get missionFailed => '$_basePath/mission_failed.png';
+  String get mission => '$_basePath/generals/mission.png';
+  String get missionSuccess => '$_basePath/generals/mission_success.png';
+  String get missionFailed => '$_basePath/generals/mission_failed.png';
 
   // === Achievement ===
-  String get achievement => '$_basePath/achievement.png';
+  String get achievement => '$_basePath/generals/achievement.png';
   String achievementCoin({bool isFemale = false}) =>
-      '$_basePath/achievement_coin_${isFemale ? 'f' : 'm'}.png';
+      '$_basePath/achievement/achievement_coin_${isFemale ? 'f' : 'm'}.png';
   String achievementLove({bool isFemale = false}) =>
-      '$_basePath/achievement_love_${isFemale ? 'f' : 'm'}.png';
+      '$_basePath/achievement/achievement_love_${isFemale ? 'f' : 'm'}.png';
   String achievementMvp({bool isFemale = false}) =>
-      '$_basePath/achievement_mvp_${isFemale ? 'f' : 'm'}.png';
+      '$_basePath/achievement/achievement_mvp_${isFemale ? 'f' : 'm'}.png';
   String achievementStreak({bool isFemale = false}) =>
-      '$_basePath/achievement_streak_${isFemale ? 'f' : 'm'}.png';
+      '$_basePath/achievement/achievement_streak_${isFemale ? 'f' : 'm'}.png';
   String achievementXp({bool isFemale = false}) =>
-      '$_basePath/achievement_xp_${isFemale ? 'f' : 'm'}.png';
+      '$_basePath/achievement/achievement_xp_${isFemale ? 'f' : 'm'}.png';
 
   // === Challenge ===
   String challenge({bool isFemale = false}) =>
-      '$_basePath/challenge_${isFemale ? 'f' : 'm'}.png';
+      '$_basePath/generals/challenge_${isFemale ? 'f' : 'm'}.png';
 
   // === Food Types ===
-  String get food1 => '$_basePath/food1.png';
-  String get food2 => '$_basePath/food2.png';
-  String get food3 => '$_basePath/food3.png';
-  String get food4 => '$_basePath/food4.png';
-  String get food5 => '$_basePath/food5.png';
-  String get food6 => '$_basePath/food6.png';
-  String get food7 => '$_basePath/food7.png';
-  String get food8 => '$_basePath/food8.png';
-  String get food9 => '$_basePath/food9.png';
-  String get food10 => '$_basePath/food10.png';
-  String get food11 => '$_basePath/food11.png';
-  String get food12 => '$_basePath/food12.png';
-  String get food13 => '$_basePath/food13.png';
-  String get food14 => '$_basePath/food14.png';
+  String get food1 => '$_basePath/food/food1.png';
+  String get food2 => '$_basePath/food/food2.png';
+  String get food3 => '$_basePath/food/food3.png';
+  String get food4 => '$_basePath/food/food4.png';
+  String get food5 => '$_basePath/food/food5.png';
+  String get food6 => '$_basePath/food/food6.png';
+  String get food7 => '$_basePath/food/food7.png';
+  String get food8 => '$_basePath/food/food8.png';
+  String get food9 => '$_basePath/food/food9.png';
+  String get food10 => '$_basePath/food/food10.png';
+  String get food11 => '$_basePath/food/food11.png';
+  String get food12 => '$_basePath/food/food12.png';
+  String get food13 => '$_basePath/food/food13.png';
+  String get food14 => '$_basePath/food/food14.png';
 }
 
 /// Asset logo di folder assets/images/logo/

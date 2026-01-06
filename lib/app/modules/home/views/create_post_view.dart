@@ -668,9 +668,10 @@ class _CreatePostViewState extends State<CreatePostView> {
         colorText: AppColors.textOnPrimary,
       );
     } catch (e) {
+      Logger.error('Failed to create post', e, null, 'CreatePostView');
       Get.snackbar(
         'Gagal',
-        'Tidak dapat membuat postingan: $e',
+        'Tidak dapat membuat postingan, silakan coba lagi',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error,
         colorText: AppColors.textOnPrimary,

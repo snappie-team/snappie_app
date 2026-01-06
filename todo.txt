@@ -1,0 +1,46 @@
+tidak bisa memilih lebih dari 3 place value, food type pada halaman registrasi
+
+notifikasi masih menggunakan dummy data, nantinya pakai conditional response yang muncul dari gamification action ada documentationnya di backend
+
+reactive data, saat melakukan aksi. misal upload foto baru maka otomatis update halaman list post, untuk comment juga.
+
+untuk post card, more button belum fungsional dan perlu diperbaiki. perlu tambahakn fitur hapus post, report user/postingan, dan ikuti pengguna.
+
+beberapa image pada post card tidak bisa dibuka fullscreen.
+
+fitur like masih belum work, server exception. sama dengan comment juga.
+
+tolong jika error jangan di expose ke ui. selalu sanitize output.
+
+untuk asset yang di ambil dari remote tolong di cache, agar tidak fetch terus dari host. ada di haalaman post create page
+
+untuk search bar kadang berukuran besar untuk screen size normal, dan jika dikecilkan akan terlalu kecil untuk screen size panjang.
+
+untuk chip item pada food type dan place value masih terpotong.
+
+tampilan ulasan masih berantakan warnanya
+
+tolong loading state widgetnya diperbaiki, dan ditest dulu tampilannya. seingat saya ada asset khusus untuk loading ini.
+
+
+untuk fitur misi masih belum bisa upload, jadi belum bisa progres ke halaman review dan kuesioner
+
+untuk post detail view dari halaman tersimpan itu bisa di implement ke halaman beranda juga.
+
+untuk halaman komentar pada post detail view belum di scroll dengan benar.
+
+ada error di controller profile, di rendersliver
+
+gunakan asset dan icon yang sudah disediakan
+
+halaman kupon belum ditampilkan dengan benar
+
+halaman penghargaan saya belum ditest dengan benar
+
+halaman tantangan sudah bagus, tapi harusnya tiap hari di reset progress nya (backend)
+
+tampilan halaman tantangan perlu diperbaiki dan disesuaikan
+
+fitur pilih bingkai masih belum diimplement
+
+fitur ganti bahasa masih belum bisa

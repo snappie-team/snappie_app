@@ -176,7 +176,7 @@ class ProfileView extends GetView<ProfileController> {
               color: AppColors.backgroundContainer,
               borderRadius: BorderRadius.circular(24),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -190,7 +190,7 @@ class ProfileView extends GetView<ProfileController> {
                   width: 1,
                   height: 40,
                   color: AppColors.borderLight,
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
                 ),
                 Expanded(
                   child: Obx(() => _buildStatColumn(
@@ -206,7 +206,7 @@ class ProfileView extends GetView<ProfileController> {
                   width: 1,
                   height: 40,
                   color: AppColors.borderLight,
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
                 ),
                 Expanded(
                   child: Obx(() => _buildStatColumn(

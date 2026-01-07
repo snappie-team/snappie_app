@@ -145,12 +145,15 @@ class HomeController extends GetxController {
         final currentUserId = _userData.value?.id;
         if (currentUserId != null) {
           final likedIds = loadedPosts
-              .where((post) => post.likes?.any((like) => like.userId == currentUserId) ?? false)
+              .where((post) =>
+                  post.likes?.any((like) => like.userId == currentUserId) ??
+                  false)
               .map((post) => post.id)
               .whereType<int>()
               .toList();
           _likedPostIds.assignAll(likedIds);
-          Logger.debug('Home: Initialized ${likedIds.length} liked posts', 'Home');
+          Logger.debug(
+              'Home: Initialized ${likedIds.length} liked posts', 'Home');
         }
       } catch (e) {
         Logger.warning('Home: Failed to load liked posts: $e', 'Home');
@@ -246,6 +249,15 @@ class HomeController extends GetxController {
       'Comment feature coming soon!',
       snackPosition: SnackPosition.BOTTOM,
     );
+  }
+
+  /// Update a specific post in the list
+  void updatePost(PostModel updatedPost) {
+    final postIndex = _posts.indexWhere((p) => p.id == updatedPost.id);
+    if (postIndex != -1) {
+      _posts[postIndex] = updatedPost;
+      Logger.debug('Post ${updatedPost.id} updated in list', 'Home');
+    }
   }
 
   void sharePost(int postId) {

@@ -14,6 +14,7 @@ import '../_navigation_widgets/button_widget.dart';
 import '../../../../core/utils/time_formatter.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../data/models/post_model.dart';
+import '../../../../data/models/comment_model.dart';
 import '../../../../routes/app_pages.dart';
 
 class PostCard extends StatelessWidget {
@@ -37,7 +38,8 @@ class PostCard extends StatelessWidget {
           _buildPostHeader(),
           _buildPostContent(),
           const SizedBox(height: 12),
-          if (post.imageUrls != null && post.imageUrls!.isNotEmpty) _buildPostImage(context),
+          if (post.imageUrls != null && post.imageUrls!.isNotEmpty)
+            _buildPostImage(context),
           const SizedBox(height: 12),
           _buildPostActions(),
           const SizedBox(height: 16),
@@ -513,7 +515,10 @@ class PostCard extends StatelessWidget {
   void _showComments() {
     final TextEditingController commentController = TextEditingController();
     final authService = Get.find<AuthService>();
-    final comments = post.comments ?? [];
+
+    // Create reactive variable for comments
+    final RxList<CommentModel> comments = (post.comments ?? []).obs;
+    final RxInt commentsCount = (post.commentsCount ?? 0).obs;
 
     Get.bottomSheet(
       SafeArea(
@@ -542,106 +547,112 @@ class PostCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                Container(
-                  margin: const EdgeInsets.fromLTRB(0, 0, 0, 12),
-                  child: Center(
-                    child: Text(
-                      'Komentar (${comments.length})',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                Obx(
+                  () => Container(
+                    margin: const EdgeInsets.fromLTRB(0, 0, 0, 12),
+                    child: Center(
+                      child: Text(
+                        'Komentar (${commentsCount.value})',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
                 ),
                 const Divider(height: 1),
                 Expanded(
-                  child: comments.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.chat_bubble_outline,
-                                size: 48,
-                                color: AppColors.textSecondary,
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Belum ada komentar',
-                                style: TextStyle(
+                  child: Obx(
+                    () => comments.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.chat_bubble_outline,
+                                  size: 48,
                                   color: AppColors.textSecondary,
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Jadilah yang pertama berkomentar!',
-                                style: TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: comments.length,
-                          itemBuilder: (context, index) {
-                            final comment = comments[index];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  AvatarWidget(
-                                    imageUrl: comment.user?.imageUrl,
-                                    size: AvatarSize.small,
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Belum ada komentar',
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
                                   ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Text(
-                                              comment.user?.name ?? 'Unknown',
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 13,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              comment.createdAt != null
-                                                  ? TimeFormatter.formatTimeAgo(
-                                                      comment.createdAt!)
-                                                  : '',
-                                              style: TextStyle(
-                                                color: AppColors.textSecondary,
-                                                fontSize: 11,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          comment.comment ?? '',
-                                          style: const TextStyle(
-                                            fontSize: 13,
-                                            height: 1.4,
-                                          ),
-                                        ),
-                                      ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Jadilah yang pertama berkomentar!',
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: comments.length,
+                            itemBuilder: (context, index) {
+                              final comment = comments[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    AvatarWidget(
+                                      imageUrl: comment.user?.imageUrl,
+                                      size: AvatarSize.small,
                                     ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Text(
+                                                comment.user?.name ?? 'Unknown',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                comment.createdAt != null
+                                                    ? TimeFormatter
+                                                        .formatTimeAgo(
+                                                            comment.createdAt!)
+                                                    : '',
+                                                style: TextStyle(
+                                                  color:
+                                                      AppColors.textSecondary,
+                                                  fontSize: 11,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            comment.comment ?? '',
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              height: 1.4,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -700,7 +711,8 @@ class PostCard extends StatelessWidget {
                             textInputAction: TextInputAction.send,
                             onSubmitted: (value) {
                               if (value.trim().isNotEmpty) {
-                                _addComment(value.trim());
+                                _addComment(
+                                    value.trim(), comments, commentsCount);
                                 commentController.clear();
                               }
                             },
@@ -710,7 +722,8 @@ class PostCard extends StatelessWidget {
                         IconButton(
                           onPressed: () {
                             if (commentController.text.trim().isNotEmpty) {
-                              _addComment(commentController.text.trim());
+                              _addComment(commentController.text.trim(),
+                                  comments, commentsCount);
                               commentController.clear();
                             }
                           },
@@ -808,23 +821,32 @@ class PostCard extends StatelessWidget {
     });
   }
 
-  void _addComment(String comment) async {
+  void _addComment(String comment, RxList<CommentModel> comments,
+      RxInt commentsCount) async {
     final postId = post.id;
     if (postId == null || comment.trim().isEmpty) return;
 
     try {
       final postRepository = Get.find<PostRepository>();
+
+      // Create comment
       await postRepository.createComment(postId, comment);
 
-      // Refresh home controller to sync comment count
+      // Fetch updated post data to get latest comments and count
+      final updatedPost = await postRepository.getPostById(postId);
+
+      // Update reactive variables
+      comments.value = updatedPost.comments ?? [];
+      commentsCount.value = updatedPost.commentsCount ?? 0;
+
+      // Update post in home controller if available
       try {
         final homeController = Get.find<HomeController>();
-        await homeController.refreshData();
+        homeController.updatePost(updatedPost);
       } catch (e) {
-        Logger.warning('HomeController not found, skipping refresh', 'PostCard');
+        Logger.warning('HomeController not found, skipping update', 'PostCard');
       }
 
-      Get.back();
       Get.snackbar(
         'Berhasil',
         'Komentar berhasil ditambahkan',

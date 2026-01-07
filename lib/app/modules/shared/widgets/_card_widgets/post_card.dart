@@ -6,6 +6,7 @@ import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:snappie_app/app/core/services/logger_service.dart';
 import 'package:snappie_app/app/data/repositories/place_repository_impl.dart';
 import 'package:snappie_app/app/data/repositories/post_repository_impl.dart';
+import 'package:snappie_app/app/modules/home/controllers/home_controller.dart';
 import 'package:snappie_app/app/modules/shared/widgets/_form_widgets/rectangle_button_widget.dart';
 import '../_display_widgets/avatar_widget.dart';
 import '../_display_widgets/fullscreen_image_viewer.dart';
@@ -13,7 +14,6 @@ import '../_navigation_widgets/button_widget.dart';
 import '../../../../core/utils/time_formatter.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../data/models/post_model.dart';
-import '../../../../modules/home/controllers/home_controller.dart';
 import '../../../../routes/app_pages.dart';
 
 class PostCard extends StatelessWidget {
@@ -37,7 +37,7 @@ class PostCard extends StatelessWidget {
           _buildPostHeader(),
           _buildPostContent(),
           const SizedBox(height: 12),
-          _buildPostImage(context),
+          if (post.imageUrls != null && post.imageUrls!.isNotEmpty) _buildPostImage(context),
           const SizedBox(height: 12),
           _buildPostActions(),
           const SizedBox(height: 16),
@@ -173,60 +173,6 @@ class PostCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // GestureDetector(
-        //   onTap: () {
-        //     FullscreenImageViewer.show(
-        //       context: context,
-        //       imageUrls: post.imageUrls ?? [imageUrl],
-        //       initialIndex: 0,
-        //       postOverlay: post,
-        //     );
-        //   },
-        //   child: Container(
-        //     width: double.infinity,
-        //     constraints: const BoxConstraints(
-        //       maxHeight: 400, // Limit maximum height to prevent overflow
-        //     ),
-        //     decoration: BoxDecoration(
-        //       color: Colors.grey[200],
-        //     ),
-        //     child: Image.network(
-        //       imageUrl,
-        //       fit: BoxFit.cover, // Changed from fill to cover for better aspect ratio
-        //       loadingBuilder: (context, child, loadingProgress) {
-        //         if (loadingProgress == null) return child;
-        //         return Container(
-        //           height: 300,
-        //           color: Colors.grey[200],
-        //           child: Center(
-        //             child: CircularProgressIndicator(
-        //               value: loadingProgress.expectedTotalBytes != null
-        //                   ? loadingProgress.cumulativeBytesLoaded /
-        //                       loadingProgress.expectedTotalBytes!
-        //                   : null,
-        //               strokeWidth: 2,
-        //               color: Colors.grey[400],
-        //             ),
-        //           ),
-        //         );
-        //       },
-        //       errorBuilder: (context, error, stackTrace) {
-        //         return Container(
-        //           height: 200,
-        //           padding: const EdgeInsets.all(20),
-        //           color: Colors.grey[200],
-        //           child: const Center(
-        //             child: Icon(
-        //               Icons.image_not_supported_outlined,
-        //               color: Colors.grey,
-        //               size: 40,
-        //             ),
-        //           ),
-        //         );
-        //       },
-        //     ),
-        //   ),
-        // ),
         _buildImageSection(context, post),
         const SizedBox(height: 8),
         Padding(
@@ -409,30 +355,6 @@ class PostCard extends StatelessWidget {
 
     return Obx(() {
       final isLiked = controller.isPostLiked(postId);
-      final isLoading = controller.isTogglingLikePost(postId);
-
-      if (isLoading) {
-        return Row(
-          children: [
-            SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: AppColors.accent,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              '${post.likesCount ?? 0}',
-              style: TextStyle(
-                color: AppColors.accent,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        );
-      }
 
       return GestureDetector(
         onTap: _handleLike,
@@ -894,6 +816,14 @@ class PostCard extends StatelessWidget {
       final postRepository = Get.find<PostRepository>();
       await postRepository.createComment(postId, comment);
 
+      // Refresh home controller to sync comment count
+      try {
+        final homeController = Get.find<HomeController>();
+        await homeController.refreshData();
+      } catch (e) {
+        Logger.warning('HomeController not found, skipping refresh', 'PostCard');
+      }
+
       Get.back();
       Get.snackbar(
         'Berhasil',
@@ -903,9 +833,10 @@ class PostCard extends StatelessWidget {
         colorText: Colors.white,
       );
     } catch (e) {
+      Logger.error('Failed to add comment', e, null, 'PostCard');
       Get.snackbar(
         'Gagal',
-        'Tidak dapat menambahkan komentar: $e',
+        'Tidak dapat menambahkan komentar, silakan coba lagi',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

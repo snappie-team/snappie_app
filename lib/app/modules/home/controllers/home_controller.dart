@@ -140,6 +140,22 @@ class HomeController extends GetxController {
         Logger.warning('Home: Failed to load saved posts: $e', 'Home');
       }
 
+      // Initialize liked posts from loaded posts
+      try {
+        final currentUserId = _userData.value?.id;
+        if (currentUserId != null) {
+          final likedIds = loadedPosts
+              .where((post) => post.likes?.any((like) => like.userId == currentUserId) ?? false)
+              .map((post) => post.id)
+              .whereType<int>()
+              .toList();
+          _likedPostIds.assignAll(likedIds);
+          Logger.debug('Home: Initialized ${likedIds.length} liked posts', 'Home');
+        }
+      } catch (e) {
+        Logger.warning('Home: Failed to load liked posts: $e', 'Home');
+      }
+
       Logger.info('Home: Loaded ${loadedPosts.length} posts', 'Home');
     } catch (e) {
       _errorMessage.value = 'Failed to load posts: $e';
@@ -216,7 +232,8 @@ class HomeController extends GetxController {
         _posts[postIndex] = post.copyWith(likesCount: revertCount);
       }
 
-      rethrow;
+      Logger.error('Failed to toggle like', e, null, 'Home');
+      throw Exception('Gagal menyukai post, silakan coba lagi');
     } finally {
       _isTogglingLikePostIds.remove(postId);
     }

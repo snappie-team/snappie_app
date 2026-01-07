@@ -155,13 +155,15 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         ApiEndpoints.postLike.replaceFirst('{post_id}', '$postId'),
       );
 
-      // Response: { success: true, message: "...", data: true/false }
-      final isLiked = extractApiResponseData<bool>(
+      // Response: { success: true, message: "...", data: { "action": "like"/"unlike", "post_id": 17 } }
+      final responseData = extractApiResponseData<Map<String, dynamic>>(
         response,
-        (json) => json as bool,
+        (json) => json as Map<String, dynamic>,
       );
 
-      return isLiked;
+      // Parse action field to determine if post is now liked
+      final action = responseData['action'] as String?;
+      return action == 'like';
     } on ApiResponseException catch (e) {
       throw ServerException(e.message, e.statusCode ?? 500);
     } on DioException catch (e) {
@@ -179,10 +181,19 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         data: {'comment': comment},
       );
 
-      return extractApiResponseData<CommentModel>(
+      // Extract response data
+      final responseData = extractApiResponseData<Map<String, dynamic>>(
         response,
-        (json) => CommentModel.fromJson(json as Map<String, dynamic>),
+        (json) => json as Map<String, dynamic>,
       );
+
+      // Check if response contains 'comment' key (nested structure)
+      // or if it's the comment data directly
+      final commentData = responseData.containsKey('comment') 
+          ? responseData['comment'] as Map<String, dynamic>
+          : responseData;
+
+      return CommentModel.fromJson(commentData);
     } on ApiResponseException catch (e) {
       throw ServerException(e.message, e.statusCode ?? 500);
     } on DioException catch (e) {

@@ -152,10 +152,25 @@ REGISTRATION_API_KEY=your_key_here
 
 4. Generate Isar database schemas and JSON serialization:
 ```bash
-flutter packages pub run build_runner build --delete-conflicting-outputs
+dart run build_runner build --delete-conflicting-outputs
 ```
 
-5. Run the app:
+5. Generate Easy Localization files:
+```bash
+dart run easy_localization:generate -S assets/translations -O lib/app/core/localization -o locale_keys.g.dart -f keys
+```
+
+6. Add Google Services configuration:
+   - Obtain `google-services.json` from Firebase Console
+   - Place it in `android/app/` directory
+   - For iOS, also download `GoogleService-Info.plist` and add it via Xcode
+
+7. Request assets folder from author:
+   - Contact the project author to obtain the complete `assets/` folder
+   - This folder contains images, icons, and other media resources
+   - Place the folder at the project root
+
+8. Run the app:
 ```bash
 flutter run
 ```

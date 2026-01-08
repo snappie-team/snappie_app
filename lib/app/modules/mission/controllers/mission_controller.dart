@@ -8,6 +8,7 @@ import 'package:snappie_app/app/core/services/cloudinary_service.dart';
 import 'package:snappie_app/app/core/services/gamification_handler_service.dart';
 import 'package:snappie_app/app/core/services/location_service.dart';
 import 'package:snappie_app/app/core/services/logger_service.dart';
+import '../../../core/helpers/error_handler.dart';
 import '../../../data/models/place_model.dart';
 import '../../../data/models/checkin_model.dart';
 import '../../../data/models/review_model.dart';
@@ -246,7 +247,7 @@ class MissionController extends GetxController {
       isConflictError.value = false;
       return false;
     } catch (e) {
-      errorMessage.value = 'Unexpected error: $e';
+      errorMessage.value = ErrorHandler.getReadableMessage(e, tag: 'MissionController');
       isConflictError.value = false;
       return false;
     } finally {
@@ -288,19 +289,21 @@ class MissionController extends GetxController {
       await Future.delayed(const Duration(milliseconds: 100));
       Get.back(closeOverlays: true);
     } on ServerException catch (e) {
-      errorMessage.value = e.message;
+      final msg = ErrorHandler.getReadableMessage(e, tag: 'MissionController');
+      errorMessage.value = msg;
       Get.snackbar(
-        'Error',
-        e.message,
+        'Gagal',
+        msg,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error,
         colorText: AppColors.textOnPrimary,
       );
     } catch (e) {
-      errorMessage.value = 'Gagal mengirim ulasan: $e';
+      final msg = ErrorHandler.getReadableMessage(e, tag: 'MissionController');
+      errorMessage.value = msg;
       Get.snackbar(
-        'Error',
-        'Gagal mengirim ulasan: $e',
+        'Gagal',
+        msg,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error,
         colorText: AppColors.textOnPrimary,
@@ -377,7 +380,7 @@ class MissionController extends GetxController {
       isConflictError.value = false;
       return false;
     } catch (e) {
-      errorMessage.value = 'Unexpected error: $e';
+      errorMessage.value = ErrorHandler.getReadableMessage(e, tag: 'MissionController');
       isConflictError.value = false;
       return false;
     } finally {
@@ -407,7 +410,7 @@ class MissionController extends GetxController {
 
       return true;
     } catch (e) {
-      errorMessage.value = 'Unexpected error: $e';
+      errorMessage.value = ErrorHandler.getReadableMessage(e, tag: 'MissionController');
       return false;
     } finally {
       isSubmitting.value = false;
@@ -456,10 +459,10 @@ class MissionController extends GetxController {
       errorMessage.value = e.message;
       return false;
     } on ServerException catch (e) {
-      errorMessage.value = e.message;
+      errorMessage.value = ErrorHandler.getReadableMessage(e, tag: 'MissionController');
       return false;
     } catch (e) {
-      errorMessage.value = 'Unexpected error: $e';
+      errorMessage.value = ErrorHandler.getReadableMessage(e, tag: 'MissionController');
       return false;
     } finally {
       isSubmitting.value = false;

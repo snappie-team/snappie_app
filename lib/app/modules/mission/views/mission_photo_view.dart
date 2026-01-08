@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/helpers/error_handler.dart';
 import '../controllers/mission_controller.dart';
 
 /// Halaman untuk mengambil foto misi
@@ -79,7 +80,7 @@ class _MissionPhotoViewStatefulState extends State<_MissionPhotoViewStateful>
       await _setupCameraController(_cameras[_selectedCameraIndex]);
     } catch (e) {
       setState(() {
-        _errorMessage = 'Gagal menginisialisasi kamera: $e';
+        _errorMessage = ErrorHandler.getReadableMessage(e, tag: 'MissionPhotoView');
       });
     }
   }
@@ -108,7 +109,7 @@ class _MissionPhotoViewStatefulState extends State<_MissionPhotoViewStateful>
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Gagal menginisialisasi kamera: $e';
+        _errorMessage = ErrorHandler.getReadableMessage(e, tag: 'MissionPhotoView');
       });
     }
   }
@@ -185,8 +186,8 @@ class _MissionPhotoViewStatefulState extends State<_MissionPhotoViewStateful>
       Get.toNamed('/mission-photo-preview');
     } catch (e) {
       Get.snackbar(
-        'Error',
-        'Gagal mengambil foto: $e',
+        'Gagal',
+        ErrorHandler.getReadableMessage(e, tag: 'MissionPhotoView'),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error,
         colorText: Colors.white,

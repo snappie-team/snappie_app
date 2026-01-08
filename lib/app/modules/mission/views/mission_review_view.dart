@@ -10,6 +10,7 @@ import '../../../core/constants/food_type.dart';
 import '../../../core/constants/place_value.dart';
 import '../../../core/services/cloudinary_service.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../core/helpers/error_handler.dart';
 import '../../../data/models/place_model.dart';
 import '../../../routes/app_pages.dart';
 import '../../shared/widgets/_dialog_widgets/mission_loading_modal.dart';
@@ -869,8 +870,8 @@ class _MissionReviewViewState extends State<MissionReviewView> {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
-        'Gagal mengambil foto: $e',
+        'Gagal',
+        ErrorHandler.getReadableMessage(e, tag: 'MissionReviewView'),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error,
         colorText: Colors.white,
@@ -914,8 +915,8 @@ class _MissionReviewViewState extends State<MissionReviewView> {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
-        'Gagal memilih foto: $e',
+        'Gagal',
+        ErrorHandler.getReadableMessage(e, tag: 'MissionReviewView'),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error,
         colorText: Colors.white,
@@ -974,8 +975,8 @@ class _MissionReviewViewState extends State<MissionReviewView> {
       } catch (e) {
         MissionLoadingModal.hide();
         Get.snackbar(
-          'Error',
-          'Gagal mengunggah foto: $e',
+          'Gagal',
+          ErrorHandler.getReadableMessage(e, tag: 'MissionReviewView'),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: AppColors.error,
           colorText: AppColors.textOnPrimary,

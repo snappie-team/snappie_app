@@ -53,6 +53,7 @@ void main() async {
       supportedLocales: const [Locale('en'), Locale('id')],
       path: 'assets/translations',
       fallbackLocale: const Locale('id'),
+      useOnlyLangCode: true,
       child: MainApp(route: await initAuthService()),
     ),
   );

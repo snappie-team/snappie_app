@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snappie_app/app/core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/auth_service.dart';
@@ -124,20 +125,27 @@ class SettingsView extends StatelessWidget {
               ),
             ),
 
-            // Avatar with border
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white,
-                  width: 3,
-                ),
-              ),
-              child: Obx(() => AvatarWidget(
-                imageUrl: controller.userAvatar,
-                size: AvatarSize.extraLarge,
-              )),
+            // Avatar with border and frame
+            FutureBuilder<String?>(
+              future: _getSelectedFrameUrl(),
+              builder: (context, snapshot) {
+                final frameUrl = snapshot.data;
+                return Container(
+                  padding: const EdgeInsets.all(4),
+                  // decoration: BoxDecoration(
+                  //   shape: BoxShape.circle,
+                  //   border: Border.all(
+                  //     color: Colors.white,
+                  //     width: 3,
+                  //   ),
+                  // ),
+                  child: Obx(() => AvatarWidget(
+                        imageUrl: controller.userAvatar,
+                        size: AvatarSize.extraLarge,
+                        frameUrl: frameUrl,
+                      )),
+                );
+              },
             ),
 
             const SizedBox(height: 20),
@@ -170,6 +178,11 @@ class SettingsView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<String?> _getSelectedFrameUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('selected_frame_url');
   }
 
   Widget _buildHeaderButton({
@@ -312,7 +325,8 @@ class SettingsView extends StatelessWidget {
                     // Update avatar
                     try {
                       await controller.userRepository.updateUserProfile(
-                        imageUrl: 'https://res.cloudinary.com/deqnkuhbv/image/upload/v1761044273/snappie/assets/avatar/$avatar',
+                        imageUrl:
+                            'https://res.cloudinary.com/deqnkuhbv/image/upload/v1761044273/snappie/assets/avatar/$avatar',
                       );
                       await controller.loadUserProfile();
                       Get.snackbar(
@@ -336,7 +350,9 @@ class SettingsView extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: selected ? AppColors.primary : AppColors.backgroundContainer,
+                        color: selected
+                            ? AppColors.primary
+                            : AppColors.backgroundContainer,
                         width: selected ? 3 : 2,
                       ),
                     ),
@@ -356,7 +372,17 @@ class SettingsView extends StatelessWidget {
     );
   }
 
-  void _showFramePicker(BuildContext context) {
+  void _showFramePicker(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final currentFrame = prefs.getString('selected_frame');
+
+    final frames = [
+      {'id': 'none', 'name': 'Tanpa Bingkai', 'asset': ''},
+      {'id': 'creator', 'name': 'Creator', 'asset': AppAssets.frames.creator},
+      {'id': 'first', 'name': 'First', 'asset': AppAssets.frames.first},
+      {'id': 'mvp', 'name': 'MVP', 'asset': AppAssets.frames.mvp},
+    ];
+
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(24),
@@ -386,30 +412,132 @@ class SettingsView extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 20),
-
-            // Coming soon
-            Icon(
-              Icons.crop_square_rounded,
-              size: 64,
-              color: AppColors.textSecondary,
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             Text(
-              'Fitur bingkai akan segera hadir',
+              'Bingkai akan ditampilkan di avatar kamu',
               style: TextStyle(
+                fontSize: 12,
                 color: AppColors.textSecondary,
-                fontSize: 14,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
+
+            // Frame grid
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 0.85,
+              ),
+              itemCount: frames.length,
+              itemBuilder: (context, index) {
+                final frame = frames[index];
+                final frameId = frame['id']!;
+                final frameName = frame['name']!;
+                final frameAsset = frame['asset']!;
+                final isSelected = currentFrame == frameId ||
+                    (currentFrame == null && frameId == 'none');
+
+                return GestureDetector(
+                  onTap: () async {
+                    Get.back();
+                    try {
+                      // Save frame selection to local storage
+                      if (frameId == 'none') {
+                        await prefs.remove('selected_frame');
+                        await prefs.remove('selected_frame_url');
+                      } else {
+                        await prefs.setString('selected_frame', frameId);
+                        await prefs.setString('selected_frame_url', frameAsset);
+                      }
+
+                      // Reload profile to show updated avatar
+                      final ProfileController profileController =
+                          Get.find<ProfileController>();
+                      profileController.loadUserProfile();
+
+                      Get.snackbar(
+                        'Berhasil',
+                        'Bingkai berhasil diubah',
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.green,
+                        colorText: Colors.white,
+                      );
+                    } catch (e) {
+                      Get.snackbar(
+                        'Gagal',
+                        'Tidak dapat mengubah bingkai',
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.red,
+                        colorText: Colors.white,
+                      );
+                    }
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.primary
+                            : Colors.grey.shade300,
+                        width: isSelected ? 3 : 2,
+                      ),
+                      color: isSelected
+                          ? AppColors.primary.withOpacity(0.05)
+                          : Colors.white,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (frameAsset.isEmpty)
+                          Icon(
+                            Icons.block,
+                            size: 48,
+                            color: isSelected ? AppColors.primary : Colors.grey,
+                          )
+                        else
+                          SizedBox(
+                            width: 80,
+                            height: 80,
+                            child: Image.asset(
+                              frameAsset,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stack) => Icon(
+                                Icons.broken_image,
+                                size: 48,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        const SizedBox(height: 12),
+                        Text(
+                          frameName,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight:
+                                isSelected ? FontWeight.w700 : FontWeight.w500,
+                            color:
+                                isSelected ? AppColors.primary : Colors.black87,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
       isScrollControlled: true,
     );
   }
-  
+
   void _showLogoutConfirmation(BuildContext context, AuthService authService) {
     Get.dialog(
       Dialog(

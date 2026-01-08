@@ -27,7 +27,7 @@ class AvatarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final avatarSize = _getSize();
-    
+
     Widget avatar = Container(
       width: avatarSize,
       height: avatarSize,
@@ -45,12 +45,17 @@ class AvatarWidget extends StatelessWidget {
 
     // Add frame if provided
     if (frameUrl != null && frameUrl!.isNotEmpty) {
-      avatar = Stack(
-        alignment: Alignment.center,
-        children: [
-          avatar,
-          _buildFrame(),
-        ],
+      final frameSize = avatarSize * 1.3;
+      avatar = SizedBox(
+        width: frameSize,
+        height: frameSize,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            avatar,
+            _buildFrame(),
+          ],
+        ),
       );
     }
 
@@ -79,7 +84,7 @@ class AvatarWidget extends StatelessWidget {
           // Fallback to local asset if network fails
           final filename = RemoteAssets.getExactFilename(imageUrl!);
           final localImagePath = RemoteAssets.localAvatar(filename);
-          
+
           return Image.asset(
             localImagePath,
             fit: BoxFit.contain,
@@ -92,7 +97,7 @@ class AvatarWidget extends StatelessWidget {
         },
       );
     }
-    
+
     return _buildFallback();
   }
 
@@ -105,25 +110,29 @@ class AvatarWidget extends StatelessWidget {
   }
 
   Widget _buildFrame() {
+    final frameSize = _getSize() * 1.15; // Frame lebih besar dari avatar
     return Image.network(
       frameUrl!,
-      width: _getSize(),
-      height: _getSize(),
-      fit: BoxFit.cover,
+      width: frameSize,
+      height: frameSize,
+      fit: BoxFit.contain,
       errorBuilder: (context, error, stackTrace) {
         // Fallback to local asset if network fails
-        final filename = RemoteAssets.getExactFilename(frameUrl!).toLowerCase().replaceAll('.png', '').replaceAll('.webp', '');
+        final filename = RemoteAssets.getExactFilename(frameUrl!)
+            .toLowerCase()
+            .replaceAll('.png', '')
+            .replaceAll('.webp', '');
         final localFramePath = _getLocalFramePath(filename);
-        
+
         if (localFramePath == null) {
           return const SizedBox.shrink();
         }
-        
+
         return Image.asset(
           localFramePath,
-          width: _getSize(),
-          height: _getSize(),
-          fit: BoxFit.cover,
+          width: frameSize,
+          height: frameSize,
+          fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
             // If both fail, don't show frame
             return const SizedBox.shrink();
@@ -197,7 +206,7 @@ class AvatarWidget extends StatelessWidget {
       'avatar_m2_hdpi.png': Colors.green[100]!,
       'avatar_m3_hdpi.png': Colors.orange[100]!,
       'avatar_m4_hdpi.png': Colors.grey[100]!,
-      'avatar_f1_hdpi.png': Colors.orange[100]! ,
+      'avatar_f1_hdpi.png': Colors.orange[100]!,
       'avatar_f2_hdpi.png': Colors.yellow[100]!,
       'avatar_f3_hdpi.png': Colors.green[100]!,
       'avatar_f4_hdpi.png': Colors.pink[100]!,
@@ -206,10 +215,10 @@ class AvatarWidget extends StatelessWidget {
     if (imageUrl != null && imageUrl!.isNotEmpty) {
       final filename = RemoteAssets.getExactFilename(imageUrl!);
       final color = avatarColors[filename];
-      
+
       return color ?? AppColors.surfaceContainer;
     }
-    
+
     return AppColors.surfaceContainer;
   }
 

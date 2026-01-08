@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../controllers/profile_controller.dart';
@@ -23,7 +24,7 @@ class ProfileView extends GetView<ProfileController> {
 
     return ScaffoldFrame(
       controller: controller,
-      headerHeight: 315,
+      headerHeight: 340,
       headerContent: _buildHeader(),
       slivers: [
         // Tab Bar (Clickable)
@@ -52,8 +53,8 @@ class ProfileView extends GetView<ProfileController> {
 
         // Tab Content - wrapped in Obx for reactivity
         Obx(() => SliverList(
-          delegate: SliverChildListDelegate(_buildTabContent()),
-        )),
+              delegate: SliverChildListDelegate(_buildTabContent()),
+            )),
       ],
     );
     // ]);
@@ -74,45 +75,45 @@ class ProfileView extends GetView<ProfileController> {
               Row(
                 children: [
                   Obx(() => GestureDetector(
-                    onTap: () => Get.toNamed(Routes.LEADERBOARD),
-                    child: Container(
-                      width: 75,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: AppColors.backgroundContainer,
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: Center(
-                          child: Text(
-                        '${controller.totalExp} XP',
-                        style: TextStyle(
-                          color: AppColors.accent,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                        onTap: () => Get.toNamed(Routes.LEADERBOARD),
+                        child: Container(
+                          width: 75,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: AppColors.backgroundContainer,
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: Center(
+                              child: Text(
+                            '${controller.totalExp} XP',
+                            style: TextStyle(
+                              color: AppColors.accent,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )),
                         ),
                       )),
-                    ),
-                  )),
                   const SizedBox(width: 4),
                   Obx(() => GestureDetector(
-                    onTap: () => Get.toNamed(Routes.COINS_HISTORY),
-                    child: Container(
-                      width: 75,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: AppColors.backgroundContainer,
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                    child: Center(
-                        child: Text(
-                      '${controller.totalCoins} Koin',
-                      style: TextStyle(
-                        color: AppColors.accent,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )),
-                  ))),
+                      onTap: () => Get.toNamed(Routes.COINS_HISTORY),
+                      child: Container(
+                        width: 75,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.backgroundContainer,
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: Center(
+                            child: Text(
+                          '${controller.totalCoins} Koin',
+                          style: TextStyle(
+                            color: AppColors.accent,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )),
+                      ))),
                 ],
               ),
               Row(
@@ -138,17 +139,24 @@ class ProfileView extends GetView<ProfileController> {
               ),
             ],
           ),
-      
+
           const SizedBox(height: 4),
-      
-          // Profile Avatar
-          Obx(() => AvatarWidget(
-            imageUrl: controller.userAvatar,
-            size: AvatarSize.extraLarge,
-          )),
-      
+
+          // Profile Avatar with frame
+          FutureBuilder<String?>(
+            future: _getSelectedFrameUrl(),
+            builder: (context, snapshot) {
+              final frameUrl = snapshot.data;
+              return Obx(() => AvatarWidget(
+                    imageUrl: controller.userAvatar,
+                    size: AvatarSize.extraLarge,
+                    frameUrl: frameUrl,
+                  ));
+            },
+          ),
+
           const SizedBox(height: 8),
-      
+
           // User Name
           Obx(() => Text(
                 controller.userName,
@@ -158,7 +166,7 @@ class ProfileView extends GetView<ProfileController> {
                   fontWeight: FontWeight.bold,
                 ),
               )),
-      
+
           // User Email
           Obx(() => Text(
                 controller.userNickname,
@@ -168,9 +176,9 @@ class ProfileView extends GetView<ProfileController> {
                   fontWeight: FontWeight.w400,
                 ),
               )),
-      
+
           const SizedBox(height: 8),
-      
+
           Container(
             decoration: BoxDecoration(
               color: AppColors.backgroundContainer,
@@ -221,7 +229,7 @@ class ProfileView extends GetView<ProfileController> {
               ],
             ),
           ),
-      
+
           const SizedBox(height: 8),
         ],
       ),
@@ -358,7 +366,8 @@ class ProfileView extends GetView<ProfileController> {
             }
 
             // Empty state
-            if (controller.savedPlaces.isEmpty && controller.savedPosts.isEmpty) {
+            if (controller.savedPlaces.isEmpty &&
+                controller.savedPosts.isEmpty) {
               return Container(
                 padding: const EdgeInsets.all(32),
                 child: Column(
@@ -388,19 +397,21 @@ class ProfileView extends GetView<ProfileController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildSavedSection(
-                    title: 'Tempat', 
-                    value: '${controller.savedPlaces.length}', onTap: () {
+                    title: 'Tempat',
+                    value: '${controller.savedPlaces.length}',
+                    onTap: () {
                       Get.toNamed(Routes.SAVED_PLACES);
-                    }, assetWidget: _buildSavedPlacesGrid(),
+                    },
+                    assetWidget: _buildSavedPlacesGrid(),
                   ),
-                  
                   const SizedBox(height: 4),
-                  
                   _buildSavedSection(
-                    title: 'Postingan', 
-                    value: '${controller.savedPosts.length}', onTap: () {
+                    title: 'Postingan',
+                    value: '${controller.savedPosts.length}',
+                    onTap: () {
                       Get.toNamed(Routes.SAVED_POSTS);
-                    }, assetWidget: _buildSavedPostsGrid(),
+                    },
+                    assetWidget: _buildSavedPostsGrid(),
                   ),
                 ],
               ),
@@ -429,8 +440,8 @@ class ProfileView extends GetView<ProfileController> {
                   // Papan Peringkat Section
                   _buildAchievementSection(
                     title: 'Papan Peringkat',
-                    value: controller.userRank != null 
-                        ? '#${controller.userRank}' 
+                    value: controller.userRank != null
+                        ? '#${controller.userRank}'
                         : '-',
                     onTap: () {
                       Get.toNamed(Routes.LEADERBOARD);
@@ -449,9 +460,9 @@ class ProfileView extends GetView<ProfileController> {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 4),
-                  
+
                   // Koin & Kupon Section
                   _buildAchievementSection(
                     title: 'Koin & Kupon',
@@ -473,9 +484,9 @@ class ProfileView extends GetView<ProfileController> {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 4),
-                  
+
                   // Penghargaan Saya Section
                   _buildAchievementSection(
                     title: 'Penghargaan Saya',
@@ -501,9 +512,9 @@ class ProfileView extends GetView<ProfileController> {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 4),
-                  
+
                   // Tantangan Section
                   _buildAchievementSection(
                     title: 'Tantangan',
@@ -601,7 +612,8 @@ class ProfileView extends GetView<ProfileController> {
 
   // ===== SAVED SECTION WIDGETS =====
 
-  Widget _buildSavedSectionHeader(String title, int count, {VoidCallback? onViewAll}) {
+  Widget _buildSavedSectionHeader(String title, int count,
+      {VoidCallback? onViewAll}) {
     return GestureDetector(
       onTap: onViewAll,
       child: Row(
@@ -615,7 +627,7 @@ class ProfileView extends GetView<ProfileController> {
               color: AppColors.textPrimary,
             ),
           ),
-         Icon(
+          Icon(
             Icons.chevron_right,
             color: AppColors.textSecondary,
           ),
@@ -628,7 +640,7 @@ class ProfileView extends GetView<ProfileController> {
     final places = controller.savedPlaces;
     // Show max 4 places in 2x2 grid
     final displayPlaces = places.take(2).toList();
-    
+
     return GridView.builder(
       padding: EdgeInsets.zero,
       shrinkWrap: true,
@@ -677,7 +689,7 @@ class ProfileView extends GetView<ProfileController> {
     final posts = controller.savedPosts;
     // Show max 4 posts in 2x2 grid
     final displayPosts = posts.take(2).toList();
-    
+
     return GridView.builder(
       padding: EdgeInsets.zero,
       shrinkWrap: true,
@@ -720,6 +732,11 @@ class ProfileView extends GetView<ProfileController> {
               ),
             ),
     );
+  }
+
+  Future<String?> _getSelectedFrameUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('selected_frame_url');
   }
 
   void _showShareProfileModal() {

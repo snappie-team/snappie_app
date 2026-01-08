@@ -44,7 +44,7 @@ class AppUpdateService extends GetxService {
   AppUpdateService({required this.dioClient});
 
   Future<AppUpdateInfo?> checkUpdate() async {
-    final requestUrl = ApiEndpoints.appUpdate;
+    final requestUrl = '${EnvironmentConfig.productionUrl}${ApiEndpoints.appUpdate}';
     final resp = await dioClient.dio.get(
       requestUrl,
       queryParameters: {

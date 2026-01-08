@@ -113,4 +113,14 @@ class PostRepository {
       locationDetails: locationDetails,
     );
   }
+
+  /// Delete a post
+  /// Throws: [NetworkException], [ServerException], [AuthenticationException], [AuthorizationException]
+  Future<void> deletePost(int postId) async {
+    if (!(await networkInfo.isConnected)) {
+      throw NetworkException('No internet connection');
+    }
+
+    await remoteDataSource.deletePost(postId);
+  }
 }

@@ -162,7 +162,8 @@ class HomeController extends GetxController {
 
       Logger.info('Home: Loaded ${loadedPosts.length} posts', 'Home');
     } catch (e) {
-      _errorMessage.value = ErrorHandler.getReadableMessage(e, tag: 'HomeController');
+      _errorMessage.value =
+          ErrorHandler.getReadableMessage(e, tag: 'HomeController');
     }
 
     _setLoading(false);
@@ -311,6 +312,14 @@ class HomeController extends GetxController {
     } finally {
       _isTogglingSavedPostIds.remove(postId);
     }
+  }
+
+  /// Remove a post from the local list (after delete)
+  void removePost(int postId) {
+    _posts.removeWhere((post) => post.id == postId);
+    _savedPostIds.remove(postId);
+    _likedPostIds.remove(postId);
+    Logger.debug('Post $postId removed from home feed', 'Home');
   }
 
   void _setLoading(bool loading) {

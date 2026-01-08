@@ -65,7 +65,8 @@ class _PostCardState extends State<PostCard> {
     // Check if current user has liked this post
     final authService = Get.find<AuthService>();
     final currentUserId = authService.userData?.id;
-    final hasLiked = post.likes?.any((like) => like.userId == currentUserId) ?? false;
+    final hasLiked =
+        post.likes?.any((like) => like.userId == currentUserId) ?? false;
     _isLiked = hasLiked.obs;
   }
 
@@ -132,65 +133,205 @@ class _PostCardState extends State<PostCard> {
             ),
           ),
           _buildFollowButton(),
-          ButtonWidget(
-            icon: Icons.more_vert_outlined,
-            iconColor: AppColors.textPrimary,
-            onPressed: () => _showPostOptions(post),
+          _buildMoreButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMoreButton() {
+    final authService = Get.find<AuthService>();
+    final currentUserId = authService.userData?.id;
+    final isOwner = post.userId == currentUserId;
+
+    return PopupMenuButton<String>(
+      icon: Icon(
+        Icons.more_vert_outlined,
+        color: AppColors.textPrimary,
+      ),
+      offset: const Offset(-140, 0), // Muncul di kiri button
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      color: Colors.white,
+      elevation: 8,
+      onSelected: (value) {
+        switch (value) {
+          case 'profile':
+            _viewProfile();
+            break;
+          case 'report':
+            _showReportModal();
+            break;
+          case 'delete':
+            _confirmDeletePost();
+            break;
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem<String>(
+          value: 'profile',
+          child: Row(
+            children: [
+              Icon(Icons.person_outline,
+                  color: AppColors.textPrimary, size: 20),
+              const SizedBox(width: 12),
+              const Text('Lihat Profil'),
+            ],
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'report',
+          child: Row(
+            children: [
+              Icon(Icons.flag_outlined, color: Colors.orange, size: 20),
+              const SizedBox(width: 12),
+              const Text('Laporkan', style: TextStyle(color: Colors.orange)),
+            ],
+          ),
+        ),
+        if (isOwner)
+          PopupMenuItem<String>(
+            value: 'delete',
+            child: Row(
+              children: [
+                Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                const SizedBox(width: 12),
+                const Text('Hapus Post', style: TextStyle(color: Colors.red)),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  void _viewProfile() {
+    final userId = post.userId;
+    if (userId == null) return;
+
+    // Navigate to user profile
+    Get.toNamed(AppPages.USER_PROFILE, arguments: {'userId': userId});
+  }
+
+  void _showReportModal() {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.flag_outlined, color: Colors.orange),
+            const SizedBox(width: 8),
+            const Text('Laporkan Post'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Fitur laporan sedang dalam pengembangan.',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Kami akan segera menambahkan fitur ini untuk membantu menjaga komunitas Snappie tetap aman.',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(
+              'Tutup',
+              style: TextStyle(color: AppColors.primary),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _showPostOptions(PostModel post) {
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  void _confirmDeletePost() {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        title: Row(
           children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.bookmark_border),
-              title: const Text('Simpan Post'),
-              onTap: () {
-                Get.back();
-                Get.snackbar('Info', 'Post disimpan');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.person_remove),
-              title: Text('Sembunyikan dari ${post.user?.name}'),
-              onTap: () {
-                Get.back();
-                Get.snackbar('Info', 'Post disembunyikan');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.report, color: Colors.red),
-              title: const Text('Laporkan Post',
-                  style: TextStyle(color: Colors.red)),
-              onTap: () {
-                Get.back();
-                Get.snackbar('Info', 'Post dilaporkan');
-              },
-            ),
+            Icon(Icons.delete_outline, color: Colors.red),
+            const SizedBox(width: 8),
+            const Text('Hapus Post'),
           ],
         ),
+        content: const Text(
+          'Apakah kamu yakin ingin menghapus post ini? Tindakan ini tidak dapat dibatalkan.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(
+              'Batal',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              _deletePost();
+            },
+            child: const Text(
+              'Hapus',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  void _deletePost() async {
+    final postId = post.id;
+    if (postId == null) return;
+
+    try {
+      final postRepository = Get.find<PostRepository>();
+      await postRepository.deletePost(postId);
+
+      // Refresh home feed
+      try {
+        final homeController = Get.find<HomeController>();
+        homeController.removePost(postId);
+      } catch (e) {
+        Logger.warning('HomeController not found, skipping sync', 'PostCard');
+      }
+
+      Get.snackbar(
+        'Berhasil',
+        'Post berhasil dihapus',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Logger.error('Failed to delete post', e, null, 'PostCard');
+      Get.snackbar(
+        'Gagal',
+        'Tidak dapat menghapus post, silakan coba lagi',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
   }
 
   Widget _buildPostContent() {
@@ -473,8 +614,8 @@ class _PostCardState extends State<PostCard> {
       final controller = Get.find<HomeController>();
       return Obx(() {
         final state = controller.getFollowState(userId);
-        final isOutline =
-            state == PostFollowState.friend || state == PostFollowState.following;
+        final isOutline = state == PostFollowState.friend ||
+            state == PostFollowState.following;
 
         final label = switch (state) {
           PostFollowState.friend => 'Teman',
@@ -560,14 +701,16 @@ class _PostCardState extends State<PostCard> {
 
       // Fetch updated post to get accurate count from backend
       final updatedPost = await postRepository.getPostById(postId);
-      
+
       // Update with actual backend data
       _likesCount.value = updatedPost.likesCount ?? 0;
-      
+
       // Check if current user has liked (from backend data)
       final authService = Get.find<AuthService>();
       final currentUserId = authService.userData?.id;
-      _isLiked.value = updatedPost.likes?.any((like) => like.userId == currentUserId) ?? false;
+      _isLiked.value =
+          updatedPost.likes?.any((like) => like.userId == currentUserId) ??
+              false;
 
       // Also sync with HomeController if available (for consistency when switching tabs)
       try {

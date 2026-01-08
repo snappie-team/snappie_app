@@ -28,6 +28,7 @@ abstract class PostRemoteDataSource {
     List<String>? hashtags,
     String? locationDetails,
   });
+  Future<void> deletePost(int postId);
 }
 
 class PostRemoteDataSourceImpl implements PostRemoteDataSource {
@@ -189,7 +190,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
 
       // Check if response contains 'comment' key (nested structure)
       // or if it's the comment data directly
-      final commentData = responseData.containsKey('comment') 
+      final commentData = responseData.containsKey('comment')
           ? responseData['comment'] as Map<String, dynamic>
           : responseData;
 
@@ -253,6 +254,19 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     }
   }
 
+  @override
+  Future<void> deletePost(int postId) async {
+    try {
+      final endpoint =
+          ApiEndpoints.postDetail.replaceAll('{id}', postId.toString());
+      await dioClient.dio.delete(endpoint);
+    } on DioException catch (e) {
+      throw _mapDioException(e);
+    } catch (e) {
+      throw ServerException('Failed to delete post: $e', 500);
+    }
+  }
+
   // @override
   // Future<PostModel> createPost(PostModel post) async {
   //   try {
@@ -286,16 +300,25 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     final status = e.response?.statusCode;
     final data = e.response?.data;
 
-    if (status == 401) return AuthenticationException('Authentication required');
+    if (status == 401)
+      return AuthenticationException('Authentication required');
     if (status == 403) return AuthorizationException('Access denied');
     if (status == 404) return ServerException('Not found', 404);
     if (status == 422) {
       return ValidationException(
-        data is Map ? (data['message'] ?? 'Validation failed') : 'Validation failed',
-        errors: data is Map && data['errors'] is Map ? Map<String, dynamic>.from(data['errors']) : null,
+        data is Map
+            ? (data['message'] ?? 'Validation failed')
+            : 'Validation failed',
+        errors: data is Map && data['errors'] is Map
+            ? Map<String, dynamic>.from(data['errors'])
+            : null,
       );
     }
 
-    return ServerException(data is Map ? data['message'] ?? 'Network error occurred' : 'Network error occurred', status ?? 500);
+    return ServerException(
+        data is Map
+            ? data['message'] ?? 'Network error occurred'
+            : 'Network error occurred',
+        status ?? 500);
   }
 }

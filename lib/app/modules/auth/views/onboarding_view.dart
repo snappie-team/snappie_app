@@ -216,7 +216,9 @@ class OnboardingView extends GetView<OnboardingController> {
 
     return GestureDetector(
       onTap: () async {
-        await context.setLocale(Locale(languageCode));
+        final newLocale = Locale(languageCode);
+        await context.setLocale(newLocale);
+        Get.updateLocale(newLocale);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

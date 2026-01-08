@@ -125,8 +125,13 @@ class _LanguageViewState extends State<LanguageView> {
   Future<void> _onSave() async {
     setState(() => _saving = true);
     
-    // Switch locale
-    await context.setLocale(Locale(_selected));
+    final newLocale = Locale(_selected);
+    
+    // Switch locale in EasyLocalization
+    await context.setLocale(newLocale);
+    
+    // Sync with GetX locale system
+    Get.updateLocale(newLocale);
     
     await Future<void>.delayed(const Duration(milliseconds: 400));
     if (!mounted) return;

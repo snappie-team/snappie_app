@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
 
@@ -67,8 +68,10 @@ class LanguageSwitcherWidget extends StatelessWidget {
     final isSelected = context.locale.languageCode == languageCode;
 
     return GestureDetector(
-      onTap: () {
-        context.setLocale(Locale(languageCode));
+      onTap: () async {
+        final newLocale = Locale(languageCode);
+        await context.setLocale(newLocale);
+        Get.updateLocale(newLocale);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -126,9 +129,11 @@ class LanguageDropdown extends StatelessWidget {
           child: Text('🇬🇧 English'),
         ),
       ],
-      onChanged: (String? languageCode) {
+      onChanged: (String? languageCode) async {
         if (languageCode != null) {
-          context.setLocale(Locale(languageCode));
+          final newLocale = Locale(languageCode);
+          await context.setLocale(newLocale);
+          Get.updateLocale(newLocale);
         }
       },
     );

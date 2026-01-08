@@ -230,7 +230,9 @@ class _LoginViewState extends State<LoginView> {
 
     return GestureDetector(
       onTap: () async {
-        await context.setLocale(Locale(languageCode));
+        final newLocale = Locale(languageCode);
+        await context.setLocale(newLocale);
+        Get.updateLocale(newLocale);
         setState(() {
           _currentLocale = languageCode;
         });

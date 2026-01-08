@@ -17,6 +17,7 @@ import '../../../data/repositories/post_repository_impl.dart';
 import '../../../data/repositories/user_repository_impl.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/location_service.dart';
+import '../../../core/helpers/error_handler.dart';
 
 class ExploreController extends GetxController {
   final PlaceRepository placeRepository;
@@ -268,8 +269,7 @@ class ExploreController extends GetxController {
       // Apply local search filter
       _applyLocalSearch();
     } catch (e) {
-      _setError('Failed to load places: $e');
-      Logger.error('Error loading places', e, null, 'ExploreController');
+      _setError(ErrorHandler.getReadableMessage(e, tag: 'ExploreController'));
     }
 
     _setLoading(false);
@@ -466,8 +466,7 @@ class ExploreController extends GetxController {
 
       Logger.debug('Place loaded by ID: ${place.name}', 'ExploreController');
     } catch (e) {
-      _setError('Failed to load place: $e');
-      Logger.error('Error loading place by ID', e, null, 'ExploreController');
+      _setError(ErrorHandler.getReadableMessage(e, tag: 'ExploreController'));
     }
 
     _setLoading(false);
@@ -492,8 +491,7 @@ class ExploreController extends GetxController {
       _reviews.assignAll(reviewsList);
       Logger.debug('Reviews loaded: ${reviewsList.length}', 'ExploreController');
     } catch (e) {
-      _setError('Failed to load reviews: $e');
-      Logger.error('Error loading reviews', e, null, 'ExploreController');
+      _setError(ErrorHandler.getReadableMessage(e, tag: 'ExploreController'));
     }
 
     _isLoadingReviews.value = false;
@@ -567,10 +565,11 @@ class ExploreController extends GetxController {
       await Future.delayed(Duration(milliseconds: 100));
       Get.back(closeOverlays: true);
     } catch (e) {
-      _setError('Failed to create review: $e');
+      final msg = ErrorHandler.getReadableMessage(e, tag: 'ExploreController');
+      _setError(msg);
       Get.snackbar(
-        'Error',
-        'Failed to create review: $e',
+        'Gagal',
+        msg,
         snackPosition: SnackPosition.BOTTOM,
       );
     }
@@ -604,10 +603,11 @@ class ExploreController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (e) {
-      _setError('Failed to create check-in: $e');
+      final msg = ErrorHandler.getReadableMessage(e, tag: 'ExploreController');
+      _setError(msg);
       Get.snackbar(
-        'Error',
-        'Failed to create check-in: $e',
+        'Gagal',
+        msg,
         snackPosition: SnackPosition.BOTTOM,
       );
     }

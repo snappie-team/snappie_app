@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:snappie_app/app/core/constants/place_value.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../core/helpers/error_handler.dart';
 import '../controllers/explore_controller.dart';
 import '../../shared/widgets/index.dart';
 import '../../../data/models/place_model.dart';
@@ -809,8 +810,8 @@ class PlaceDetailView extends GetView<ExploreController> {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
-        'Gagal membuka peta: $e',
+        'Gagal',
+        ErrorHandler.getReadableMessage(e, tag: 'PlaceDetailView'),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error,
         colorText: AppColors.textOnPrimary,
@@ -863,8 +864,8 @@ class PlaceDetailView extends GetView<ExploreController> {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
-        'Gagal membuka WhatsApp: $e',
+        'Gagal',
+        ErrorHandler.getReadableMessage(e, tag: 'PlaceDetailView'),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error,
         colorText: AppColors.textOnPrimary,
@@ -1260,8 +1261,8 @@ class PlaceDetailView extends GetView<ExploreController> {
       );
     } catch (e) {
       Get.snackbar(
-        'Error',
-        'Gagal menyimpan: $e',
+        'Gagal',
+        ErrorHandler.getReadableMessage(e, tag: 'PlaceDetailView'),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error,
         colorText: AppColors.textOnPrimary,

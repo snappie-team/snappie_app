@@ -9,6 +9,7 @@ import '../../../core/constants/food_type.dart';
 import '../../../core/constants/place_value.dart';
 import '../../../core/services/cloudinary_service.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../core/helpers/error_handler.dart';
 import '../../../data/models/place_model.dart';
 import '../controllers/explore_controller.dart';
 
@@ -875,8 +876,8 @@ class _GiveReviewViewState extends State<GiveReviewView> {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
-        'Gagal mengambil foto: $e',
+        'Gagal',
+        ErrorHandler.getReadableMessage(e, tag: 'GiveReviewView'),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error,
         colorText: Colors.white,
@@ -920,8 +921,8 @@ class _GiveReviewViewState extends State<GiveReviewView> {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
-        'Gagal memilih foto: $e',
+        'Gagal',
+        ErrorHandler.getReadableMessage(e, tag: 'GiveReviewView'),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error,
         colorText: Colors.white,
@@ -1019,7 +1020,7 @@ class _GiveReviewViewState extends State<GiveReviewView> {
     } catch (e) {
       Get.snackbar(
         'Gagal',
-        'Gagal mengirim ulasan: $e',
+        ErrorHandler.getReadableMessage(e, tag: 'GiveReviewView'),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error,
         colorText: Colors.white,

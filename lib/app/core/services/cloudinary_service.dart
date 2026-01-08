@@ -62,6 +62,33 @@ class CloudinaryUploadResult {
       success: false,
     );
   }
+
+  /// Create user-friendly error message from technical error
+  factory CloudinaryUploadResult.friendlyError(String technicalError) {
+    String friendlyMessage;
+    
+    if (technicalError.contains('SocketException') || 
+        technicalError.contains('Connection refused') ||
+        technicalError.contains('Network is unreachable')) {
+      friendlyMessage = 'Tidak ada koneksi internet. Periksa jaringan Anda dan coba lagi.';
+    } else if (technicalError.contains('TimeoutException') ||
+               technicalError.contains('timed out')) {
+      friendlyMessage = 'Koneksi timeout. Coba lagi dengan jaringan yang lebih stabil.';
+    } else if (technicalError.contains('File too large') ||
+               technicalError.contains('exceeds')) {
+      friendlyMessage = 'Ukuran file terlalu besar. Maksimal 10MB.';
+    } else if (technicalError.contains('Invalid image') ||
+               technicalError.contains('unsupported')) {
+      friendlyMessage = 'Format gambar tidak didukung. Gunakan JPG atau PNG.';
+    } else {
+      friendlyMessage = 'Gagal mengunggah gambar. Silakan coba lagi.';
+    }
+    
+    return CloudinaryUploadResult(
+      error: friendlyMessage,
+      success: false,
+    );
+  }
 }
 
 /// Cloudinary Service for image uploads
@@ -70,6 +97,12 @@ class CloudinaryService {
   late final Cloudinary _cloudinary;
   late final Uploader _uploader;
   late final String _uploadPreset;
+
+  /// Maximum file size in bytes (10MB)
+  static const int maxFileSizeBytes = 10 * 1024 * 1024;
+  
+  /// Maximum retry attempts
+  static const int maxRetryAttempts = 3;
 
   /// Initialize service with environment variables
   CloudinaryService() {
@@ -104,11 +137,44 @@ class CloudinaryService {
     UploadProgressCallback? progressCallback,
     int quality = 85,
   }) async {
+    // Validate file exists
+    if (!await file.exists()) {
+      return CloudinaryUploadResult.error('File tidak ditemukan');
+    }
+
+    // Validate file size
+    final fileSize = await file.length();
+    if (fileSize > maxFileSizeBytes) {
+      final sizeMB = (fileSize / (1024 * 1024)).toStringAsFixed(1);
+      Logger.warning('File size too large: ${sizeMB}MB (max: 10MB)', 'CloudinaryService');
+      return CloudinaryUploadResult.error(
+        'Ukuran file terlalu besar (${sizeMB}MB). Maksimal 10MB.',
+      );
+    }
+
+    Logger.debug('File size: ${(fileSize / 1024).toStringAsFixed(1)}KB', 'CloudinaryService');
+
+    // Attempt upload with retry mechanism
+    return _uploadWithRetry(
+      file,
+      folder: folder,
+      progressCallback: progressCallback,
+      quality: quality,
+    );
+  }
+
+  /// Upload with retry mechanism and exponential backoff
+  Future<CloudinaryUploadResult> _uploadWithRetry(
+    File file, {
+    required String folder,
+    UploadProgressCallback? progressCallback,
+    required int quality,
+    int attempt = 1,
+  }) async {
     try {
+      Logger.debug('Upload attempt $attempt/$maxRetryAttempts', 'CloudinaryService');
       Logger.debug('Uploading image: ${file.path}', 'CloudinaryService');
       Logger.debug('Folder: $folder', 'CloudinaryService');
-      Logger.debug('Quality: $quality', 'CloudinaryService');
-      Logger.debug('Upload preset: $_uploadPreset', 'CloudinaryService');
 
       final response = await _uploader.upload(
         file,
@@ -123,23 +189,42 @@ class CloudinaryService {
       );
 
       if (response?.error != null) {
-        Logger.error('Upload error: ${response?.error?.message}', null, null, 'CloudinaryService');
-        return CloudinaryUploadResult.error(
-          response?.error?.message ?? 'Unknown upload error',
-        );
+        final errorMsg = response?.error?.message ?? 'Unknown upload error';
+        Logger.error('Upload error: $errorMsg', null, null, 'CloudinaryService');
+        
+        // Retry on certain errors
+        if (_shouldRetry(errorMsg) && attempt < maxRetryAttempts) {
+          return _retryAfterDelay(
+            file,
+            folder: folder,
+            progressCallback: progressCallback,
+            quality: quality,
+            attempt: attempt,
+          );
+        }
+        
+        return CloudinaryUploadResult.friendlyError(errorMsg);
       }
 
       final result = response?.data;
       if (result == null) {
-        return CloudinaryUploadResult.error('No upload result received');
+        if (attempt < maxRetryAttempts) {
+          return _retryAfterDelay(
+            file,
+            folder: folder,
+            progressCallback: progressCallback,
+            quality: quality,
+            attempt: attempt,
+          );
+        }
+        return CloudinaryUploadResult.error('Gagal mengunggah gambar. Silakan coba lagi.');
       }
 
       // Generate optimized URL with quality transformation
       final optimizedUrl = _generateOptimizedUrl(result.secureUrl, quality);
       Logger.debug('Upload success: $optimizedUrl', 'CloudinaryService');
 
-      // Update the result with optimized URL
-      final optimizedResult = CloudinaryUploadResult(
+      return CloudinaryUploadResult(
         publicId: result.publicId,
         url: result.url,
         secureUrl: optimizedUrl,
@@ -149,12 +234,65 @@ class CloudinaryService {
         bytes: result.bytes,
         success: true,
       );
-
-      return optimizedResult;
     } catch (e, stackTrace) {
-      Logger.error('Upload exception', e, stackTrace, 'CloudinaryService');
-      return CloudinaryUploadResult.error(e.toString());
+      Logger.error('Upload exception (attempt $attempt)', e, stackTrace, 'CloudinaryService');
+      
+      // Retry on network-related errors
+      if (_shouldRetry(e.toString()) && attempt < maxRetryAttempts) {
+        return _retryAfterDelay(
+          file,
+          folder: folder,
+          progressCallback: progressCallback,
+          quality: quality,
+          attempt: attempt,
+        );
+      }
+      
+      return CloudinaryUploadResult.friendlyError(e.toString());
     }
+  }
+
+  /// Check if error is retryable
+  bool _shouldRetry(String error) {
+    final retryableErrors = [
+      'SocketException',
+      'Connection refused',
+      'Connection reset',
+      'Connection closed',
+      'timeout',
+      'timed out',
+      'Network is unreachable',
+      'No route to host',
+      'temporarily unavailable',
+      '503',
+      '502',
+      '504',
+    ];
+    
+    return retryableErrors.any((e) => error.toLowerCase().contains(e.toLowerCase()));
+  }
+
+  /// Retry upload after exponential backoff delay
+  Future<CloudinaryUploadResult> _retryAfterDelay(
+    File file, {
+    required String folder,
+    UploadProgressCallback? progressCallback,
+    required int quality,
+    required int attempt,
+  }) async {
+    // Exponential backoff: 1s, 2s, 4s
+    final delaySeconds = 1 << (attempt - 1);
+    Logger.debug('Retrying in ${delaySeconds}s...', 'CloudinaryService');
+    
+    await Future.delayed(Duration(seconds: delaySeconds));
+    
+    return _uploadWithRetry(
+      file,
+      folder: folder,
+      progressCallback: progressCallback,
+      quality: quality,
+      attempt: attempt + 1,
+    );
   }
 
   /// Generate optimized URL with quality and format transformations

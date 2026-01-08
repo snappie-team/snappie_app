@@ -83,16 +83,16 @@ class AuthController extends GetxController {
     // Check if user is already logged in
     _isLoggedIn.value = authService.isLoggedIn;
     _loadGoogleUserData();
-    
+
     // Add listeners for form validation
     firstnameController.addListener(() {
       _isFirstnameValid.value = firstnameController.text.trim().isNotEmpty;
     });
-    
+
     lastnameController.addListener(() {
       _isLastnameValid.value = lastnameController.text.trim().isNotEmpty;
     });
-    
+
     usernameController.addListener(() {
       _isUsernameValid.value = usernameController.text.trim().length >= 8;
     });
@@ -167,7 +167,8 @@ class AuthController extends GetxController {
 
       switch (result.errorType ?? AuthErrorType.unknown) {
         case AuthErrorType.userNotFound:
-          Logger.debug('User not found, navigating to registration', 'AuthController');
+          Logger.debug(
+              'User not found, navigating to registration', 'AuthController');
           _loadGoogleUserData();
           Get.toNamed(AppPages.REGISTER);
           break;
@@ -528,40 +529,59 @@ class AuthController extends GetxController {
 
   void toggleAvatarPicker() {
     _showAvatarPicker.value = !_showAvatarPicker.value;
-    Logger.debug('Avatar picker toggled: ${_showAvatarPicker.value}', 'AuthController');
+    Logger.debug(
+        'Avatar picker toggled: ${_showAvatarPicker.value}', 'AuthController');
   }
 
   void nextPage() {
     if (_selectedPageIndex.value < 2) {
       _selectedPageIndex.value++;
-      Logger.debug('Moving to page: ${_selectedPageIndex.value}', 'AuthController');
+      Logger.debug(
+          'Moving to page: ${_selectedPageIndex.value}', 'AuthController');
     }
   }
 
   void previousPage() {
     if (_selectedPageIndex.value > 0) {
       _selectedPageIndex.value--;
-      Logger.debug('Moving to page: ${_selectedPageIndex.value}', 'AuthController');
+      Logger.debug(
+          'Moving to page: ${_selectedPageIndex.value}', 'AuthController');
     }
   }
 
   void goToPage(int index) {
     if (index >= 0 && index <= 2) {
       _selectedPageIndex.value = index;
-      Logger.debug('Going to page: ${_selectedPageIndex.value}', 'AuthController');
+      Logger.debug(
+          'Going to page: ${_selectedPageIndex.value}', 'AuthController');
     }
   }
+
+  static const int maxSelectionLimit = 3;
 
   void toggleFoodTypeSelection(String foodType) {
     if (_selectedFoodTypes.contains(foodType)) {
       _selectedFoodTypes.remove(foodType);
       Logger.debug('Food type removed: $foodType', 'AuthController');
     } else {
+      // Check max limit
+      if (_selectedFoodTypes.length >= maxSelectionLimit) {
+        Get.snackbar(
+          'Batas Tercapai',
+          'Kamu hanya dapat memilih maksimal $maxSelectionLimit tipe kuliner',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+        );
+        return;
+      }
       _selectedFoodTypes.add(foodType);
       Logger.debug('Food type selected: $foodType', 'AuthController');
     }
     Logger.debug(
-        'Total selected: ${_selectedFoodTypes.length} - ${_selectedFoodTypes.join(", ")}', 'AuthController');
+        'Total selected: ${_selectedFoodTypes.length} - ${_selectedFoodTypes.join(", ")}',
+        'AuthController');
   }
 
   void togglePlaceValueSelection(String placeValue) {
@@ -569,11 +589,24 @@ class AuthController extends GetxController {
       _selectedPlaceValues.remove(placeValue);
       Logger.debug('Place value removed: $placeValue', 'AuthController');
     } else {
+      // Check max limit
+      if (_selectedPlaceValues.length >= maxSelectionLimit) {
+        Get.snackbar(
+          'Batas Tercapai',
+          'Kamu hanya dapat memilih maksimal $maxSelectionLimit nilai tempat',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+        );
+        return;
+      }
       _selectedPlaceValues.add(placeValue);
       Logger.debug('Place value selected: $placeValue', 'AuthController');
     }
     Logger.debug(
-        'Total selected: ${_selectedPlaceValues.length} - ${_selectedPlaceValues.join(", ")}', 'AuthController');
+        'Total selected: ${_selectedPlaceValues.length} - ${_selectedPlaceValues.join(", ")}',
+        'AuthController');
   }
 
   List<Map<String, dynamic>> getAvatarOptions(String gender) {

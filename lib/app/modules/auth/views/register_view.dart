@@ -101,14 +101,14 @@ class RegisterView extends GetView<AuthController> {
                                           controller.isUsernameValid.value;
                                   break;
                                 case 1:
-                                  // Page 2: Check if at least 3 food types selected
+                                  // Page 2: Check if exactly 3 food types selected
                                   canProceed =
-                                      controller.selectedFoodTypes.length >= 3;
+                                      controller.selectedFoodTypes.length == 3;
                                   break;
                                 case 2:
-                                  // Page 3: Check if at least 3 place values selected
+                                  // Page 3: Check if exactly 3 place values selected
                                   canProceed =
-                                      controller.selectedPlaceValues.length >=
+                                      controller.selectedPlaceValues.length ==
                                           3;
                                   break;
                               }
@@ -568,46 +568,54 @@ class RegisterView extends GetView<AuthController> {
               () {
                 final isSelected =
                     controller.selectedFoodTypes.contains(foodType);
+                final isLimitReached = controller.selectedFoodTypes.length >= 3;
+                final isDisabled = !isSelected && isLimitReached;
 
                 return GestureDetector(
                   onTap: () {
                     controller.toggleFoodTypeSelection(foodType);
                   },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.primary.withAlpha(50)
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color:
-                            isSelected ? AppColors.primary : Colors.transparent,
-                        width: isSelected ? 2.5 : 1.5,
+                  child: Opacity(
+                    opacity: isDisabled ? 0.4 : 1.0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.primary.withAlpha(50)
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.primary
+                              : Colors.transparent,
+                          width: isSelected ? 2.5 : 1.5,
+                        ),
                       ),
-                    ),
-                    padding: const EdgeInsets.all(4),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Image.asset(
-                          imagePath!,
-                          fit: BoxFit.contain,
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          foodType,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight:
-                                isSelected ? FontWeight.w600 : FontWeight.w500,
-                            color:
-                                isSelected ? AppColors.primary : Colors.black87,
+                      padding: const EdgeInsets.all(4),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Image.asset(
+                            imagePath!,
+                            fit: BoxFit.contain,
                           ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                          const SizedBox(height: 6),
+                          Text(
+                            foodType,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : Colors.black87,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -655,36 +663,42 @@ class RegisterView extends GetView<AuthController> {
               () {
                 final isSelected =
                     controller.selectedPlaceValues.contains(placeValue);
+                final isLimitReached =
+                    controller.selectedPlaceValues.length >= 3;
+                final isDisabled = !isSelected && isLimitReached;
 
                 return GestureDetector(
                   onTap: () {
                     controller.togglePlaceValueSelection(placeValue);
                   },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.primary.withAlpha(100)
-                          : Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color:
-                            isSelected ? AppColors.primary : Colors.transparent,
-                        width: 2,
+                  child: Opacity(
+                    opacity: isDisabled ? 0.4 : 1.0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.primary.withAlpha(100)
+                            : Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.primary
+                              : Colors.transparent,
+                          width: 2,
+                        ),
                       ),
-                    ),
-                    alignment: Alignment.center,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                    child: Text(
-                      placeValue,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: isSelected ? AppColors.primary : Colors.black87,
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 8),
+                      child: Text(
+                        placeValue,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color:
+                              isSelected ? AppColors.primary : Colors.black87,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
-                      // overflow: TextOverflow.ellipsis,
-                      // maxLines: 2,
                     ),
                   ),
                 );

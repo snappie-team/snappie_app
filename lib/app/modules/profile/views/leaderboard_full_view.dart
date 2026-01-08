@@ -84,7 +84,9 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
             child: _buildEmptyState(),
           )
         else
-          _buildLeaderboardContent(),
+          SliverFillRemaining(
+            child: _buildLeaderboardContent(),
+          ),
       ],
     );
   }
@@ -251,22 +253,22 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
   Widget _buildLeaderboardContent() {
     return RefreshIndicator(
       onRefresh: _loadLeaderboard,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: Column(
             children: [
               // Top 3 Section (show even if less than 3)

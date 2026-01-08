@@ -8,6 +8,7 @@ import 'package:snappie_app/app/data/repositories/achievement_repository_impl.da
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../core/helpers/error_handler.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/models/post_model.dart';
 
@@ -316,8 +317,8 @@ class ProfileController extends GetxController {
       
       // Show error message
       Get.snackbar(
-        'Error',
-        'Gagal logout: $e',
+        'Gagal',
+        ErrorHandler.getReadableMessage(e, tag: 'ProfileController'),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

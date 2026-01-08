@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/helpers/error_handler.dart';
 import '../controllers/profile_controller.dart';
 
 /// Edit Profile page – simple form to update basic user info.
@@ -325,7 +326,7 @@ class _EditProfileViewState extends State<EditProfileView> {
           snackPosition: SnackPosition.BOTTOM);
       Get.back();
     } catch (e) {
-      Get.snackbar('Gagal', 'Tidak dapat menyimpan profil: $e',
+      Get.snackbar('Gagal', ErrorHandler.getReadableMessage(e, tag: 'EditProfileView'),
           snackPosition: SnackPosition.BOTTOM);
     } finally {
       if (mounted) setState(() => _saving = false);

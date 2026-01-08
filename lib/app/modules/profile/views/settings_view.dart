@@ -4,6 +4,7 @@ import 'package:snappie_app/app/core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../core/helpers/error_handler.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/profile_controller.dart';
 import '../../shared/widgets/index.dart';
@@ -324,7 +325,7 @@ class SettingsView extends StatelessWidget {
                     } catch (e) {
                       Get.snackbar(
                         'Gagal',
-                        'Gagal mengubah avatar: $e',
+                        ErrorHandler.getReadableMessage(e, tag: 'SettingsView'),
                         snackPosition: SnackPosition.BOTTOM,
                         backgroundColor: Colors.red,
                         colorText: Colors.white,

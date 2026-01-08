@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../core/helpers/error_handler.dart';
 import '../../../data/models/social_model.dart';
 import '../../../data/repositories/social_repository_impl.dart';
 import '../../../routes/app_pages.dart';
@@ -297,7 +298,7 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
     } catch (e) {
       Get.snackbar(
         'Gagal',
-        'Gagal memproses permintaan: $e',
+        ErrorHandler.getReadableMessage(e, tag: 'FollowersFollowingView'),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

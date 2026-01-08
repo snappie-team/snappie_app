@@ -6,6 +6,7 @@ import 'package:snappie_app/app/modules/shared/widgets/_dialog_widgets/share_pro
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../core/helpers/error_handler.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/repositories/user_repository_impl.dart';
 import '../../../data/repositories/social_repository_impl.dart';
@@ -216,7 +217,7 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
     } catch (e) {
       Get.snackbar(
         'Gagal',
-        'Gagal memproses permintaan: $e',
+        ErrorHandler.getReadableMessage(e, tag: 'InviteFriendsView'),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
 import 'package:snappie_app/app/core/services/cloudinary_service.dart';
 import 'package:snappie_app/app/core/services/logger_service.dart';
+import 'package:snappie_app/app/core/helpers/error_handler.dart';
 import 'package:snappie_app/app/data/models/place_model.dart';
 import 'package:snappie_app/app/data/models/user_model.dart';
 import 'package:snappie_app/app/data/repositories/place_repository_impl.dart';
@@ -544,8 +545,8 @@ class _CreatePostViewState extends State<CreatePostView> {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
-        'Gagal memilih gambar: $e',
+        'Gagal',
+        ErrorHandler.getReadableMessage(e, tag: 'CreatePostView'),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error,
         colorText: AppColors.textOnPrimary,

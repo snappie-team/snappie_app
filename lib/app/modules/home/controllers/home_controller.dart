@@ -7,6 +7,7 @@ import '../../../data/repositories/social_repository_impl.dart';
 import '../../../data/repositories/user_repository_impl.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../core/helpers/error_handler.dart';
 
 enum PostFollowState {
   friend,
@@ -161,8 +162,7 @@ class HomeController extends GetxController {
 
       Logger.info('Home: Loaded ${loadedPosts.length} posts', 'Home');
     } catch (e) {
-      _errorMessage.value = 'Failed to load posts: $e';
-      Logger.error('Error loading home data', e, null, 'Home');
+      _errorMessage.value = ErrorHandler.getReadableMessage(e, tag: 'HomeController');
     }
 
     _setLoading(false);

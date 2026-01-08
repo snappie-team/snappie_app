@@ -9,97 +9,97 @@
 ## 🔴 CRITICAL - Bug Fixes dari QC
 
 ### 1. Like & Comment - Server Exception
-- [ ] **Fix Like Functionality**
-  - [ ] Debug server exception pada like/unlike
-  - [ ] Periksa endpoint URL dan request body format
-  - [ ] Periksa authentication header
-  - [ ] Implementasi optimistic UI update
-  - [ ] Location: `home_controller.dart`, `post_repository.dart`
+- [x] **Fix Like Functionality**
+  - [x] Debug server exception pada like/unlike
+  - [x] Periksa endpoint URL dan request body format
+  - [x] Periksa authentication header
+  - [x] Implementasi optimistic UI update
+  - [x] Location: `home_controller.dart`, `post_repository.dart`
 
-- [ ] **Fix Comment System**
-  - [ ] Debug server exception pada create comment
-  - [ ] Periksa endpoint dan payload format
-  - [ ] Test dengan Postman/Insomnia dulu
-  - [ ] Location: `post_detail_view.dart`, `post_repository.dart`
+- [x] **Fix Comment System**
+  - [x] Debug server exception pada create comment
+  - [x] Periksa endpoint dan payload format
+  - [x] Test dengan Postman/Insomnia dulu
+  - [x] Location: `post_detail_view.dart`, `post_repository.dart`
 
 ### 2. Mission Upload Failed
-- [ ] **Fix Upload Foto Check-in**
-  - [ ] Debug Cloudinary upload error
-  - [ ] Periksa file size limit
-  - [ ] Periksa Cloudinary credentials di .env
-  - [ ] Test upload ke Cloudinary secara terpisah
-  - [ ] Handle permission kamera dengan benar
-  - [ ] Location: `mission_controller.dart`, `cloudinary_service.dart`
+- [x] **Fix Upload Foto Check-in**
+  - [x] Debug Cloudinary upload error
+  - [x] Periksa file size limit
+  - [x] Periksa Cloudinary credentials di .env
+  - [x] Test upload ke Cloudinary secara terpisah
+  - [x] Handle permission kamera dengan benar
+  - [x] Location: `mission_controller.dart`, `cloudinary_service.dart`
 
 ### 3. Profile RenderSliver Error
-- [ ] **Fix Sliver Widget Error**
-  - [ ] Debug error "RenderSliver" di profile controller
-  - [ ] Periksa Obx() yang return null
-  - [ ] Pastikan sliver widget di context yang benar
-  - [ ] Periksa height constraint issues
-  - [ ] Location: `profile_view.dart`, `profile_controller.dart`
+- [x] **Fix Sliver Widget Error**
+  - [x] Debug error "RenderSliver" di profile controller
+  - [x] Periksa Obx() yang return null
+  - [x] Pastikan sliver widget di context yang benar
+  - [x] Periksa height constraint issues
+  - [x] Location: `profile_view.dart`, `profile_controller.dart`
 
 ### 4. Error Sanitization
-- [ ] **Jangan Expose Error ke UI**
-  - [ ] Buat helper function untuk sanitize error messages
-  - [ ] Gunakan generic message: "Terjadi kesalahan, silakan coba lagi"
-  - [ ] Log technical error untuk debugging saja
-  - [ ] Update semua catch blocks di controllers
-  - [ ] Location: All controllers and views
+- [x] **Jangan Expose Error ke UI**
+  - [x] Buat helper function untuk sanitize error messages
+  - [x] Gunakan generic message: "Terjadi kesalahan, silakan coba lagi"
+  - [x] Log technical error untuk debugging saja
+  - [x] Update semua catch blocks di controllers
+  - [x] Location: All controllers and views
 
 ### 5. Language Switch Not Working
-- [ ] **Fix Fitur Ganti Bahasa**
-  - [ ] Debug easy_localization setup
-  - [ ] Pastikan `context.setLocale()` dipanggil dengan benar
-  - [ ] Test apakah app perlu restart setelah ganti bahasa
-  - [ ] Periksa locale files (en.json, id.json)
-  - [ ] Location: `language_view.dart`, `main.dart`
+- [x] **Fix Fitur Ganti Bahasa**
+  - [x] Debug easy_localization setup
+  - [x] Pastikan `context.setLocale()` dipanggil dengan benar
+  - [x] Test apakah app perlu restart setelah ganti bahasa
+  - [x] Periksa locale files (en.json, id.json)
+  - [x] Location: `language_view.dart`, `main.dart`
 
 ---
 
 ## 🟡 HIGH PRIORITY - Feature Implementation
 
 ### 1. PostCard - More Button
-- [ ] **Implement More Button Actions**
-  - [ ] Hapus Post (jika owner)
-  - [ ] Report Post/User
-  - [ ] Ikuti/Berhenti mengikuti pengguna
-  - [ ] Salin link post
-  - [ ] Bagikan post
-  - [ ] Location: `post_card.dart`, `home_controller.dart`
+- [x] **Implement More Button Actions** *(more testing needed)*
+  - [x] Hapus Post (jika owner)
+  - [x] Report Post/User
+  - [x] Ikuti/Berhenti mengikuti pengguna
+  - [x] Salin link post
+  - [x] Bagikan post
+  - [x] Location: `post_card.dart`, `home_controller.dart`
 
 ### 2. Notifikasi - Dummy Data
-- [ ] **Implement Real Notifications**
-  - [ ] Buat `NotificationController`
-  - [ ] Integrasikan dengan gamification response dari backend
-  - [ ] Parse conditional response untuk notifikasi
-  - [ ] Implement pagination
-  - [ ] Tambah filter (read/unread)
-  - [ ] Mark as read functionality
-  - [ ] Location: `notifications_view.dart`, new `notification_controller.dart`
+- [x] **Implement Real Notifications** *(more testing needed)*
+  - [x] Buat `NotificationController`
+  - [x] Integrasikan dengan gamification response dari backend
+  - [x] Parse conditional response untuk notifikasi
+  - [x] Implement pagination
+  - [x] Tambah filter (read/unread)
+  - [x] Mark as read functionality
+  - [x] Location: `notifications_view.dart`, new `notification_controller.dart`
 
 ### 3. Reactive Data Refresh
-- [ ] **Auto-update setelah Create/Update**
-  - [ ] Refresh post list setelah create post berhasil
-  - [ ] Refresh comments setelah submit comment
-  - [ ] Gunakan callback atau `ever()` listener
-  - [ ] Implement optimistic updates
-  - [ ] Location: `home_controller.dart`, `post_detail_view.dart`
+- [x] **Auto-update setelah Create/Update** *(more testing needed)*
+  - [x] Refresh post list setelah create post berhasil
+  - [x] Refresh comments setelah submit comment
+  - [x] Gunakan callback atau `ever()` listener
+  - [x] Implement optimistic updates
+  - [x] Location: `home_controller.dart`, `post_detail_view.dart`
 
 ### 4. Registrasi - Place Value & Food Type Limit
-- [ ] **Fix Limit 3 Selection**
-  - [ ] Tambah feedback visual saat user pilih lebih dari 3
-  - [ ] Show snackbar/toast dengan pesan jelas
-  - [ ] Disable chip secara visual setelah 3 dipilih
-  - [ ] Location: `register_view.dart`, `onboarding_controller.dart`
+- [x] **Fix Limit 3 Selection** *(more testing needed)*
+  - [x] Tambah feedback visual saat user pilih lebih dari 3
+  - [x] Show snackbar/toast dengan pesan jelas
+  - [x] Disable chip secara visual setelah 3 dipilih
+  - [x] Location: `register_view.dart`, `onboarding_controller.dart`
 
 ### 5. Fitur Pilih Bingkai
-- [ ] **Implement Frame Selection**
-  - [ ] Buat UI untuk pilih bingkai foto
-  - [ ] Gunakan assets dari `assets/images/frames/`
-  - [ ] Apply frame ke foto sebelum upload
-  - [ ] Preview frame sebelum konfirmasi
-  - [ ] Location: `mission_photo_preview_view.dart`
+- [x] **Implement Frame Selection** *(more testing needed)*
+  - [x] Buat UI untuk pilih bingkai foto
+  - [x] Gunakan assets dari `assets/images/frames/`
+  - [x] Apply frame ke foto sebelum upload
+  - [x] Preview frame sebelum konfirmasi
+  - [x] Location: `mission_photo_preview_view.dart`
 
 ---
 

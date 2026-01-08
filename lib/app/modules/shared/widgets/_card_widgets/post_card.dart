@@ -17,13 +17,57 @@ import '../../../../data/models/post_model.dart';
 import '../../../../data/models/comment_model.dart';
 import '../../../../routes/app_pages.dart';
 
-class PostCard extends StatelessWidget {
+class PostCard extends StatefulWidget {
   final PostModel post;
 
   const PostCard({
     super.key,
     required this.post,
   });
+
+  @override
+  State<PostCard> createState() => _PostCardState();
+}
+
+class _PostCardState extends State<PostCard> {
+  // Local reactive state for like and comment
+  late RxInt _likesCount;
+  late RxInt _commentsCount;
+  late RxBool _isLiked;
+  late RxBool _isTogglingLike;
+  late RxList<CommentModel> _comments;
+
+  PostModel get post => widget.post;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeLocalState();
+  }
+
+  @override
+  void didUpdateWidget(PostCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Re-initialize if post data changed (e.g., from parent refresh)
+    if (oldWidget.post.id != widget.post.id ||
+        oldWidget.post.likesCount != widget.post.likesCount ||
+        oldWidget.post.commentsCount != widget.post.commentsCount) {
+      _initializeLocalState();
+    }
+  }
+
+  void _initializeLocalState() {
+    _likesCount = (post.likesCount ?? 0).obs;
+    _commentsCount = (post.commentsCount ?? 0).obs;
+    _comments = (post.comments ?? <CommentModel>[]).obs;
+    _isTogglingLike = false.obs;
+
+    // Check if current user has liked this post
+    final authService = Get.find<AuthService>();
+    final currentUserId = authService.userData?.id;
+    final hasLiked = post.likes?.any((like) => like.userId == currentUserId) ?? false;
+    _isLiked = hasLiked.obs;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -168,10 +212,6 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildPostImage(BuildContext context) {
-    // Use first image from imageUrls array
-    // final imageUrl = (post.imageUrls != null && post.imageUrls!.isNotEmpty) ? post.imageUrls!.first : 'https://statik.tempo.co/data/2023/12/19/id_1264597/1264597_720.jpg';
-    //  final imageUrls = post.imageUrls ?? [];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -192,7 +232,6 @@ class PostCard extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              // const SizedBox(width: 8),
               Spacer(),
               RectangleButtonWidget(
                 text: 'Lihat Tempat',
@@ -350,13 +389,13 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildLikeButton() {
-    final controller = Get.find<HomeController>();
     final postId = post.id;
 
     if (postId == null) return const SizedBox.shrink();
 
     return Obx(() {
-      final isLiked = controller.isPostLiked(postId);
+      final isLiked = _isLiked.value;
+      final likesCount = _likesCount.value;
 
       return GestureDetector(
         onTap: _handleLike,
@@ -369,7 +408,7 @@ class PostCard extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              '${post.likesCount ?? 0}',
+              '$likesCount',
               style: TextStyle(
                 color: AppColors.accent,
                 fontSize: 14,
@@ -382,26 +421,30 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildCommentButton() {
-    return GestureDetector(
-      onTap: _showComments,
-      child: Row(
-        children: [
-          Icon(
-            Icons.chat_bubble_outline,
-            color: AppColors.accent,
-            size: 24,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            '${post.commentsCount ?? 0}',
-            style: TextStyle(
+    return Obx(() {
+      final commentsCount = _commentsCount.value;
+
+      return GestureDetector(
+        onTap: _showComments,
+        child: Row(
+          children: [
+            Icon(
+              Icons.chat_bubble_outline,
               color: AppColors.accent,
-              fontSize: 14,
+              size: 24,
             ),
-          ),
-        ],
-      ),
-    );
+            const SizedBox(width: 4),
+            Text(
+              '$commentsCount',
+              style: TextStyle(
+                color: AppColors.accent,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildShareButton() {
@@ -416,7 +459,6 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildFollowButton() {
-    final controller = Get.find<HomeController>();
     final authService = Get.find<AuthService>();
 
     final userId = post.userId;
@@ -426,63 +468,69 @@ class PostCard extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return Obx(() {
-      final state = controller.getFollowState(userId);
-      final isOutline =
-          state == PostFollowState.friend || state == PostFollowState.following;
+    // Try to get HomeController for follow state (optional)
+    try {
+      final controller = Get.find<HomeController>();
+      return Obx(() {
+        final state = controller.getFollowState(userId);
+        final isOutline =
+            state == PostFollowState.friend || state == PostFollowState.following;
 
-      final label = switch (state) {
-        PostFollowState.friend => 'Teman',
-        PostFollowState.following => 'Mengikuti',
-        PostFollowState.followBack => 'Ikuti Balik',
-        PostFollowState.follow => 'Ikuti',
-      };
+        final label = switch (state) {
+          PostFollowState.friend => 'Teman',
+          PostFollowState.following => 'Mengikuti',
+          PostFollowState.followBack => 'Ikuti Balik',
+          PostFollowState.follow => 'Ikuti',
+        };
 
-      return RectangleButtonWidget(
-        text: label,
-        type: isOutline ? ButtonType.outline : ButtonType.primary,
-        backgroundColor: isOutline ? null : AppColors.accent,
-        textColor: isOutline ? AppColors.accent : AppColors.textOnPrimary,
-        borderColor: isOutline ? AppColors.accent : null,
-        size: RectangleButtonSize.small,
-        borderRadius: BorderRadius.circular(24),
-        onPressed: _handleFollow,
-      );
-    });
+        return RectangleButtonWidget(
+          text: label,
+          type: isOutline ? ButtonType.outline : ButtonType.primary,
+          backgroundColor: isOutline ? null : AppColors.accent,
+          textColor: isOutline ? AppColors.accent : AppColors.textOnPrimary,
+          borderColor: isOutline ? AppColors.accent : null,
+          size: RectangleButtonSize.small,
+          borderRadius: BorderRadius.circular(24),
+          onPressed: _handleFollow,
+        );
+      });
+    } catch (e) {
+      // HomeController not available, hide follow button
+      return const SizedBox.shrink();
+    }
   }
 
   Widget _buildSaveButton() {
-    final controller = Get.find<HomeController>();
     final postId = post.id;
 
     if (postId == null) return const SizedBox.shrink();
 
-    return Obx(() {
-      final isSaved = controller.isPostSaved(postId);
-      final isLoading = controller.isTogglingSavedPost(postId);
+    // Try to get HomeController for save state (optional)
+    try {
+      final controller = Get.find<HomeController>();
+      return Obx(() {
+        final isSaved = controller.isPostSaved(postId);
+        final isLoading = controller.isTogglingSavedPost(postId);
 
-      if (isLoading) {
-        return const SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        );
-      }
+        if (isLoading) {
+          return const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          );
+        }
 
-      // Inverse of follow button:
-      // - saved => full color
-      // - not saved => outline
-      if (isSaved) {
         return GestureDetector(
           onTap: _savePost,
           child: Icon(
-            Icons.bookmark,
+            isSaved ? Icons.bookmark : Icons.bookmark_border,
             color: AppColors.accent,
             size: 24,
           ),
         );
-      }
-
+      });
+    } catch (e) {
+      // HomeController not available, show default bookmark
       return GestureDetector(
         onTap: _savePost,
         child: Icon(
@@ -491,34 +539,64 @@ class PostCard extends StatelessWidget {
           size: 24,
         ),
       );
-    });
+    }
   }
 
   void _handleLike() async {
-    final controller = Get.find<HomeController>();
     final postId = post.id;
-    if (postId == null) return;
+    if (postId == null || _isTogglingLike.value) return;
+
+    _isTogglingLike.value = true;
+    final wasLiked = _isLiked.value;
+    final originalCount = _likesCount.value;
+
+    // Optimistic update - update local state immediately
+    _isLiked.value = !wasLiked;
+    _likesCount.value += wasLiked ? -1 : 1;
 
     try {
-      await controller.toggleLikePost(postId);
+      final postRepository = Get.find<PostRepository>();
+      await postRepository.toggleLikePost(postId);
+
+      // Fetch updated post to get accurate count from backend
+      final updatedPost = await postRepository.getPostById(postId);
+      
+      // Update with actual backend data
+      _likesCount.value = updatedPost.likesCount ?? 0;
+      
+      // Check if current user has liked (from backend data)
+      final authService = Get.find<AuthService>();
+      final currentUserId = authService.userData?.id;
+      _isLiked.value = updatedPost.likes?.any((like) => like.userId == currentUserId) ?? false;
+
+      // Also sync with HomeController if available (for consistency when switching tabs)
+      try {
+        final homeController = Get.find<HomeController>();
+        homeController.updatePost(updatedPost);
+      } catch (e) {
+        // HomeController not available, skip sync
+      }
     } catch (e) {
+      // Revert on failure
+      _isLiked.value = wasLiked;
+      _likesCount.value = originalCount;
+
+      Logger.error('Failed to toggle like', e, null, 'PostCard');
       Get.snackbar(
         'Gagal',
-        'Tidak dapat menyukai post: $e',
+        'Tidak dapat menyukai post, silakan coba lagi',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
+    } finally {
+      _isTogglingLike.value = false;
     }
   }
 
   void _showComments() {
     final TextEditingController commentController = TextEditingController();
     final authService = Get.find<AuthService>();
-
-    // Create reactive variable for comments
-    final RxList<CommentModel> comments = (post.comments ?? []).obs;
-    final RxInt commentsCount = (post.commentsCount ?? 0).obs;
 
     Get.bottomSheet(
       SafeArea(
@@ -552,7 +630,7 @@ class PostCard extends StatelessWidget {
                     margin: const EdgeInsets.fromLTRB(0, 0, 0, 12),
                     child: Center(
                       child: Text(
-                        'Komentar (${commentsCount.value})',
+                        'Komentar (${_commentsCount.value})',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -564,7 +642,7 @@ class PostCard extends StatelessWidget {
                 const Divider(height: 1),
                 Expanded(
                   child: Obx(
-                    () => comments.isEmpty
+                    () => _comments.isEmpty
                         ? Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -594,9 +672,9 @@ class PostCard extends StatelessWidget {
                           )
                         : ListView.builder(
                             padding: const EdgeInsets.all(16),
-                            itemCount: comments.length,
+                            itemCount: _comments.length,
                             itemBuilder: (context, index) {
-                              final comment = comments[index];
+                              final comment = _comments[index];
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 16),
                                 child: Row(
@@ -711,8 +789,7 @@ class PostCard extends StatelessWidget {
                             textInputAction: TextInputAction.send,
                             onSubmitted: (value) {
                               if (value.trim().isNotEmpty) {
-                                _addComment(
-                                    value.trim(), comments, commentsCount);
+                                _addComment(value.trim());
                                 commentController.clear();
                               }
                             },
@@ -722,8 +799,7 @@ class PostCard extends StatelessWidget {
                         IconButton(
                           onPressed: () {
                             if (commentController.text.trim().isNotEmpty) {
-                              _addComment(commentController.text.trim(),
-                                  comments, commentsCount);
+                              _addComment(commentController.text.trim());
                               commentController.clear();
                             }
                           },
@@ -773,9 +849,9 @@ class PostCard extends StatelessWidget {
   void _handleFollow() async {
     final userId = post.userId;
     if (userId == null) return;
-    final controller = Get.find<HomeController>();
 
     try {
+      final controller = Get.find<HomeController>();
       await controller.toggleFollowUser(userId);
       Get.snackbar(
         'Berhasil',
@@ -796,33 +872,42 @@ class PostCard extends StatelessWidget {
   }
 
   void _savePost() {
-    final controller = Get.find<HomeController>();
     final postId = post.id;
     if (postId == null) return;
 
-    controller.toggleSavePost(postId).then((_) {
-      Get.snackbar(
-        'Berhasil',
-        controller.isPostSaved(postId)
-            ? 'Postingan disimpan'
-            : 'Postingan dihapus dari tersimpan',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
-    }).catchError((e) {
+    try {
+      final controller = Get.find<HomeController>();
+      controller.toggleSavePost(postId).then((_) {
+        Get.snackbar(
+          'Berhasil',
+          controller.isPostSaved(postId)
+              ? 'Postingan disimpan'
+              : 'Postingan dihapus dari tersimpan',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      }).catchError((e) {
+        Get.snackbar(
+          'Gagal',
+          'Tidak dapat menyimpan: $e',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      });
+    } catch (e) {
       Get.snackbar(
         'Gagal',
-        'Tidak dapat menyimpan: $e',
+        'Fitur simpan tidak tersedia',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-    });
+    }
   }
 
-  void _addComment(String comment, RxList<CommentModel> comments,
-      RxInt commentsCount) async {
+  void _addComment(String comment) async {
     final postId = post.id;
     if (postId == null || comment.trim().isEmpty) return;
 
@@ -835,16 +920,16 @@ class PostCard extends StatelessWidget {
       // Fetch updated post data to get latest comments and count
       final updatedPost = await postRepository.getPostById(postId);
 
-      // Update reactive variables
-      comments.value = updatedPost.comments ?? [];
-      commentsCount.value = updatedPost.commentsCount ?? 0;
+      // Update local reactive state - this will update UI immediately
+      _comments.value = updatedPost.comments ?? [];
+      _commentsCount.value = updatedPost.commentsCount ?? 0;
 
-      // Update post in home controller if available
+      // Also sync with HomeController if available
       try {
         final homeController = Get.find<HomeController>();
         homeController.updatePost(updatedPost);
       } catch (e) {
-        Logger.warning('HomeController not found, skipping update', 'PostCard');
+        Logger.warning('HomeController not found, skipping sync', 'PostCard');
       }
 
       Get.snackbar(

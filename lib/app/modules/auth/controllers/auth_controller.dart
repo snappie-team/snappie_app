@@ -118,6 +118,39 @@ class AuthController extends GetxController {
     super.onClose();
   }
 
+  void _showSnackbar(String title, String message, Color backgroundColor) {
+    // Check if overlay is available before showing snackbar
+    try {
+      if (Get.overlayContext != null) {
+        Get.snackbar(
+          title,
+          message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: backgroundColor,
+          colorText: Colors.white,
+        );
+      } else {
+        // If no overlay available, schedule it for next frame
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (Get.overlayContext != null) {
+            Get.snackbar(
+              title,
+              message,
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: backgroundColor,
+              colorText: Colors.white,
+            );
+          } else {
+            Logger.warning(
+                'Cannot show snackbar: $title - $message', 'AuthController');
+          }
+        });
+      }
+    } catch (e) {
+      Logger.error('Error showing snackbar', e, null, 'AuthController');
+    }
+  }
+
   void _loadGoogleUserData() {
     try {
       // Get user data from Google Auth Service
@@ -131,12 +164,10 @@ class AuthController extends GetxController {
       }
     } catch (e) {
       Logger.error('Error loading Google user data', e, null, 'AuthController');
-      Get.snackbar(
+      _showSnackbar(
         'Error',
         'Google Sign In failed. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        Colors.red,
       );
     }
   }
@@ -150,12 +181,10 @@ class AuthController extends GetxController {
       if (result.success) {
         _isLoggedIn.value = true;
 
-        Get.snackbar(
+        _showSnackbar(
           'Success',
           'Google Sign In successful. wait a minute sir',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
+          Colors.green,
         );
 
         // Navigate to main app
@@ -173,40 +202,32 @@ class AuthController extends GetxController {
           Get.toNamed(AppPages.REGISTER);
           break;
         case AuthErrorType.hasActiveSession:
-          Get.snackbar(
+          _showSnackbar(
             'Session Active',
             result.message ?? 'Masih ada sesi aktif. Silakan coba lagi.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.orange,
-            colorText: Colors.white,
+            Colors.orange,
           );
           break;
         case AuthErrorType.network:
-          Get.snackbar(
+          _showSnackbar(
             'Network Error',
             'Please check your connection and try again.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
+            Colors.red,
           );
           break;
         case AuthErrorType.unknown:
-          Get.snackbar(
+          _showSnackbar(
             'Error',
             result.message ?? 'Google Sign In failed. Please try again.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
+            Colors.red,
           );
           break;
       }
     } catch (e) {
-      Get.snackbar(
+      _showSnackbar(
         'Error',
         'Network error: Please check your connection and try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        Colors.red,
       );
     }
 
@@ -222,12 +243,10 @@ class AuthController extends GetxController {
       if (result.success) {
         _isLoggedIn.value = true;
 
-        Get.snackbar(
+        _showSnackbar(
           'Success',
           'User already created.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
+          Colors.green,
         );
 
         // Navigate to main app
@@ -241,37 +260,29 @@ class AuthController extends GetxController {
         _loadGoogleUserData();
         Get.toNamed(AppPages.REGISTER);
       } else if (result.errorType == AuthErrorType.hasActiveSession) {
-        Get.snackbar(
+        _showSnackbar(
           'Session Active',
           result.message ?? 'Masih ada sesi aktif. Silakan coba lagi.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
+          Colors.orange,
         );
       } else if (result.errorType == AuthErrorType.network) {
-        Get.snackbar(
+        _showSnackbar(
           'Network Error',
           'Please check your connection and try again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+          Colors.red,
         );
       } else {
-        Get.snackbar(
+        _showSnackbar(
           'Error',
           result.message ?? 'Google Sign In failed. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+          Colors.red,
         );
       }
     } catch (e) {
-      Get.snackbar(
+      _showSnackbar(
         'Error',
         'Network error: Please check your connection and try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        Colors.red,
       );
     }
 
@@ -288,13 +299,10 @@ class AuthController extends GetxController {
     _setLoading(true);
 
     // Show info snackbar
-    Get.snackbar(
+    _showSnackbar(
       'Processing',
       'Mendaftarkan akun Anda, mohon tunggu...',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.blue,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 3),
+      Colors.blue,
     );
 
     try {
@@ -313,13 +321,10 @@ class AuthController extends GetxController {
         // Set loading false before navigation
         _setLoading(false);
 
-        Get.snackbar(
+        _showSnackbar(
           'Berhasil',
           'Registrasi berhasil! Selamat datang di Snappie',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 2),
+          Colors.green,
         );
 
         // Small delay before navigation to ensure everything is ready
@@ -330,24 +335,18 @@ class AuthController extends GetxController {
 
         return; // Exit early to avoid setting loading again
       } else {
-        Get.snackbar(
+        _showSnackbar(
           'Gagal',
           'Registrasi gagal. Silakan coba lagi.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3),
+          Colors.red,
         );
       }
     } catch (e, stackTrace) {
       Logger.error('Registration error', e, stackTrace, 'AuthController');
-      Get.snackbar(
+      _showSnackbar(
         'Error',
         'Server membutuhkan waktu lama atau koneksi bermasalah. Silakan coba lagi.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 4),
+        Colors.red,
       );
     }
 
@@ -357,34 +356,28 @@ class AuthController extends GetxController {
   bool _validateForm() {
     if (firstnameController.text.trim().isEmpty ||
         lastnameController.text.trim().isEmpty) {
-      Get.snackbar(
+      _showSnackbar(
         'Error',
         'Please enter your full name',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        Colors.red,
       );
       return false;
     }
 
     if (usernameController.text.trim().isEmpty) {
-      Get.snackbar(
+      _showSnackbar(
         'Error',
         'Please enter a username',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        Colors.red,
       );
       return false;
     }
 
     if (registerEmailController.text.trim().isEmpty) {
-      Get.snackbar(
+      _showSnackbar(
         'Error',
         'Email is required',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        Colors.red,
       );
       return false;
     }
@@ -392,72 +385,60 @@ class AuthController extends GetxController {
     // Basic username validation
     final username = usernameController.text.trim();
     if (username.length < 3) {
-      Get.snackbar(
+      _showSnackbar(
         'Error',
         'Username must be at least 3 characters long',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        Colors.red,
       );
       return false;
     }
 
     // Check for valid username characters
     if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(username)) {
-      Get.snackbar(
+      _showSnackbar(
         'Error',
         'Username can only contain letters, numbers, and underscores',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        Colors.red,
       );
       return false;
     }
 
     // Validate gender
     if (_selectedGender.value.isEmpty) {
-      Get.snackbar(
+      _showSnackbar(
         'Error',
         'Please select your gender',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        Colors.red,
       );
       return false;
     }
 
     // Validate avatar
     if (_selectedAvatar.value.isEmpty) {
-      Get.snackbar(
+      _showSnackbar(
         'Error',
         'Please select an avatar',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        Colors.red,
       );
       return false;
     }
 
     // Validate food types (minimum 3)
     if (_selectedFoodTypes.length < 3) {
-      Get.snackbar(
+      _showSnackbar(
         'Error',
         'Please select at least 3 food types',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        Colors.red,
       );
       return false;
     }
 
     // Validate place values (minimum 3)
     if (_selectedPlaceValues.length < 3) {
-      Get.snackbar(
+      _showSnackbar(
         'Error',
         'Please select at least 3 place values',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        Colors.red,
       );
       return false;
     }
@@ -470,12 +451,10 @@ class AuthController extends GetxController {
     googleAuthService.signOut();
     Get.toNamed(AppPages.LOGIN);
 
-    Get.snackbar(
+    _showSnackbar(
       'Cancelled',
       'Registration cancelled',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.orange,
-      colorText: Colors.white,
+      Colors.orange,
     );
   }
 
@@ -484,12 +463,10 @@ class AuthController extends GetxController {
   void skipLogin() {
     // For development - skip authentication
     _isLoggedIn.value = true;
-    Get.snackbar(
+    _showSnackbar(
       'Development Mode',
       'Login skipped for development',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.orange,
-      colorText: Colors.white,
+      Colors.orange,
     );
 
     // Navigate to main app
@@ -501,12 +478,10 @@ class AuthController extends GetxController {
     _isLoggedIn.value = false;
     emailController.clear();
 
-    Get.snackbar(
+    _showSnackbar(
       'Logged Out',
       'You have been logged out',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.blue,
-      colorText: Colors.white,
+      Colors.blue,
     );
 
     // Navigate back to login
@@ -566,13 +541,10 @@ class AuthController extends GetxController {
     } else {
       // Check max limit
       if (_selectedFoodTypes.length >= maxSelectionLimit) {
-        Get.snackbar(
+        _showSnackbar(
           'Batas Tercapai',
           'Kamu hanya dapat memilih maksimal $maxSelectionLimit tipe kuliner',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 2),
+          Colors.orange,
         );
         return;
       }
@@ -591,13 +563,10 @@ class AuthController extends GetxController {
     } else {
       // Check max limit
       if (_selectedPlaceValues.length >= maxSelectionLimit) {
-        Get.snackbar(
+        _showSnackbar(
           'Batas Tercapai',
           'Kamu hanya dapat memilih maksimal $maxSelectionLimit nilai tempat',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 2),
+          Colors.orange,
         );
         return;
       }

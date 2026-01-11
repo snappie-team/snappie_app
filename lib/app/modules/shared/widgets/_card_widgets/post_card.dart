@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
 import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:snappie_app/app/core/services/logger_service.dart';
 import 'package:snappie_app/app/data/repositories/place_repository_impl.dart';
 import 'package:snappie_app/app/data/repositories/post_repository_impl.dart';
 import 'package:snappie_app/app/modules/home/controllers/home_controller.dart';
-import 'package:snappie_app/app/modules/shared/widgets/_form_widgets/rectangle_button_widget.dart';
-import '../_display_widgets/avatar_widget.dart';
-import '../_display_widgets/fullscreen_image_viewer.dart';
-import '../_navigation_widgets/button_widget.dart';
+import 'package:snappie_app/app/modules/shared/widgets/index.dart';
 import '../../../../core/utils/time_formatter.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../data/models/post_model.dart';
@@ -145,14 +143,15 @@ class _PostCardState extends State<PostCard> {
     final isOwner = post.userId == currentUserId;
 
     return PopupMenuButton<String>(
-      icon: Icon(
-        Icons.more_vert_outlined,
-        color: AppColors.textPrimary,
+      icon: AppIcon(
+        AppAssets.iconsSvg.moreDots,
+        color: AppColors.textSecondary,
+        size: 18,
       ),
-      offset: const Offset(-140, 0), // Muncul di kiri button
+      offset: const Offset(-48, 0), // Muncul di kiri button
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: AppColors.textSecondary)),
       color: Colors.white,
       elevation: 8,
       onSelected: (value) {
@@ -169,38 +168,25 @@ class _PostCardState extends State<PostCard> {
         }
       },
       itemBuilder: (context) => [
-        PopupMenuItem<String>(
-          value: 'profile',
-          child: Row(
-            children: [
-              Icon(Icons.person_outline,
-                  color: AppColors.textPrimary, size: 20),
-              const SizedBox(width: 12),
-              const Text('Lihat Profil'),
-            ],
-          ),
-        ),
-        PopupMenuItem<String>(
-          value: 'report',
-          child: Row(
-            children: [
-              Icon(Icons.flag_outlined, color: Colors.orange, size: 20),
-              const SizedBox(width: 12),
-              const Text('Laporkan', style: TextStyle(color: Colors.orange)),
-            ],
-          ),
-        ),
-        if (isOwner)
+        if (!isOwner) ...[
           PopupMenuItem<String>(
-            value: 'delete',
-            child: Row(
-              children: [
-                Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                const SizedBox(width: 12),
-                const Text('Hapus Post', style: TextStyle(color: Colors.red)),
-              ],
-            ),
+              value: 'profile',
+              child: Text('Lihat Profil',
+                  style: TextStyle(color: AppColors.textSecondary))),
+          const PopupMenuDivider(),
+          PopupMenuItem<String>(
+            value: 'report',
+            child: Text('Laporkan',
+                style: TextStyle(color: AppColors.textSecondary)),
           ),
+        ],
+        if (isOwner) ...[
+          // const PopupMenuDivider(),
+          PopupMenuItem<String>(
+              value: 'delete',
+              child: Text('Hapus Post',
+                  style: TextStyle(color: AppColors.textSecondary))),
+        ],
       ],
     );
   }
@@ -219,13 +205,7 @@ class _PostCardState extends State<PostCard> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: Row(
-          children: [
-            Icon(Icons.flag_outlined, color: Colors.orange),
-            const SizedBox(width: 8),
-            const Text('Laporkan Post'),
-          ],
-        ),
+        title: Text('Laporkan Post', style: TextStyle(color: AppColors.error)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,7 +248,8 @@ class _PostCardState extends State<PostCard> {
         ),
         title: Row(
           children: [
-            Icon(Icons.delete_outline, color: Colors.red),
+            // TODO: Replace with svg delete icon asset
+            Icon(Icons.delete_outline, color: AppColors.error),
             const SizedBox(width: 8),
             const Text('Hapus Post'),
           ],
@@ -411,25 +392,34 @@ class _PostCardState extends State<PostCard> {
 
     // If only one image, show it without carousel
     if (imageUrls.length == 1) {
-      return Container(
-        height: imageHeight,
-        width: double.infinity,
-        child: ClipRRect(
-          child: Image.network(
-            imageUrls.first,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                color: AppColors.background,
-                child: Center(
-                  child: Icon(
-                    Icons.restaurant,
-                    color: AppColors.textTertiary,
-                    size: imageHeight * 0.3,
+      return GestureDetector(
+        onTap: () {
+          FullscreenImageViewer.show(
+            context: context,
+            imageUrls: imageUrls,
+            initialIndex: 0,
+          );
+        },
+        child: Container(
+          height: imageHeight,
+          width: double.infinity,
+          child: ClipRRect(
+            child: Image.network(
+              imageUrls.first,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: AppColors.background,
+                  child: Center(
+                    child: Icon(
+                      Icons.restaurant,
+                      color: AppColors.textTertiary,
+                      size: imageHeight * 0.3,
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       );
@@ -542,10 +532,12 @@ class _PostCardState extends State<PostCard> {
         onTap: _handleLike,
         child: Row(
           children: [
-            Icon(
-              isLiked ? Icons.favorite : Icons.favorite_border,
-              color: AppColors.accent,
+            AppIcon(
+              isLiked
+                  ? AppAssets.iconsSvg.loveActive
+                  : AppAssets.iconsSvg.loveInactive,
               size: 24,
+              color: AppColors.accent,
             ),
             const SizedBox(width: 4),
             Text(
@@ -569,8 +561,8 @@ class _PostCardState extends State<PostCard> {
         onTap: _showComments,
         child: Row(
           children: [
-            Icon(
-              Icons.chat_bubble_outline,
+            AppIcon(
+              AppAssets.iconsSvg.comment,
               color: AppColors.accent,
               size: 24,
             ),
@@ -591,8 +583,8 @@ class _PostCardState extends State<PostCard> {
   Widget _buildShareButton() {
     return GestureDetector(
       onTap: _showShare,
-      child: Icon(
-        Icons.share_outlined,
+      child: AppIcon(
+        AppAssets.iconsSvg.share,
         color: AppColors.accent,
         size: 24,
       ),
@@ -663,8 +655,10 @@ class _PostCardState extends State<PostCard> {
 
         return GestureDetector(
           onTap: _savePost,
-          child: Icon(
-            isSaved ? Icons.bookmark : Icons.bookmark_border,
+          child: AppIcon(
+            isSaved
+                ? AppAssets.iconsSvg.saveActive
+                : AppAssets.iconsSvg.saveInactive,
             color: AppColors.accent,
             size: 24,
           ),
@@ -674,8 +668,8 @@ class _PostCardState extends State<PostCard> {
       // HomeController not available, show default bookmark
       return GestureDetector(
         onTap: _savePost,
-        child: Icon(
-          Icons.bookmark_border,
+        child: AppIcon(
+          AppAssets.iconsSvg.saveInactive,
           color: AppColors.accent,
           size: 24,
         ),
@@ -739,7 +733,6 @@ class _PostCardState extends State<PostCard> {
 
   void _showComments() {
     final TextEditingController commentController = TextEditingController();
-    final authService = Get.find<AuthService>();
 
     Get.bottomSheet(
       SafeArea(
@@ -790,8 +783,8 @@ class _PostCardState extends State<PostCard> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.chat_bubble_outline,
+                                AppIcon(
+                                  AppAssets.iconsSvg.comment,
                                   size: 48,
                                   color: AppColors.textSecondary,
                                 ),
@@ -875,80 +868,66 @@ class _PostCardState extends State<PostCard> {
                           ),
                   ),
                 ),
-                Container(
+                Padding(
                   padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[50],
-                    border: Border(
-                      top: BorderSide(
-                        color: Colors.grey[200]!,
-                        width: 1,
-                      ),
-                    ),
-                  ),
                   child: SafeArea(
                     top: false,
-                    child: Row(
-                      children: [
-                        AvatarWidget(
-                          imageUrl: authService.userData?.imageUrl,
-                          size: AvatarSize.small,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: AppColors.primary,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: TextField(
-                            controller: commentController,
-                            decoration: InputDecoration(
-                              hintText: 'Tulis komentar...',
-                              hintStyle: TextStyle(
-                                color: Colors.grey[500],
-                                fontSize: 14,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(24),
-                                borderSide: BorderSide(
-                                  color: Colors.grey[300]!,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: commentController,
+                              decoration: InputDecoration(
+                                hintText: 'Tulis komentar...',
+                                hintStyle: TextStyle(
+                                  color: Colors.grey[500],
+                                  fontSize: 14,
                                 ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(24),
-                                borderSide: BorderSide(
-                                  color: Colors.grey[300]!,
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 10,
                                 ),
+                                isDense: true,
                               ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(24),
-                                borderSide: BorderSide(
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
-                              ),
-                              isDense: true,
+                              maxLines: 1,
+                              textInputAction: TextInputAction.send,
+                              onSubmitted: (value) {
+                                if (value.trim().isNotEmpty) {
+                                  _addComment(value.trim());
+                                  commentController.clear();
+                                }
+                              },
                             ),
-                            maxLines: 1,
-                            textInputAction: TextInputAction.send,
-                            onSubmitted: (value) {
-                              if (value.trim().isNotEmpty) {
-                                _addComment(value.trim());
+                          ),
+                          const SizedBox(width: 8),
+                          TextButton(
+                            onPressed: () {
+                              if (commentController.text.trim().isNotEmpty) {
+                                _addComment(commentController.text.trim());
                                 commentController.clear();
                               }
                             },
+                            child: Text(
+                              'Kirim',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          onPressed: () {
-                            if (commentController.text.trim().isNotEmpty) {
-                              _addComment(commentController.text.trim());
-                              commentController.clear();
-                            }
-                          },
-                          icon: Icon(Icons.send, color: AppColors.primary),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),

@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class NavItem extends StatelessWidget {
-  final IconData icon;
-  final IconData activeIcon;
+  /// Icon widget for inactive state (use AppIcon)
+  final Widget inactiveIcon;
+  
+  /// Icon widget for active state (use AppIcon)
+  final Widget activeIcon;
+  
   final String label;
   final bool isActive;
   final VoidCallback onTap;
 
   const NavItem({
     super.key,
-    required this.icon,
+    required this.inactiveIcon,
     required this.activeIcon,
     required this.label,
     required this.isActive,
@@ -19,6 +23,8 @@ class NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = isActive ? AppColors.primary : AppColors.textSecondary;
+    
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -27,16 +33,15 @@ class NavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              isActive ? activeIcon : icon,
-              color: isActive ? AppColors.primary : AppColors.textSecondary,
-              size: 24,
+            IconTheme(
+              data: IconThemeData(color: color, size: 24),
+              child: isActive ? activeIcon : inactiveIcon,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                color: isActive ? AppColors.primary : AppColors.textSecondary,
+                color: color,
                 fontSize: 12,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
               ),

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
 import 'package:snappie_app/app/core/services/cloudinary_service.dart';
 import 'package:snappie_app/app/core/services/logger_service.dart';
@@ -34,7 +35,6 @@ class _CreatePostViewState extends State<CreatePostView> {
   final _pageController = PageController();
   int _currentImageIndex = 0;
   static const int _maxImages = 5;
-  bool _showDetailedActions = false;
 
   UserModel? _userData;
   List<PlaceModel> _places = [];
@@ -68,6 +68,11 @@ class _CreatePostViewState extends State<CreatePostView> {
       });
     }
 
+    // Add listener to text controller to update button state
+    _contentController.addListener(() {
+      setState(() {});
+    });
+
     _loadData();
     // _loadPlaces();
   }
@@ -77,6 +82,12 @@ class _CreatePostViewState extends State<CreatePostView> {
     _contentController.dispose();
     _pageController.dispose();
     super.dispose();
+  }
+
+  bool get _isFormValid {
+    return _contentController.text.trim().isNotEmpty &&
+        _imageFiles.isNotEmpty &&
+        _selectedPlace != null;
   }
 
   Future<void> _loadData() async {
@@ -99,36 +110,6 @@ class _CreatePostViewState extends State<CreatePostView> {
   Widget build(BuildContext context) {
     return ScaffoldFrame.detail(
       title: 'Buat Postingan',
-      actions: [
-        ElevatedButton(
-          onPressed: _isLoading ? null : _submitPost,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.textOnPrimary,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(99),
-            ),
-          ),
-          child: _isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : Text(
-                  'Posting',
-                  style: TextStyle(
-                    color: AppColors.textOnPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-        ),
-        const SizedBox(width: 16),
-      ],
       slivers: [
         SliverFillRemaining(
           hasScrollBody: false,
@@ -138,248 +119,287 @@ class _CreatePostViewState extends State<CreatePostView> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppColors.backgroundContainer,
-                border: Border(
-                  top: BorderSide(color: AppColors.borderLight, width: 1),
-                ),
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // User info and content
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Avatar
-                          AvatarWidget(
-                            imageUrl: _userData?.imageUrl ?? '',
-                            size: AvatarSize.medium,
-                          ),
-                          const SizedBox(width: 12),
-                          // Content input
-                          Expanded(
-                            child: TextField(
-                              controller: _contentController,
-                              maxLines: null,
-                              decoration: InputDecoration(
-                                hintText: 'Apa yang kamu ingin bagikan?',
-                                hintStyle:
-                                    TextStyle(color: AppColors.textSecondary),
-                                border: InputBorder.none,
-                              ),
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    border: Border(
+                      top: BorderSide(color: AppColors.borderLight, width: 1),
                     ),
-
-                    // Image carousel
-                    if (_imageFiles.isNotEmpty)
-                      Container(
-                        width: double.infinity,
-                        height: 400,
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        color: AppColors.background,
-                        child: Stack(
-                          children: [
-                            PageView.builder(
-                              controller: _pageController,
-                              onPageChanged: (index) {
-                                setState(() => _currentImageIndex = index);
-                              },
-                              itemCount: _imageFiles.length,
-                              itemBuilder: (context, index) {
-                                return Image.file(
-                                  _imageFiles[index],
-                                  width: double.infinity,
-                                  fit: BoxFit.contain,
-                                );
-                              },
-                            ),
-                            // Image counter
-                            if (_imageFiles.length > 1)
-                              Positioned(
-                                top: 8,
-                                left: 8,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black54,
-                                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // User info and content
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Avatar
+                              AvatarWidget(
+                                imageUrl: _userData?.imageUrl ?? '',
+                                size: AvatarSize.medium,
+                              ),
+                              const SizedBox(width: 12),
+                              // Content input
+                              Expanded(
+                                child: TextField(
+                                  controller: _contentController,
+                                  maxLines: null,
+                                  decoration: InputDecoration(
+                                    hintText: 'Apa yang kamu ingin bagikan?',
+                                    hintStyle: TextStyle(
+                                        color: AppColors.textSecondary),
+                                    border: InputBorder.none,
                                   ),
-                                  child: Text(
-                                    '${_currentImageIndex + 1}/${_imageFiles.length}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Image carousel
+                        if (_imageFiles.isNotEmpty)
+                          Container(
+                            width: double.infinity,
+                            height: 400,
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            color: AppColors.background,
+                            child: Stack(
+                              children: [
+                                PageView.builder(
+                                  controller: _pageController,
+                                  onPageChanged: (index) {
+                                    setState(() => _currentImageIndex = index);
+                                  },
+                                  itemCount: _imageFiles.length,
+                                  itemBuilder: (context, index) {
+                                    return Image.file(
+                                      _imageFiles[index],
+                                      width: double.infinity,
+                                      fit: BoxFit.contain,
+                                    );
+                                  },
+                                ),
+                                // Image counter
+                                if (_imageFiles.length > 1)
+                                  Positioned(
+                                    top: 8,
+                                    left: 8,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black54,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        '${_currentImageIndex + 1}/${_imageFiles.length}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                // Delete button
+                                Positioned(
+                                  top: 8,
+                                  right: 8,
+                                  child: IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _imageFiles
+                                            .removeAt(_currentImageIndex);
+                                        if (_currentImageIndex >=
+                                                _imageFiles.length &&
+                                            _currentImageIndex > 0) {
+                                          _currentImageIndex--;
+                                          _pageController
+                                              .jumpToPage(_currentImageIndex);
+                                        }
+                                      });
+                                    },
+                                    icon: AppIcon(
+                                      AppAssets.iconsSvg.close,
+                                      color: AppColors.textOnPrimary,
+                                    ),
+                                    style: IconButton.styleFrom(
+                                      backgroundColor: Colors.black54,
+                                      foregroundColor: Colors.white,
                                     ),
                                   ),
                                 ),
+                              ],
+                            ),
+                          ),
+
+                        // Selected place chip
+                        if (_selectedPlace != null)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            child: Chip(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(99),
                               ),
-                            // Delete button
-                            Positioned(
-                              top: 8,
-                              right: 8,
-                              child: IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _imageFiles.removeAt(_currentImageIndex);
-                                    if (_currentImageIndex >=
-                                            _imageFiles.length &&
-                                        _currentImageIndex > 0) {
-                                      _currentImageIndex--;
-                                      _pageController
-                                          .jumpToPage(_currentImageIndex);
-                                    }
-                                  });
-                                },
-                                icon: const Icon(Icons.close),
-                                style: IconButton.styleFrom(
-                                  backgroundColor: Colors.black54,
-                                  foregroundColor: Colors.white,
+                              label: Text(
+                                _selectedPlace!.name ?? 'Unknown',
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 14,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                    // Selected place chip
-                    if (_selectedPlace != null)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        child: Chip(
-                          avatar: Icon(
-                            Icons.place,
-                            color: AppColors.primary,
-                            size: 18,
-                          ),
-                          label: Text(
-                            _selectedPlace!.name ?? 'Unknown',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 14,
+                              deleteIcon: AppIcon(
+                                AppAssets.iconsSvg.close,
+                                size: 18,
+                                color: AppColors.primary,
+                              ),
+                              onDeleted: () =>
+                                  setState(() => _selectedPlace = null),
+                              backgroundColor: AppColors.backgroundContainer,
+                              side: BorderSide(
+                                color: AppColors.primary,
+                                width: 1,
+                              ),
                             ),
                           ),
-                          deleteIcon: Icon(
-                            Icons.close,
-                            size: 18,
-                            color: AppColors.primary,
+
+                        const SizedBox(height: 80), // Space for bottom bar
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Bottom action bar
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundContainer,
+                  // border: Border(
+                  //   top: BorderSide(color: AppColors.borderLight, width: 1),
+                  // ),
+                ),
+                child: Column(
+                  children: [
+                    // Foto/Video option
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.backgroundContainer,
+                        border: Border.all(color: AppColors.borderLight),
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.shadowDark,
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
                           ),
-                          onDeleted: () =>
-                              setState(() => _selectedPlace = null),
-                          backgroundColor: AppColors.backgroundContainer,
-                          side: BorderSide(
-                            color: AppColors.primary,
-                            width: 1,
+                        ],
+                      ),
+                      child: ListTile(
+                        leading: AppIcon(
+                          AppAssets.iconsSvg.video,
+                          color: AppColors.primary,
+                        ),
+                        title: Text(
+                          'Foto/Video',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 16,
                           ),
                         ),
+                        trailing: AppIcon(
+                          AppAssets.iconsSvg.moreOption3,
+                          color: AppColors.textSecondary,
+                        ),
+                        onTap: _pickImage,
                       ),
-
-                    const SizedBox(height: 80), // Space for bottom bar
+                    ),
+                    // Lokasi option
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.backgroundContainer,
+                        border: Border.all(color: AppColors.borderLight),
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.shadowDark,
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ListTile(
+                        leading: AppIcon(
+                          AppAssets.iconsSvg.location,
+                          color: AppColors.error,
+                        ),
+                        title: Text(
+                          'Lokasi',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 16,
+                          ),
+                        ),
+                        trailing: AppIcon(
+                          AppAssets.iconsSvg.moreOption3,
+                          color: AppColors.textSecondary,
+                        ),
+                        onTap: _showPlaceSelection,
+                      ),
+                    ),
+                    // Tombol Unggah
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: (_isLoading || !_isFormValid)
+                              ? null
+                              : _submitPost,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: AppColors.textOnPrimary,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(99),
+                            ),
+                            disabledBackgroundColor:
+                                AppColors.textSecondary.withOpacity(0.3),
+                            disabledForegroundColor: AppColors.textSecondary,
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  'Unggah',
+                                  style: TextStyle(
+                                    color: AppColors.textOnPrimary,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ),
+            ],
           ),
-
-          // Bottom action bar
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              border: Border(
-                top: BorderSide(color: AppColors.borderLight, width: 1),
-              ),
-            ),
-            child: Row(
-              children: [
-                if (!_showDetailedActions) ...[
-                  IconButton(
-                    onPressed: _pickImage,
-                    icon: Icon(Icons.image, color: AppColors.primary),
-                    tooltip: 'Tambah Foto',
-                  ),
-                  IconButton(
-                    onPressed: _showPlaceSelection,
-                    icon: Icon(Icons.place, color: AppColors.error),
-                    tooltip: 'Pilih Tempat',
-                  ),
-                ] else ...[
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.primary),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      child: GestureDetector(
-                        onTap: _pickImage,
-                        child: Column(
-                          children: [
-                            Icon(Icons.image, color: AppColors.primary),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Foto/Video',
-                              style: TextStyle(color: AppColors.textPrimary),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.error),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      child: GestureDetector(
-                        onTap: _showPlaceSelection,
-                        child: Column(
-                          children: [
-                            Icon(Icons.place, color: AppColors.error),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Lokasi',
-                              style: TextStyle(color: AppColors.textPrimary),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-                const Spacer(),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _showDetailedActions = !_showDetailedActions;
-                    });
-                  },
-                    icon: Icon(
-                    _showDetailedActions
-                      ? Icons.keyboard_arrow_down
-                      : Icons.keyboard_arrow_up,
-                    color: AppColors.textSecondary,
-                    ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),)
+        )
       ],
     );
   }
@@ -389,7 +409,7 @@ class _CreatePostViewState extends State<CreatePostView> {
       Container(
         height: Get.height * 0.7,
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: AppColors.backgroundContainer,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -415,7 +435,10 @@ class _CreatePostViewState extends State<CreatePostView> {
                   ),
                   IconButton(
                     onPressed: () => Get.back(),
-                    icon: const Icon(Icons.close),
+                    icon: AppIcon(
+                      AppAssets.iconsSvg.close,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -435,41 +458,6 @@ class _CreatePostViewState extends State<CreatePostView> {
                           itemBuilder: (context, index) {
                             final place = _places[index];
                             return ListTile(
-                              leading: place.imageUrls?.isNotEmpty == true
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.network(
-                                        place.imageUrls!.first,
-                                        width: 50,
-                                        height: 50,
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                          return Container(
-                                            width: 50,
-                                            height: 50,
-                                            color:
-                                                AppColors.backgroundContainer,
-                                            child: Icon(
-                                              Icons.restaurant,
-                                              color: AppColors.textSecondary,
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    )
-                                  : Container(
-                                      width: 50,
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.backgroundContainer,
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Icon(
-                                        Icons.restaurant,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
                               title: Text(
                                 place.name ?? 'Unknown',
                                 style: TextStyle(
@@ -584,16 +572,17 @@ class _CreatePostViewState extends State<CreatePostView> {
       // Upload images to Cloudinary if any
       List<String> imageUrls = [];
       if (_imageFiles.isNotEmpty) {
-        Logger.debug(
-            'Starting upload of ${_imageFiles.length} images...', 'CreatePostView');
+        Logger.debug('Starting upload of ${_imageFiles.length} images...',
+            'CreatePostView');
 
         for (int i = 0; i < _imageFiles.length; i++) {
           final file = _imageFiles[i];
-          Logger.debug(
-              'Uploading image ${i + 1}/${_imageFiles.length}...', 'CreatePostView');
+          Logger.debug('Uploading image ${i + 1}/${_imageFiles.length}...',
+              'CreatePostView');
           Logger.debug('File path: ${file.path}', 'CreatePostView');
           Logger.debug('File exists: ${await file.exists()}', 'CreatePostView');
-          Logger.debug('File size: ${await file.length()} bytes', 'CreatePostView');
+          Logger.debug(
+              'File size: ${await file.length()} bytes', 'CreatePostView');
 
           try {
             final result = await _cloudinaryService.uploadPostImage(file);
@@ -601,10 +590,12 @@ class _CreatePostViewState extends State<CreatePostView> {
             if (result.success && result.secureUrl != null) {
               imageUrls.add(result.secureUrl!);
               Logger.debug(
-                  'Image ${i + 1} uploaded successfully: ${result.secureUrl}', 'CreatePostView');
+                  'Image ${i + 1} uploaded successfully: ${result.secureUrl}',
+                  'CreatePostView');
             } else {
               Logger.warning(
-                  'Upload failed for image ${i + 1}: ${result.error}', 'CreatePostView');
+                  'Upload failed for image ${i + 1}: ${result.error}',
+                  'CreatePostView');
               // Show error to user
               Get.snackbar(
                 'Warning',
@@ -616,8 +607,8 @@ class _CreatePostViewState extends State<CreatePostView> {
               );
             }
           } catch (uploadError) {
-            Logger.error(
-                'Exception uploading image ${i + 1}', uploadError, null, 'CreatePostView');
+            Logger.error('Exception uploading image ${i + 1}', uploadError,
+                null, 'CreatePostView');
             Get.snackbar(
               'Warning',
               'Error upload gambar ${i + 1}: $uploadError',
@@ -630,7 +621,8 @@ class _CreatePostViewState extends State<CreatePostView> {
         }
 
         Logger.debug(
-            'Upload complete. Successfully uploaded ${imageUrls.length}/${_imageFiles.length} images', 'CreatePostView');
+            'Upload complete. Successfully uploaded ${imageUrls.length}/${_imageFiles.length} images',
+            'CreatePostView');
 
         if (imageUrls.isEmpty && _imageFiles.isNotEmpty) {
           Get.snackbar(
@@ -645,8 +637,8 @@ class _CreatePostViewState extends State<CreatePostView> {
         }
       }
 
-      Logger.debug(
-          'Creating post with ${imageUrls.length} image URLs...', 'CreatePostView');
+      Logger.debug('Creating post with ${imageUrls.length} image URLs...',
+          'CreatePostView');
       await _postRepository.createPost(
         placeId: _selectedPlace!.id!,
         content: _contentController.text.trim(),

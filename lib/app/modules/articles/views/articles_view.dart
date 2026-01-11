@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
 import '../controllers/articles_controller.dart';
@@ -81,8 +82,8 @@ class ArticlesView extends GetView<ArticlesController> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.close,
+                          AppIcon(
+                            AppAssets.iconsSvg.close,
                             size: 16,
                             color: AppColors.textSecondary,
                           ),
@@ -148,7 +149,6 @@ class ArticlesView extends GetView<ArticlesController> {
             if (controller.searchQuery.isNotEmpty) {
               return SliverFillRemaining(
                 child: EmptyStateWidget(
-                  icon: Icon(Icons.search_off),
                   title: 'Tidak ada artikel yang cocok dengan "${controller.searchQuery}"',
                 ),
               );

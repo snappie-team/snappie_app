@@ -116,8 +116,8 @@ class ExploreView extends GetView<ExploreController> {
             ),
             if (label == 'Penilaian' || label == 'Harga') ...[
               const SizedBox(width: 4),
-              Icon(
-                Icons.keyboard_arrow_down,
+              AppIcon(
+                AppAssets.iconsSvg.more,
                 size: 16,
                 color: isSelected ? AppColors.textOnPrimary : AppColors.primary,
               ),
@@ -173,7 +173,7 @@ class ExploreView extends GetView<ExploreController> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close),
+                  icon: AppIcon(AppAssets.iconsSvg.close),
                 ),
               ],
             ),
@@ -292,7 +292,7 @@ class ExploreView extends GetView<ExploreController> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close),
+                  icon: AppIcon(AppAssets.iconsSvg.close),
                 ),
               ],
             ),
@@ -413,7 +413,7 @@ class ExploreView extends GetView<ExploreController> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close),
+                  icon: AppIcon(AppAssets.iconsSvg.close),
                 ),
               ],
             ),
@@ -432,8 +432,8 @@ class ExploreView extends GetView<ExploreController> {
                       children: [
                         Text('$rating'),
                         const SizedBox(width: 8),
-                        Icon(
-                          Icons.star,
+                        AppIcon(
+                          AppAssets.iconsSvg.rating,
                           color: AppColors.warning,
                           size: 16,
                         ),
@@ -503,7 +503,7 @@ class ExploreView extends GetView<ExploreController> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close),
+                  icon: AppIcon(AppAssets.iconsSvg.close),
                 ),
               ],
             ),
@@ -618,8 +618,8 @@ class ExploreView extends GetView<ExploreController> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.location_on_outlined,
+                AppIcon(
+                  AppAssets.iconsSvg.location,
                   size: 24,
                   color: AppColors.textSecondary,
                 ),
@@ -790,8 +790,8 @@ class ExploreView extends GetView<ExploreController> {
               const SizedBox(width: 8),
               IconButton(
                 onPressed: () => controller.clearFilters(),
-                icon: Icon(
-                  Icons.close,
+                icon: AppIcon(
+                  AppAssets.iconsSvg.close,
                   color: AppColors.textSecondary,
                   size: 20,
                 ),
@@ -848,8 +848,8 @@ class ExploreView extends GetView<ExploreController> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.search_off,
+                AppIcon(
+                  AppAssets.iconsSvg.search,
                   size: 48,
                   color: AppColors.textSecondary,
                 ),

@@ -65,7 +65,7 @@ class HomeView extends GetView<HomeController> {
         foregroundColor: AppColors.textOnPrimary,
         shape: CircleBorder(),
         elevation: 4,
-        child: const Icon(Icons.add, size: 28),
+        child: AppIcon(AppAssets.iconsSvg.create, size: 28, color: AppColors.textOnPrimary),
       ),
     );
   }
@@ -91,13 +91,13 @@ class HomeView extends GetView<HomeController> {
             )),
           ),
           ButtonWidget(
-            icon: Icons.person_add_outlined,
+            icon: AppIcon(AppAssets.iconsSvg.addFriend, color: AppColors.primary),
             backgroundColor: AppColors.backgroundContainer,
             onPressed: () => Get.toNamed(AppPages.INVITE_FRIENDS),
           ),
           const SizedBox(width: 8),
           ButtonWidget(
-            icon: Icons.notifications_outlined,
+            icon: AppIcon(AppAssets.iconsSvg.notification, color: AppColors.primary),
             backgroundColor: AppColors.backgroundContainer,
             onPressed: () => Get.toNamed(AppPages.NOTIFICATIONS),
             hasNotification: true, // TODO: ganti dengan logika sebenarnya

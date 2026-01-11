@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
 import 'package:snappie_app/app/core/constants/food_type.dart';
 import 'package:snappie_app/app/core/localization/locale_keys.g.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
+import 'package:snappie_app/app/modules/shared/widgets/_display_widgets/app_icon.dart';
 import '../controllers/auth_controller.dart';
 
 class RegisterView extends GetView<AuthController> {
@@ -466,8 +468,9 @@ class RegisterView extends GetView<AuthController> {
                                                     fit: BoxFit.contain,
                                                     errorBuilder: (context,
                                                         error, stackTrace) {
-                                                      return const Icon(
-                                                          Icons.person,
+                                                      return AppIcon(
+                                                          AppAssets.iconsSvg
+                                                              .profile,
                                                           size: 40);
                                                     },
                                                   );

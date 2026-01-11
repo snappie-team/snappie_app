@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snappie_app/app/core/constants/app_assets.dart';
+import 'package:snappie_app/app/core/constants/app_constants.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/logger_service.dart';
@@ -36,28 +37,28 @@ class SettingsView extends StatelessWidget {
 
                   // Info Personal
                   _buildMenuItem(
-                    icon: Icons.person_outline,
+                    iconAsset: AppAssets.iconsSvg.profile,
                     title: 'Info Personal',
                     onTap: () => Get.toNamed(AppPages.EDIT_PROFILE),
                   ),
 
                   // Bahasa
                   _buildMenuItem(
-                    icon: Icons.language,
+                    iconAsset: AppAssets.iconsSvg.language,
                     title: 'Bahasa',
                     onTap: () => Get.toNamed(AppPages.LANGUAGE),
                   ),
 
                   // Pusat Bantuan
                   _buildMenuItem(
-                    icon: Icons.help_outline,
+                    iconAsset: AppAssets.iconsSvg.helpCenter,
                     title: 'Pusat Bantuan',
                     onTap: () => Get.toNamed(AppPages.HELP_CENTER),
                   ),
 
                   // FAQ
                   _buildMenuItem(
-                    icon: Icons.quiz_outlined,
+                    iconAsset: AppAssets.iconsSvg.faq,
                     title: 'FAQ',
                     onTap: () => Get.toNamed(AppPages.FAQ),
                   ),
@@ -77,7 +78,7 @@ class SettingsView extends StatelessWidget {
 
                   // Keluar
                   _buildMenuItem(
-                    icon: Icons.logout,
+                    iconAsset: AppAssets.iconsSvg.logout,
                     title: 'Keluar',
                     onTap: () => _showLogoutConfirmation(context, authService),
                   ),
@@ -86,7 +87,7 @@ class SettingsView extends StatelessWidget {
 
                   // App version
                   Text(
-                    'Snappie v1.0.0',
+                    'Snappie v${AppConstants.appVersion}',
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 12,
@@ -120,7 +121,10 @@ class SettingsView extends StatelessWidget {
             Align(
               alignment: Alignment.topLeft,
               child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                icon: AppIcon.forButton(
+                  AppAssets.iconsSvg.back,
+                  color: Colors.white,
+                ),
                 onPressed: () => Get.back(),
               ),
             ),
@@ -212,10 +216,16 @@ class SettingsView extends StatelessWidget {
   }
 
   Widget _buildMenuItem({
-    required IconData icon,
+    IconData? icon,
+    String? iconAsset,
     required String title,
     required VoidCallback onTap,
   }) {
+    assert(
+      (icon != null) || (iconAsset != null),
+      'Either icon or iconAsset must be provided',
+    );
+    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
@@ -231,7 +241,9 @@ class SettingsView extends StatelessWidget {
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        leading: Icon(icon, color: AppColors.primary),
+        leading: iconAsset != null
+            ? AppIcon(iconAsset, size: 24, color: AppColors.primary)
+            : Icon(icon, color: AppColors.primary),
         title: Text(
           title,
           style: TextStyle(
@@ -248,6 +260,9 @@ class SettingsView extends StatelessWidget {
       ),
     );
   }
+  //     ),
+  //   );
+  // }
 
   void _showAvatarPicker(BuildContext context, ProfileController controller) {
     final gender = controller.userData?.userDetail?.gender?.toLowerCase();

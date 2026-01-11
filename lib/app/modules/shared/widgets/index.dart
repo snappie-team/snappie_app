@@ -18,6 +18,7 @@ export '_dialog_widgets/mission_survey_modal.dart';
 export '_dialog_widgets/share_profile_modal.dart';
 
 // Display Widgets
+export '_display_widgets/app_icon.dart';
 export '_display_widgets/avatar_widget.dart';
 export '_display_widgets/fullscreen_image_viewer.dart';
 export '_display_widgets/network_image_widget.dart';

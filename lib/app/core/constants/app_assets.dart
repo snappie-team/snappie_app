@@ -28,6 +28,9 @@ class AppAssets {
 
   /// Asset icons (assets/icon/)
   static const icons = _AppIcons();
+
+  /// Asset SVG icons (assets/iconsvg/)
+  static const iconsSvg = _AppIconsSvg();
 }
 
 /// Asset gambar di folder assets/images/
@@ -203,6 +206,105 @@ class _AppIcons {
   String get icon3 => '$_basePath/Icon-2.png';
   String get save => '$_basePath/Simpan.png';
 
+  // === Placeholders for Future Icon Assets ===
+  // NOTE: These icons need to be designed and added to assets/icon/
+  // Using Material Icons as fallback until PNG assets are ready
+  
+  // TODO: Add to assets/icon/ directory
+  // String get favorite => '$_basePath/favorite.png';
+  // String get favoriteBorder => '$_basePath/favorite_border.png';
+  // String get bookmark => '$_basePath/bookmark.png';
+  // String get bookmarkBorder => '$_basePath/bookmark_border.png';
+  // String get star => '$_basePath/star.png';
+  // String get starBorder => '$_basePath/star_border.png';
+  // String get coin => '$_basePath/coin.png';
+  // String get send => '$_basePath/send.png';
+  // String get add => '$_basePath/add.png';
+  // String get delete => '$_basePath/delete.png';
+  // String get flag => '$_basePath/flag.png';
+
   /// Get icon by filename dynamically
+  String byName(String filename) => '$_basePath/$filename';
+}
+
+/// Asset SVG icons di folder assets/iconsvg/
+class _AppIconsSvg {
+  const _AppIconsSvg();
+
+  // === Base Path ===
+  static const String _basePath = 'assets/iconsvg';
+
+  // === Navigation Icons ===
+  String get home => '$_basePath/Icon Home.svg';
+  String get homeActive => '$_basePath/Icon Home-1.svg';
+  String get explore => '$_basePath/Icon Explore.svg';
+  String get exploreActive => '$_basePath/Icon Explore-1.svg';
+  String get article => '$_basePath/Icon Article.svg';
+  String get articleActive => '$_basePath/Icon Article-1.svg';
+  String get profile => '$_basePath/Data Diri.svg';
+  String get profileActive => '$_basePath/Data Diri-1.svg';
+
+  // === Action Icons ===
+  String get loveActive => '$_basePath/Icon Love.svg';
+  String get loveInactive => '$_basePath/Icon Love-1.svg';
+  String get back => '$_basePath/Back.svg';
+  String get close => '$_basePath/Close.svg';
+  String get search => '$_basePath/Search Active.svg';
+  String get notification => '$_basePath/Notifikasi.svg';
+  String get setting => '$_basePath/Setting.svg';
+  String get share => '$_basePath/Bagikan.svg';
+  String get saveInactive => '$_basePath/Simpan.svg';
+  String get saveActive => '$_basePath/Simpan-1.svg';
+  String get download => '$_basePath/Download.svg';
+  String get addFriend => '$_basePath/Tambah Teman.svg';
+  String get create => '$_basePath/create.svg';
+  
+  // === Content Icons ===
+  String get capture => '$_basePath/Capture.svg';
+  String get camera => '$_basePath/camera mini.svg';
+  String get video => '$_basePath/video.svg';
+  String get comment => '$_basePath/Icon Comment.svg';
+  String get location => '$_basePath/Lokasi.svg';
+  String get cursor => '$_basePath/cursor.svg';
+  String get union => '$_basePath/Union.svg';
+  String get checklist => '$_basePath/Icon Checklist.svg';
+
+  // === Category Icons ===
+  String get meTime => '$_basePath/Icon Me Time.svg';
+  String get nongkrong => '$_basePath/Icon Nongkrong.svg';
+  String get pasangan => '$_basePath/Icon Pasangan.svg';
+  String get laptop => '$_basePath/Icon Laptop.svg';
+
+  // === Menu Icons ===
+  String get logout => '$_basePath/Logout.svg';
+  String get faq => '$_basePath/FAQ.svg';
+  String get language => '$_basePath/Ubah Bahasa.svg';
+  String get changePassword => '$_basePath/Ubah Kata Sandi.svg';
+  String get helpCenter => '$_basePath/Pusat Bantuan.svg';
+  
+  // === Gamification Icons ===
+  String get leaderboard => '$_basePath/Papan Peringkat Fix.svg';
+  String get achievement => '$_basePath/Penghargaan Fix.svg';
+  String get coupon => '$_basePath/Tukar Kupon Fix.svg';
+
+  // === Rating Icons ===
+  String get ratingEmpty => '$_basePath/Rating Empty.svg';
+  String get rating => '$_basePath/Rating.svg';
+  String get ratingAlt => '$_basePath/Rating-1.svg';
+  String get success => '$_basePath/Success.svg';
+
+  // === More Options ===
+  String get more => '$_basePath/More.svg';
+  String get moreOption1 => '$_basePath/More-1.svg';
+  String get moreOption2 => '$_basePath/More-2.svg';
+  String get moreOption3 => '$_basePath/More-3.svg';
+  String get moreDots => '$_basePath/more dots.svg';
+
+  // === Generic Icons ===
+  String get icon => '$_basePath/Icon.svg';
+  String get icon1 => '$_basePath/Icon-1.svg';
+  String get icon2 => '$_basePath/Icon-2.svg';
+
+  /// Get SVG icon by filename dynamically
   String byName(String filename) => '$_basePath/$filename';
 }

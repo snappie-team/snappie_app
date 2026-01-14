@@ -73,7 +73,7 @@ class _PostCardState extends State<PostCard> {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.backgroundContainer,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,7 +92,7 @@ class _PostCardState extends State<PostCard> {
   }
 
   Widget _buildPostHeader() {
-    final username = post.user?.name ?? 'Unknown';
+    final username = post.user?.username ?? 'Unknown';
     final avatarUrl = post.user?.imageUrl;
     final placeName = post.place?.name ?? 'Unknown Place';
 
@@ -104,27 +104,24 @@ class _PostCardState extends State<PostCard> {
             imageUrl: avatarUrl,
             size: AvatarSize.medium,
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   username,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: FontSize.getSize(FontSizeOption.regular),
                   ),
                 ),
-                GestureDetector(
-                  onTap: _openPlace,
-                  child: Text(
-                    placeName,
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
+                Text(
+                  placeName,
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: FontSize.getSize(FontSizeOption.mediumSmall),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -142,54 +139,101 @@ class _PostCardState extends State<PostCard> {
     final currentUserId = authService.userData?.id;
     final isOwner = post.userId == currentUserId;
 
-    return PopupMenuButton<String>(
-      icon: AppIcon(
-        AppAssets.icons.moreDots,
-        color: AppColors.textSecondary,
-        size: 18,
-      ),
-      offset: const Offset(-48, 0), // Muncul di kiri button
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: AppColors.textSecondary)
-      ),
-      color: AppColors.backgroundContainer,
-      elevation: 8,
-      onSelected: (value) {
-        switch (value) {
-          case 'profile':
-            _viewProfile();
-            break;
-          case 'report':
-            _showReportModal();
-            break;
-          case 'delete':
-            _confirmDeletePostModal();
-            break;
-        }
-      },
-      itemBuilder: (context) => [
-        if (!isOwner) ...[
-          PopupMenuItem<String>(
-              value: 'profile',
-              child: Text('Lihat Profil',
-                  style: TextStyle(color: AppColors.textSecondary))),
-          const PopupMenuDivider(),
-          PopupMenuItem<String>(
-            value: 'report',
-            child: Text('Laporkan',
-                style: TextStyle(color: AppColors.textSecondary)),
+    PopupMenuButton<String> buildMenu({PostFollowState? followState}) {
+      final canShowUnfollow = followState == PostFollowState.friend ||
+          followState == PostFollowState.following;
+
+      Widget menuText(String text) {
+        return SizedBox(
+          width: double.infinity,
+          child: Center(
+            child: Text(
+              text,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: FontSize.getSize(FontSizeOption.mediumSmall),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
+        );
+      }
+
+      PopupMenuItem<String> menuItem({
+        required String value,
+        required String text,
+      }) {
+        return PopupMenuItem<String>(
+          value: value,
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: menuText(text),
+        );
+      }
+
+      return PopupMenuButton<String>(
+        icon: AppIcon(
+          AppAssets.icons.moreDots,
+          color: AppColors.textSecondary,
+          size: 16,
+        ),
+        offset: const Offset(-48, 0),
+        constraints: const BoxConstraints(
+          minWidth: 140,
+          maxWidth: 160,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+          side: BorderSide(color: AppColors.textSecondary),
+        ),
+        color: AppColors.backgroundContainer,
+        elevation: 8,
+        onSelected: (value) {
+          switch (value) {
+            case 'profile':
+              _viewProfile();
+              break;
+            case 'delete':
+              _confirmDeletePostModal();
+              break;
+            case 'follow':
+              _handleFollow();
+              break;
+            case 'report':
+              _showReportModal();
+              break;
+          }
+        },
+        itemBuilder: (context) => [
+          menuItem(value: 'profile', text: 'Lihat Profil'),
+          if (isOwner) ...[
+            const PopupMenuDivider(height: 8),
+            menuItem(value: 'delete', text: 'Hapus Post'),
+          ] else ...[
+            const PopupMenuDivider(height: 8),
+            if (canShowUnfollow) ...[
+              menuItem(value: 'follow', text: 'Berhenti mengikuti'),
+              const PopupMenuDivider(height: 8),
+            ],
+            menuItem(value: 'report', text: 'Laporkan'),
+          ],
         ],
-        if (isOwner) ...[
-          // const PopupMenuDivider(),
-          PopupMenuItem<String>(
-              value: 'delete',
-              child: Text('Hapus Post',
-                  style: TextStyle(color: AppColors.textSecondary))),
-        ],
-      ],
-    );
+      );
+    }
+
+    if (isOwner) return buildMenu();
+
+    final userId = post.userId;
+    if (userId == null) return buildMenu();
+
+    try {
+      final controller = Get.find<HomeController>();
+      return Obx(
+          () => buildMenu(followState: controller.getFollowState(userId)));
+    } catch (e) {
+      return buildMenu();
+    }
   }
 
   void _viewProfile() {
@@ -215,7 +259,7 @@ class _PostCardState extends State<PostCard> {
               'Fitur laporan sedang dalam pengembangan.',
               style: TextStyle(
                 color: AppColors.textSecondary,
-                fontSize: 14,
+                fontSize: FontSize.getSize(FontSizeOption.medium),
               ),
             ),
             const SizedBox(height: 12),
@@ -223,7 +267,7 @@ class _PostCardState extends State<PostCard> {
               'Kami akan segera menambahkan fitur ini untuk membantu menjaga komunitas Snappie tetap aman.',
               style: TextStyle(
                 color: AppColors.textSecondary,
-                fontSize: 14,
+                fontSize: FontSize.getSize(FontSizeOption.medium),
               ),
             ),
           ],
@@ -244,7 +288,7 @@ class _PostCardState extends State<PostCard> {
   void _confirmDeletePostModal() {
     Get.dialog(
       Dialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.backgroundContainer,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
@@ -261,17 +305,17 @@ class _PostCardState extends State<PostCard> {
               Text(
                 'Hapus Postingan',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: FontSize.getSize(FontSizeOption.large),
                   fontWeight: FontWeight.w700,
-                  color: Colors.red.shade700,
+                  color: AppColors.error,
                 ),
               ),
               const SizedBox(height: 6),
-              const Text(
+              Text(
                 'Yakin ingin menghapus postingan?',
                 style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.black,
+                  fontSize: FontSize.getSize(FontSizeOption.medium),
+                  color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
@@ -283,17 +327,17 @@ class _PostCardState extends State<PostCard> {
                     child: ElevatedButton(
                       onPressed: () => Get.back(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red.shade700,
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.error,
+                        foregroundColor: AppColors.textPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(32),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Batal',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: FontSize.getSize(FontSizeOption.regular),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -308,16 +352,16 @@ class _PostCardState extends State<PostCard> {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                        foregroundColor: AppColors.textPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(32),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Ya',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: FontSize.getSize(FontSizeOption.regular),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -353,8 +397,8 @@ class _PostCardState extends State<PostCard> {
         'Berhasil',
         'Post berhasil dihapus',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
+        backgroundColor: AppColors.success,
+        colorText: AppColors.textPrimary,
       );
     } catch (e) {
       Logger.error('Failed to delete post', e, null, 'PostCard');
@@ -362,8 +406,8 @@ class _PostCardState extends State<PostCard> {
         'Gagal',
         'Tidak dapat menghapus post, silakan coba lagi',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        backgroundColor: AppColors.error,
+        colorText: AppColors.textPrimary,
       );
     }
   }
@@ -376,8 +420,8 @@ class _PostCardState extends State<PostCard> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             post.content ?? '',
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: FontSize.getSize(FontSizeOption.regular),
               height: 1.4,
             ),
           ),
@@ -401,8 +445,8 @@ class _PostCardState extends State<PostCard> {
                     ? TimeFormatter.formatTimeAgo(post.createdAt!)
                     : 'Unknown',
                 style: TextStyle(
-                  color: Colors.grey[500],
-                  fontSize: FontSize.getSize(FontSizeOption.small),
+                  color: AppColors.textTertiary,
+                  fontSize: FontSize.getSize(FontSizeOption.mediumSmall),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -529,14 +573,15 @@ class _PostCardState extends State<PostCard> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.6),
+                        color:
+                            AppColors.withOpacity(AppColors.textPrimary, 0.6),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         '${index + 1}/${imageUrls.length}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: FontSize.getSize(FontSizeOption.xxSmall),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -597,7 +642,7 @@ class _PostCardState extends State<PostCard> {
               '$likesCount',
               style: TextStyle(
                 color: AppColors.accent,
-                fontSize: 14,
+                fontSize: FontSize.getSize(FontSizeOption.regular),
               ),
             ),
           ],
@@ -624,7 +669,7 @@ class _PostCardState extends State<PostCard> {
               '$commentsCount',
               style: TextStyle(
                 color: AppColors.accent,
-                fontSize: 14,
+                fontSize: FontSize.getSize(FontSizeOption.regular),
               ),
             ),
           ],
@@ -709,9 +754,7 @@ class _PostCardState extends State<PostCard> {
         return GestureDetector(
           onTap: _savePost,
           child: AppIcon(
-            isSaved
-                ? AppAssets.icons.saveActive
-                : AppAssets.icons.saveInactive,
+            isSaved ? AppAssets.icons.saveActive : AppAssets.icons.saveInactive,
             color: AppColors.accent,
             size: 24,
           ),
@@ -776,8 +819,8 @@ class _PostCardState extends State<PostCard> {
         'Gagal',
         'Tidak dapat menyukai post, silakan coba lagi',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        backgroundColor: AppColors.error,
+        colorText: AppColors.textPrimary,
       );
     } finally {
       _isTogglingLike.value = false;
@@ -799,8 +842,8 @@ class _PostCardState extends State<PostCard> {
           ),
           child: Container(
             height: Get.height * 0.85,
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: AppColors.backgroundContainer,
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: Column(
@@ -810,20 +853,18 @@ class _PostCardState extends State<PostCard> {
                   height: 4,
                   margin: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: AppColors.textTertiary,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                Obx(
-                  () => Container(
-                    margin: const EdgeInsets.fromLTRB(0, 0, 0, 12),
-                    child: Center(
-                      child: Text(
-                        'Komentar (${_commentsCount.value})',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                Container(
+                  margin: const EdgeInsets.fromLTRB(0, 0, 0, 12),
+                  child: Center(
+                    child: Text(
+                      'Komentar',
+                      style: TextStyle(
+                        fontSize: FontSize.getSize(FontSizeOption.medium),
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -833,30 +874,12 @@ class _PostCardState extends State<PostCard> {
                   child: Obx(
                     () => _comments.isEmpty
                         ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                AppIcon(
-                                  AppAssets.icons.comment,
-                                  size: 48,
-                                  color: AppColors.textSecondary,
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  'Belum ada komentar',
-                                  style: TextStyle(
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Jadilah yang pertama berkomentar!',
-                                  style: TextStyle(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
+                            child: Text(
+                              'Tidak Ada Komentar',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           )
                         : ListView.builder(
@@ -883,9 +906,10 @@ class _PostCardState extends State<PostCard> {
                                             children: [
                                               Text(
                                                 comment.user?.name ?? 'Unknown',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontWeight: FontWeight.bold,
-                                                  fontSize: 13,
+                                                  fontSize: FontSize.getSize(
+                                                      FontSizeOption.regular),
                                                 ),
                                               ),
                                               const SizedBox(width: 8),
@@ -898,7 +922,8 @@ class _PostCardState extends State<PostCard> {
                                                 style: TextStyle(
                                                   color:
                                                       AppColors.textSecondary,
-                                                  fontSize: 11,
+                                                  fontSize: FontSize.getSize(
+                                                      FontSizeOption.xxSmall),
                                                 ),
                                               ),
                                             ],
@@ -906,8 +931,9 @@ class _PostCardState extends State<PostCard> {
                                           const SizedBox(height: 4),
                                           Text(
                                             comment.comment ?? '',
-                                            style: const TextStyle(
-                                              fontSize: 13,
+                                            style: TextStyle(
+                                              fontSize: FontSize.getSize(
+                                                  FontSizeOption.regular),
                                               height: 1.4,
                                             ),
                                           ),
@@ -927,7 +953,7 @@ class _PostCardState extends State<PostCard> {
                     top: false,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.backgroundContainer,
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
                           color: AppColors.primary,
@@ -941,8 +967,9 @@ class _PostCardState extends State<PostCard> {
                               decoration: InputDecoration(
                                 hintText: 'Tulis komentar...',
                                 hintStyle: TextStyle(
-                                  color: Colors.grey[500],
-                                  fontSize: 14,
+                                  color: AppColors.textTertiary,
+                                  fontSize:
+                                      FontSize.getSize(FontSizeOption.regular),
                                 ),
                                 border: InputBorder.none,
                                 enabledBorder: InputBorder.none,
@@ -1032,16 +1059,16 @@ class _PostCardState extends State<PostCard> {
         'Berhasil',
         'Status mengikuti diperbarui',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
+        backgroundColor: AppColors.success,
+        colorText: AppColors.textPrimary,
       );
     } catch (e) {
       Get.snackbar(
         'Gagal',
         'Tidak dapat mengikuti: $e',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        backgroundColor: AppColors.error,
+        colorText: AppColors.textPrimary,
       );
     }
   }
@@ -1059,16 +1086,16 @@ class _PostCardState extends State<PostCard> {
               ? 'Postingan disimpan'
               : 'Postingan dihapus dari tersimpan',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
+          backgroundColor: AppColors.success,
+          colorText: AppColors.textPrimary,
         );
       }).catchError((e) {
         Get.snackbar(
           'Gagal',
           'Tidak dapat menyimpan: $e',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+          backgroundColor: AppColors.error,
+          colorText: AppColors.textPrimary,
         );
       });
     } catch (e) {
@@ -1076,8 +1103,8 @@ class _PostCardState extends State<PostCard> {
         'Gagal',
         'Fitur simpan tidak tersedia',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        backgroundColor: AppColors.error,
+        colorText: AppColors.textPrimary,
       );
     }
   }
@@ -1096,7 +1123,6 @@ class _PostCardState extends State<PostCard> {
       final updatedPost = await postRepository.getPostById(postId);
 
       // Update local reactive state - this will update UI immediately
-      _comments.value = updatedPost.comments ?? [];
       _commentsCount.value = updatedPost.commentsCount ?? 0;
 
       // Also sync with HomeController if available
@@ -1111,8 +1137,8 @@ class _PostCardState extends State<PostCard> {
         'Berhasil',
         'Komentar berhasil ditambahkan',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
+        backgroundColor: AppColors.success,
+        colorText: AppColors.textPrimary,
       );
     } catch (e) {
       Logger.error('Failed to add comment', e, null, 'PostCard');
@@ -1120,8 +1146,8 @@ class _PostCardState extends State<PostCard> {
         'Gagal',
         'Tidak dapat menambahkan komentar, silakan coba lagi',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        backgroundColor: AppColors.error,
+        colorText: AppColors.textPrimary,
       );
     }
   }

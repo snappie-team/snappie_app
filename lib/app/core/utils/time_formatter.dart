@@ -30,8 +30,8 @@ class TimeFormatter {
   /// Format DateTime to readable date format
   static String formatDate(DateTime dateTime) {
     final months = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
     ];
     
     return '${dateTime.day} ${months[dateTime.month - 1]} ${dateTime.year}';

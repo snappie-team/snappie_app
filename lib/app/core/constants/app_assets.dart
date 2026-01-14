@@ -64,6 +64,7 @@ class _AppImages {
   String get logout => '$_basePath/generals/logout.png';
   String get target => '$_basePath/generals/target.png';
   String get unlocked => '$_basePath/generals/unlocked.png';
+  String get delete => '$_basePath/generals/delete.png';
 
   // === Mission ===
   String get mission => '$_basePath/generals/mission.png';
@@ -124,7 +125,6 @@ class _AppAvatar {
   String avatarMale(int number) => '$_basePath/avatar_m${number}_hdpi.png';
   String avatarFemale(int number) => '$_basePath/avatar_f${number}_hdpi.png';
 }
-
 
 /// Asset frames di folder assets/images/frames/
 class _AppFrames {
@@ -206,23 +206,6 @@ class _AppIcons {
   String get icon3 => '$_basePath/Icon-2.png';
   String get save => '$_basePath/Simpan.png';
 
-  // === Placeholders for Future Icon Assets ===
-  // NOTE: These icons need to be designed and added to assets/icon/
-  // Using Material Icons as fallback until PNG assets are ready
-  
-  // TODO: Add to assets/icon/ directory
-  // String get favorite => '$_basePath/favorite.png';
-  // String get favoriteBorder => '$_basePath/favorite_border.png';
-  // String get bookmark => '$_basePath/bookmark.png';
-  // String get bookmarkBorder => '$_basePath/bookmark_border.png';
-  // String get star => '$_basePath/star.png';
-  // String get starBorder => '$_basePath/star_border.png';
-  // String get coin => '$_basePath/coin.png';
-  // String get send => '$_basePath/send.png';
-  // String get add => '$_basePath/add.png';
-  // String get delete => '$_basePath/delete.png';
-  // String get flag => '$_basePath/flag.png';
-
   /// Get icon by filename dynamically
   String byName(String filename) => '$_basePath/$filename';
 }
@@ -237,8 +220,8 @@ class _AppIconsSvg {
   // === Navigation Icons ===
   String get home => '$_basePath/Icon Home.svg';
   String get homeActive => '$_basePath/Icon Home-1.svg';
-  String get explore => '$_basePath/Icon Explore.svg';
-  String get exploreActive => '$_basePath/Icon Explore-1.svg';
+  String get explore => '$_basePath/Icon Explore-1.svg';
+  String get exploreActive => '$_basePath/Icon Explore.svg';
   String get article => '$_basePath/Icon Article.svg';
   String get articleActive => '$_basePath/Icon Article-1.svg';
   String get profile => '$_basePath/Data Diri.svg';
@@ -268,6 +251,8 @@ class _AppIconsSvg {
   String get cursor => '$_basePath/cursor.svg';
   String get union => '$_basePath/Union.svg';
   String get checklist => '$_basePath/Icon Checklist.svg';
+  String get clock => '$_basePath/jam.svg';
+  String get contact => '$_basePath/contact.svg';
 
   // === Category Icons ===
   String get meTime => '$_basePath/Icon Me Time.svg';

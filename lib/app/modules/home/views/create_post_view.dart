@@ -35,6 +35,7 @@ class _CreatePostViewState extends State<CreatePostView> {
   final _pageController = PageController();
   int _currentImageIndex = 0;
   static const int _maxImages = 5;
+  bool _hasForcedPlaceSelection = false;
 
   UserModel? _userData;
   List<PlaceModel> _places = [];
@@ -99,6 +100,23 @@ class _CreatePostViewState extends State<CreatePostView> {
         _userData = userData;
         _places = placeData;
       });
+      if (!_hasForcedPlaceSelection && mounted) {
+        _hasForcedPlaceSelection = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || _selectedPlace != null) return;
+          if (_places.isEmpty) {
+            Get.snackbar(
+              'Error',
+              'Tidak ada tempat tersedia',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: AppColors.error,
+              colorText: AppColors.textOnPrimary,
+            );
+            return;
+          }
+          _showPlaceSelection(force: true);
+        });
+      }
     } catch (e) {
       Logger.error('Error loading user data', e, null, 'CreatePostView');
     } finally {
@@ -108,57 +126,59 @@ class _CreatePostViewState extends State<CreatePostView> {
 
   @override
   Widget build(BuildContext context) {
-    return ScaffoldFrame.detail(
-      title: 'Buat Postingan',
-      slivers: [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: Column(
-            children: [
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.backgroundContainer,
-                    border: Border(
-                      top: BorderSide(color: AppColors.borderLight, width: 1),
+    return LoadingOverlayWidget(
+      isLoading: _isLoading,
+      child: ScaffoldFrame.detail(
+        title: 'Buat Postingan',
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Column(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.backgroundContainer,
+                      border: Border(
+                        top: BorderSide(color: AppColors.borderLight, width: 1),
+                      ),
                     ),
-                  ),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // User info and content
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Avatar
-                              AvatarWidget(
-                                imageUrl: _userData?.imageUrl ?? '',
-                                size: AvatarSize.medium,
-                              ),
-                              const SizedBox(width: 12),
-                              // Content input
-                              Expanded(
-                                child: TextField(
-                                  controller: _contentController,
-                                  maxLines: null,
-                                  decoration: InputDecoration(
-                                    hintText: 'Apa yang kamu ingin bagikan?',
-                                    hintStyle: TextStyle(
-                                        color: AppColors.textSecondary),
-                                    border: InputBorder.none,
-                                  ),
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: AppColors.textPrimary,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // User info and content
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Avatar
+                                AvatarWidget(
+                                  imageUrl: _userData?.imageUrl ?? '',
+                                  size: AvatarSize.medium,
+                                ),
+                                const SizedBox(width: 12),
+                                // Content input
+                                Expanded(
+                                  child: TextField(
+                                    controller: _contentController,
+                                    maxLines: null,
+                                    decoration: InputDecoration(
+                                      hintText: 'Apa yang kamu ingin bagikan?',
+                                      hintStyle: TextStyle(
+                                          color: AppColors.textSecondary),
+                                      border: InputBorder.none,
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: AppColors.textPrimary,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
 
                         // Image carousel
                         if (_imageFiles.isNotEmpty)
@@ -268,224 +288,231 @@ class _CreatePostViewState extends State<CreatePostView> {
                             ),
                           ),
 
-                        const SizedBox(height: 80), // Space for bottom bar
-                      ],
+                          const SizedBox(height: 80), // Space for bottom bar
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-
-              // Bottom action bar
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundContainer,
-                  // border: Border(
-                  //   top: BorderSide(color: AppColors.borderLight, width: 1),
-                  // ),
-                ),
-                child: Column(
-                  children: [
-                    // Foto/Video option
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: AppColors.backgroundContainer,
-                        border: Border.all(color: AppColors.borderLight),
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.shadowDark,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: ListTile(
-                        leading: AppIcon(
-                          AppAssets.icons.video,
-                          color: AppColors.primary,
-                        ),
-                        title: Text(
-                          'Foto/Video',
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 16,
-                          ),
-                        ),
-                        trailing: AppIcon(
-                          AppAssets.icons.moreOption3,
-                          color: AppColors.textSecondary,
-                        ),
-                        onTap: _pickImage,
-                      ),
-                    ),
-                    // Lokasi option
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: AppColors.backgroundContainer,
-                        border: Border.all(color: AppColors.borderLight),
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.shadowDark,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: ListTile(
-                        leading: AppIcon(
-                          AppAssets.icons.location,
-                          color: AppColors.error,
-                        ),
-                        title: Text(
-                          'Lokasi',
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 16,
-                          ),
-                        ),
-                        trailing: AppIcon(
-                          AppAssets.icons.moreOption3,
-                          color: AppColors.textSecondary,
-                        ),
-                        onTap: _showPlaceSelection,
-                      ),
-                    ),
-                    // Tombol Unggah
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: (_isLoading || !_isFormValid)
-                              ? null
-                              : _submitPost,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: AppColors.textOnPrimary,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(99),
+  
+                // Bottom action bar
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundContainer,
+                    // border: Border(
+                    //   top: BorderSide(color: AppColors.borderLight, width: 1),
+                    // ),
+                  ),
+                  child: Column(
+                    children: [
+                      // Foto/Video option
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.backgroundContainer,
+                          border: Border.all(color: AppColors.borderLight),
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.shadowDark,
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
                             ),
-                            disabledBackgroundColor:
-                                AppColors.textSecondary.withOpacity(0.3),
-                            disabledForegroundColor: AppColors.textSecondary,
+                          ],
+                        ),
+                        child: ListTile(
+                          leading: AppIcon(
+                            AppAssets.icons.video,
+                            color: AppColors.primary,
                           ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Text(
-                                  'Unggah',
-                                  style: TextStyle(
-                                    color: AppColors.textOnPrimary,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                  ),
-                                ),
+                          title: Text(
+                            'Foto/Video',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 16,
+                            ),
+                          ),
+                          trailing: AppIcon(
+                            AppAssets.icons.moreOption3,
+                            color: AppColors.textSecondary,
+                          ),
+                          onTap: _pickImage,
                         ),
                       ),
-                    ),
-                  ],
+                      // Lokasi option
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.backgroundContainer,
+                          border: Border.all(color: AppColors.borderLight),
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.shadowDark,
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: ListTile(
+                          leading: AppIcon(
+                            AppAssets.icons.location,
+                            color: AppColors.error,
+                          ),
+                          title: Text(
+                            'Lokasi',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 16,
+                            ),
+                          ),
+                          trailing: AppIcon(
+                            AppAssets.icons.moreOption3,
+                            color: AppColors.textSecondary,
+                          ),
+                          onTap: _showPlaceSelection,
+                        ),
+                      ),
+                      // Tombol Unggah
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: (_isLoading || !_isFormValid)
+                                ? null
+                                : _submitPost,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: AppColors.textOnPrimary,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(99),
+                              ),
+                              disabledBackgroundColor:
+                                  AppColors.textSecondary.withOpacity(0.3),
+                              disabledForegroundColor: AppColors.textSecondary,
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : Text(
+                                    'Unggah',
+                                    style: TextStyle(
+                                      color: AppColors.textOnPrimary,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        )
-      ],
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 
-  void _showPlaceSelection() {
+  void _showPlaceSelection({bool force = false}) {
     Get.bottomSheet(
-      Container(
-        height: Get.height * 0.7,
-        decoration: BoxDecoration(
-          color: AppColors.backgroundContainer,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: AppColors.borderLight),
+      PopScope(
+        canPop: !force,
+        child: Container(
+          height: Get.height * 0.9,
+          decoration: BoxDecoration(
+            color: AppColors.backgroundContainer,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: AppColors.borderLight),
+                  ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Pilih Tempat',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Pilih Tempat',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () => Get.back(),
-                    icon: AppIcon(
-                      AppAssets.icons.close,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: _isLoadingPlaces
-                  ? const Center(child: CircularProgressIndicator())
-                  : _places.isEmpty
-                      ? Center(
-                          child: Text(
-                            'Tidak ada tempat tersedia',
-                            style: TextStyle(color: AppColors.textSecondary),
-                          ),
-                        )
-                      : ListView.builder(
-                          itemCount: _places.length,
-                          itemBuilder: (context, index) {
-                            final place = _places[index];
-                            return ListTile(
-                              title: Text(
-                                place.name ?? 'Unknown',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              subtitle: Text(
-                                place.placeDetail?.address ?? '',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              onTap: () {
-                                setState(() => _selectedPlace = place);
-                                Get.back();
-                              },
-                            );
-                          },
+                    if (!force)
+                      IconButton(
+                        onPressed: () => Get.back(),
+                        icon: AppIcon(
+                          AppAssets.icons.close,
+                          color: AppColors.textSecondary,
                         ),
-            ),
-          ],
+                      ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: _isLoadingPlaces
+                    ? const Center(child: CircularProgressIndicator())
+                    : _places.isEmpty
+                        ? Center(
+                            child: Text(
+                              'Tidak ada tempat tersedia',
+                              style: TextStyle(color: AppColors.textSecondary),
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: _places.length,
+                            itemBuilder: (context, index) {
+                              final place = _places[index];
+                              return ListTile(
+                                title: Text(
+                                  place.name ?? 'Unknown',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  place.placeDetail?.address ?? '',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                onTap: () {
+                                  setState(() => _selectedPlace = place);
+                                  Get.back();
+                                },
+                              );
+                            },
+                          ),
+              ),
+            ],
+          ),
         ),
       ),
       isScrollControlled: true,
+      isDismissible: !force,
+      enableDrag: !force,
     );
   }
 

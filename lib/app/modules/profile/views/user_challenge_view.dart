@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
+import 'package:snappie_app/app/modules/shared/widgets/_display_widgets/app_icon.dart';
 import 'package:snappie_app/app/modules/shared/widgets/_state_widgets/empty_state_widget.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/logger_service.dart';
@@ -156,125 +158,142 @@ class _UserChallengesViewState extends State<UserChallengesView> {
   Widget _buildChallengeItem(UserAchievement challenge) {
     final isCompleted = challenge.isCompleted ?? false;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        color: challenge.isCompleted == true
-            ? AppColors.background
-            : AppColors.accentLight,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Icon from iconUrl or default
-          challenge.iconUrl != null && challenge.iconUrl!.isNotEmpty
-              ? Image.network(
-                  challenge.iconUrl!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Icon(
-                      Icons.flag,
-                      color:
-                          isCompleted ? AppColors.success : AppColors.primary,
-                      size: 24,
-                    );
-                  },
-                )
-              : Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: isCompleted
-                        ? AppColors.successSurface
-                        : AppColors.primarySurface,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.flag,
-                    color: isCompleted ? AppColors.success : AppColors.primary,
-                    size: 24,
-                  ),
-                ),
-
-          const SizedBox(width: 12),
-
-          // Name, progress, target
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  challenge.name ?? 'Tantangan',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (isCompleted)
-                  Text(
-                    'Selesai',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
-                    ),
+    return GestureDetector(
+      onTap: () => _buildDetailChallenge(challenge),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        decoration: BoxDecoration(
+          color: challenge.isCompleted == true
+              ? AppColors.primaryLight.withAlpha(75)
+              : AppColors.accent.withAlpha(75),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Icon from iconUrl or default
+            challenge.iconUrl != null && challenge.iconUrl!.isNotEmpty
+                ? Image.network(
+                    challenge.iconUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        Icons.flag,
+                        color:
+                            isCompleted ? AppColors.success : AppColors.primary,
+                        size: 24,
+                      );
+                    },
                   )
-                else if (challenge.progress != null && challenge.target != null) ...[
-                  Text(
-                    'Progress: ${challenge.progress ?? 0}/${challenge.target ?? 0}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
+                : Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: isCompleted
+                          ? AppColors.successSurface
+                          : AppColors.primarySurface,
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    child: Icon(
+                      Icons.flag,
+                      color: isCompleted ? AppColors.success : AppColors.primary,
+                      size: 24,
+                    ),
+                  ),
+      
+            const SizedBox(width: 12),
+      
+            // Name, progress, target
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    challenge.name ?? 'Tantangan',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(99),
-                          child: LinearProgressIndicator(
-                            value: (challenge.progress ?? 0) /
-                                (challenge.target ?? 1),
-                            backgroundColor: AppColors.border,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(AppColors.accent),
-                            minHeight: 16,
-                            borderRadius: BorderRadius.circular(99),
+                  if (isCompleted)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryLight,
+                        borderRadius: BorderRadius.circular(99),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 4, horizontal: 16),
+                      child: Center(
+                        child: Text(
+                          'Selesai',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textOnPrimary,
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    )
+                  else if (challenge.progress != null && challenge.target != null)
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          height: 24,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: AppColors.accent,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(99),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(99),
+                            child: LinearProgressIndicator(
+                              value: (challenge.progress ?? 0) /
+                                  (challenge.target ?? 1),
+                              backgroundColor: Colors.transparent,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(AppColors.accent),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '${challenge.progress ?? 0}/${challenge.target ?? 0}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.accent,
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
-              ],
+              ),
             ),
-          ),
-
-          const SizedBox(width: 12),
-
-          // Detail arrow
-          GestureDetector(
-            onTap: () => _buildDetailChallenge(challenge),
-            child: Icon(
-              Icons.arrow_forward_ios,
+      
+            const SizedBox(width: 12),
+      
+            // Detail arrow
+            if (!isCompleted)
+            AppIcon(
+              AppAssets.iconsSvg.moreOption3,
               color: AppColors.textSecondary,
-              size: 18,
+              size: 24,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

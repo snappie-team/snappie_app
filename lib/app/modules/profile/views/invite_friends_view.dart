@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
-import 'package:snappie_app/app/modules/shared/widgets/_dialog_widgets/share_profile_modal.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/logger_service.dart';
@@ -242,7 +240,7 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
         backgroundColor: AppColors.backgroundContainer,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.primary),
+          icon: AppIcon(AppAssets.iconsSvg.back, color: AppColors.primary, size: 24),
           onPressed: () => Get.back(),
         ),
         title: Text(
@@ -282,9 +280,10 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
         decoration: InputDecoration(
           hintText: 'Nama atau username',
           hintStyle: TextStyle(color: AppColors.textSecondary),
-          prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
+          prefixIcon: AppIcon(AppAssets.iconsSvg.search, color: AppColors.textSecondary, size: 24),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
+                  // TODO: Add clear.svg icon to assets/iconsvg/
                   icon: Icon(Icons.clear, color: AppColors.textSecondary),
                   onPressed: () {
                     _searchController.clear();

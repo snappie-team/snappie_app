@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_assets.dart';
+import '../../shared/widgets/_display_widgets/app_icon.dart';
 
 class HelpCenterView extends StatelessWidget {
   const HelpCenterView({super.key});
@@ -54,7 +56,7 @@ class HelpCenterView extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Row(
                       children: [
-                        Icon(Icons.search, color: Colors.grey.shade600),
+                        AppIcon(AppAssets.iconsSvg.search, color: Colors.grey.shade600, size: 24),
                         const SizedBox(width: 8),
                         Text(
                           'Apa ada yang bisa dibantu?',

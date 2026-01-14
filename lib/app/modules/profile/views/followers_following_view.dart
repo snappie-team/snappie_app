@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/helpers/error_handler.dart';
 import '../../../data/models/social_model.dart';
 import '../../../data/repositories/social_repository_impl.dart';
 import '../../../routes/app_pages.dart';
 import '../../shared/widgets/index.dart';
+import '../../shared/widgets/_display_widgets/app_icon.dart';
 
 /// View type enum
 enum FollowViewType { followers, following }
@@ -119,9 +121,10 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
         decoration: InputDecoration(
           hintText: 'Cari',
           hintStyle: TextStyle(color: AppColors.textSecondary),
-          prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
+          prefixIcon: AppIcon(AppAssets.iconsSvg.search, color: AppColors.textSecondary, size: 24),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
+                  // TODO: Add clear.svg icon to assets/iconsvg/
                   icon: Icon(Icons.clear, color: AppColors.textSecondary),
                   onPressed: () {
                     _searchController.clear();

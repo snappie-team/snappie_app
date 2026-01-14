@@ -316,6 +316,7 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
           
           // Status
           if (isRedeemed)
+            // TODO: Add check_circle.svg icon to assets/iconsvg/
             const Icon(Icons.check_circle, color: Colors.green, size: 24)
           else
             Container(

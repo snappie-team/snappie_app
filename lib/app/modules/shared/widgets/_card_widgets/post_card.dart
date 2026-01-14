@@ -151,8 +151,9 @@ class _PostCardState extends State<PostCard> {
       offset: const Offset(-48, 0), // Muncul di kiri button
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: AppColors.textSecondary)),
-      color: Colors.white,
+          side: BorderSide(color: AppColors.textSecondary)
+      ),
+      color: AppColors.backgroundContainer,
       elevation: 8,
       onSelected: (value) {
         switch (value) {
@@ -163,7 +164,7 @@ class _PostCardState extends State<PostCard> {
             _showReportModal();
             break;
           case 'delete':
-            _confirmDeletePost();
+            _confirmDeletePostModal();
             break;
         }
       },
@@ -240,43 +241,95 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  void _confirmDeletePost() {
+  void _confirmDeletePostModal() {
     Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Row(
-          children: [
-            // TODO: Replace with svg delete icon asset
-            Icon(Icons.delete_outline, color: AppColors.error),
-            const SizedBox(width: 8),
-            const Text('Hapus Post'),
-          ],
-        ),
-        content: const Text(
-          'Apakah kamu yakin ingin menghapus post ini? Tindakan ini tidak dapat dibatalkan.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(
-              'Batal',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
+      Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                AppAssets.images.delete,
+                width: 140,
+                height: 140,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Hapus Postingan',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.red.shade700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Yakin ingin menghapus postingan?',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Get.back(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.shade700,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(32),
+                        ),
+                      ),
+                      child: const Text(
+                        'Batal',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                        _deletePost();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(32),
+                        ),
+                      ),
+                      child: const Text(
+                        'Ya',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Get.back();
-              _deletePost();
-            },
-            child: const Text(
-              'Hapus',
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
+        ),
       ),
+      barrierDismissible: true,
     );
   }
 

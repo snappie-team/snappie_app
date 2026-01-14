@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
+import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../../shared/widgets/index.dart';
+import '../../shared/widgets/_display_widgets/app_icon.dart';
 import '../controllers/notification_controller.dart';
 
 class NotificationsView extends StatefulWidget {
@@ -33,26 +35,6 @@ class _NotificationsViewState extends State<NotificationsView> {
   Widget build(BuildContext context) {
     return ScaffoldFrame.detail(
       title: 'Notifikasi',
-      actions: [
-        // Mark all as read button
-        Obx(() => controller.unreadCount > 0
-            ? IconButton(
-                onPressed: () {
-                  controller.markAllAsRead();
-                  Get.snackbar(
-                    'Berhasil',
-                    'Semua notifikasi ditandai sudah dibaca',
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
-                },
-                icon: Icon(
-                  Icons.done_all,
-                  color: AppColors.primary,
-                ),
-                tooltip: 'Tandai semua dibaca',
-              )
-            : const SizedBox.shrink()),
-      ],
       slivers: [
         Obx(() {
           if (controller.isLoading) {
@@ -122,8 +104,8 @@ class _NotificationsViewState extends State<NotificationsView> {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: notification.isRead
-            ? Colors.white
-            : AppColors.primary.withOpacity(0.05),
+            ? AppColors.backgroundContainer.withAlpha(200)
+            : AppColors.backgroundContainer,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
@@ -132,9 +114,6 @@ class _NotificationsViewState extends State<NotificationsView> {
             offset: const Offset(0, 2),
           ),
         ],
-        border: notification.isRead
-            ? null
-            : Border.all(color: AppColors.primary.withOpacity(0.2), width: 1),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -150,30 +129,10 @@ class _NotificationsViewState extends State<NotificationsView> {
                 Text(
                   notification.title,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight:
                         notification.isRead ? FontWeight.w500 : FontWeight.w700,
                     color: Colors.black,
-                  ),
-                ),
-                if (notification.subtitle != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    notification.subtitle!,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-                const SizedBox(height: 4),
-                Text(
-                  _formatTime(notification.createdAt),
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textTertiary,
                   ),
                 ),
               ],
@@ -198,18 +157,21 @@ class _NotificationsViewState extends State<NotificationsView> {
               child: Text(
                 notification.actionLabel!,
                 style: const TextStyle(
-                  fontSize: 12,
+                  fontSize: 10,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           // More button
           PopupMenuButton<String>(
-            icon:
-                Icon(Icons.more_vert, color: AppColors.textTertiary, size: 20),
+            icon: AppIcon(AppAssets.iconsSvg.moreDots,
+                color: AppColors.textTertiary, size: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
+              side: BorderSide(color: AppColors.textSecondary),
             ),
+            offset: const Offset(-48, 0),
+            color: AppColors.backgroundContainer,
             onSelected: (value) {
               switch (value) {
                 case 'read':
@@ -231,18 +193,17 @@ class _NotificationsViewState extends State<NotificationsView> {
                   value: 'read',
                   child: Row(
                     children: [
-                      Icon(Icons.check, size: 18),
                       SizedBox(width: 8),
                       Text('Tandai dibaca'),
                     ],
                   ),
                 ),
+              if (!notification.isRead && notification.relatedUserId != null) const PopupMenuDivider(),
               if (notification.relatedUserId != null)
                 const PopupMenuItem<String>(
                   value: 'profile',
                   child: Row(
                     children: [
-                      Icon(Icons.person_outline, size: 18),
                       SizedBox(width: 8),
                       Text('Lihat profil'),
                     ],
@@ -303,24 +264,5 @@ class _NotificationsViewState extends State<NotificationsView> {
       ),
       child: Icon(iconData, color: iconColor, size: 22),
     );
-  }
-
-  String _formatTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final diff = now.difference(dateTime);
-
-    if (diff.inMinutes < 1) {
-      return 'Baru saja';
-    } else if (diff.inMinutes < 60) {
-      return '${diff.inMinutes} menit lalu';
-    } else if (diff.inHours < 24) {
-      return '${diff.inHours} jam lalu';
-    } else if (diff.inDays == 1) {
-      return 'Kemarin';
-    } else if (diff.inDays < 7) {
-      return '${diff.inDays} hari lalu';
-    } else {
-      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
-    }
   }
 }

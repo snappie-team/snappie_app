@@ -283,7 +283,7 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
           prefixIcon: AppIcon(AppAssets.icons.search, color: AppColors.textSecondary, size: 24),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
-                  // TODO: Add clear.svg icon to assets/iconsvg/
+                  // TODO: Add clear.svg icon to assets/icons/
                   icon: Icon(Icons.clear, color: AppColors.textSecondary),
                   onPressed: () {
                     _searchController.clear();

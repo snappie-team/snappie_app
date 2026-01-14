@@ -291,7 +291,7 @@ class _ReviewsViewState extends State<ReviewsView> {
                       rating,
                       (_) =>
                           AppIcon(AppAssets.icons.rating, color: AppColors.warning, size: 16)),
-                  // TODO: Add star_border.svg icon to assets/iconsvg/
+                  // TODO: Add star_border.svg icon to assets/icons/
                   ...List.generate(
                       5 - rating,
                       (_) => Icon(Icons.star_border,
@@ -380,7 +380,7 @@ class _ReviewsViewState extends State<ReviewsView> {
                   ),
                 ),
                 const SizedBox(width: 4),
-                // TODO: Add chevron_right.svg icon to assets/iconsvg/
+                // TODO: Add chevron_right.svg icon to assets/icons/
                 Icon(Icons.chevron_right, size: 20),
               ],
             ),
@@ -422,11 +422,11 @@ class _ReviewsViewState extends State<ReviewsView> {
               if (avgRating >= starValue) {
                 return AppIcon(AppAssets.icons.rating, color: AppColors.warning, size: 28);
               } else if (avgRating >= starValue - 0.5) {
-                // TODO: Add star_half.svg icon to assets/iconsvg/
+                // TODO: Add star_half.svg icon to assets/icons/
                 return Icon(Icons.star_half,
                     color: AppColors.warning, size: 28);
               } else {
-                // TODO: Add star_border.svg icon to assets/iconsvg/
+                // TODO: Add star_border.svg icon to assets/icons/
                 return Icon(Icons.star_border,
                     color: AppColors.warning, size: 28);
               }

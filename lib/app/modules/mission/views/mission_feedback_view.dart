@@ -107,7 +107,7 @@ class _FeedbackBaseLayout extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // TODO: Add coin.svg icon to assets/iconsvg/
+                // TODO: Add coin.svg icon to assets/icons/
                 Icon(Icons.monetization_on, color: AppColors.primary, size: 16),
                 const SizedBox(width: 4),
                 Text(

@@ -64,8 +64,8 @@ class PlaceDetailView extends GetView<ExploreController> {
                       )
                     : AppIcon(
                         isSaved
-                            ? AppAssets.iconsSvg.saveActive
-                            : AppAssets.iconsSvg.saveInactive,
+                            ? AppAssets.icons.saveActive
+                            : AppAssets.icons.saveInactive,
                         color: AppColors.primary,
                         size: 24,
                       ),
@@ -73,7 +73,7 @@ class PlaceDetailView extends GetView<ExploreController> {
               );
             }),
             IconButton(
-              icon: AppIcon(AppAssets.iconsSvg.share,
+              icon: AppIcon(AppAssets.icons.share,
                   color: AppColors.primary, size: 24),
               onPressed: () => _showShareDialog(place),
             ),
@@ -295,8 +295,8 @@ class PlaceDetailView extends GetView<ExploreController> {
               ...List.generate(5, (index) {
                 return AppIcon(
                   index < (place.avgRating ?? 0).round()
-                      ? AppAssets.iconsSvg.rating
-                      : AppAssets.iconsSvg.ratingEmpty,
+                      ? AppAssets.icons.rating
+                      : AppAssets.icons.ratingEmpty,
                   color: AppColors.warning,
                   size: 20,
                 );
@@ -458,7 +458,7 @@ class PlaceDetailView extends GetView<ExploreController> {
           _buildInfoRow(
             title: 'Alamat',
             content: Text(detail?.address ?? 'Alamat belum tersedia'),
-            icon: AppIcon(AppAssets.iconsSvg.location,
+            icon: AppIcon(AppAssets.icons.location,
                 color: AppColors.textSecondary, size: 20),
             trailing: TextButton(
               onPressed: () => _openMap(place),
@@ -516,13 +516,13 @@ class PlaceDetailView extends GetView<ExploreController> {
                 ),
               ),
             ),
-            icon: AppIcon(AppAssets.iconsSvg.clock,
+            icon: AppIcon(AppAssets.icons.clock,
                 color: AppColors.textSecondary, size: 20),
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
             title: 'Reservasi',
-            icon: AppIcon(AppAssets.iconsSvg.contact,
+            icon: AppIcon(AppAssets.icons.contact,
                 color: AppColors.textSecondary, size: 20),
             trailing: ElevatedButton(
               onPressed: () => _openReservation(detail?.contactNumber),
@@ -568,9 +568,8 @@ class PlaceDetailView extends GetView<ExploreController> {
                             width: 70,
                             height: 70,
                             color: AppColors.surfaceContainer,
-                            // TODO: Add fastfood.svg icon to assets/iconsvg/
                             child: AppIcon(
-                              AppAssets.iconsSvg.camera,
+                              AppAssets.icons.camera,
                             ),
                           ),
                   ),
@@ -784,8 +783,8 @@ class PlaceDetailView extends GetView<ExploreController> {
                         children: List.generate(5, (index) {
                           return AppIcon(
                             index < (review.rating ?? 0)
-                                ? AppAssets.iconsSvg.rating
-                                : AppAssets.iconsSvg.ratingEmpty,
+                                ? AppAssets.icons.rating
+                                : AppAssets.icons.ratingEmpty,
                             color: AppColors.warning,
                             size: 20,
                           );
@@ -1121,7 +1120,7 @@ class PlaceDetailView extends GetView<ExploreController> {
                             height: 70,
                             color: AppColors.surfaceContainer,
                             child: AppIcon(
-                              AppAssets.iconsSvg.camera,
+                              AppAssets.icons.camera,
                               color: AppColors.textSecondary,
                               size: 36,
                             ),
@@ -1149,7 +1148,7 @@ class PlaceDetailView extends GetView<ExploreController> {
                         ),
                         Row(
                           children: [
-                            AppIcon(AppAssets.iconsSvg.rating,
+                            AppIcon(AppAssets.icons.rating,
                                 color: AppColors.warning, size: 16),
                             const SizedBox(width: 4),
                             Text((place.avgRating ?? 0).toStringAsFixed(1)),
@@ -1236,7 +1235,7 @@ class PlaceDetailView extends GetView<ExploreController> {
                 ),
                 IconButton(
                   onPressed: controller.hideMissionCta,
-                  icon: AppIcon(AppAssets.iconsSvg.close,
+                  icon: AppIcon(AppAssets.icons.close,
                       color: AppColors.textSecondary, size: 20),
                   splashRadius: 18,
                   tooltip: 'Tutup',

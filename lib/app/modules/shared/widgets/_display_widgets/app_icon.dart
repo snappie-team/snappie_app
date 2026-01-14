@@ -12,11 +12,11 @@ import 'package:snappie_app/app/core/constants/app_colors.dart';
 /// 
 /// Contoh penggunaan:
 /// ```dart
-/// AppIcon(AppAssets.iconsSvg.home, size: 24, color: Colors.blue)
-/// AppIcon.forButton(AppAssets.iconsSvg.close, color: Colors.white)
+/// AppIcon(AppAssets.icons.home, size: 24, color: Colors.blue)
+/// AppIcon.forButton(AppAssets.icons.close, color: Colors.white)
 /// ```
 class AppIcon extends StatelessWidget {
-  /// Path ke SVG asset icon (dari AppAssets.iconsSvg.*)
+  /// Path ke SVG asset icon (dari AppAssets.icons.*)
   final String assetPath;
   
   /// Ukuran icon (width & height sama)
@@ -45,7 +45,7 @@ class AppIcon extends StatelessWidget {
   /// Usage:
   /// ```dart
   /// IconButton(
-  ///   icon: AppIcon.forButton(AppAssets.iconsSvg.close, color: Colors.white),
+  ///   icon: AppIcon.forButton(AppAssets.icons.close, color: Colors.white),
   ///   onPressed: () {},
   /// )
   /// ```

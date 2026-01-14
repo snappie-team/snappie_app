@@ -469,7 +469,7 @@ class RegisterView extends GetView<AuthController> {
                                                     errorBuilder: (context,
                                                         error, stackTrace) {
                                                       return AppIcon(
-                                                          AppAssets.iconsSvg
+                                                          AppAssets.icons
                                                               .profile,
                                                           size: 40);
                                                     },

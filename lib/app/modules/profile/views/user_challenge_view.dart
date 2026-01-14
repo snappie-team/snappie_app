@@ -288,7 +288,7 @@ class _UserChallengesViewState extends State<UserChallengesView> {
             // Detail arrow
             if (!isCompleted)
             AppIcon(
-              AppAssets.iconsSvg.moreOption3,
+              AppAssets.icons.moreOption3,
               color: AppColors.textSecondary,
               size: 24,
             ),

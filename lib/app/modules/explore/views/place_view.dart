@@ -49,13 +49,13 @@ class PlaceView extends GetView<ExploreController> {
         title: currentPlace?.name ?? '',
         actions: [
           ButtonWidget(
-            icon: AppIcon(AppAssets.iconsSvg.saveInactive, size: 24),
+            icon: AppIcon(AppAssets.icons.saveInactive, size: 24),
             backgroundColor: AppColors.background,
             onPressed: () => {},
           ),
           const SizedBox(width: 8),
           ButtonWidget(
-            icon: AppIcon(AppAssets.iconsSvg.share, size: 24),
+            icon: AppIcon(AppAssets.icons.share, size: 24),
             backgroundColor: AppColors.background,
             onPressed: () => {},
           ),

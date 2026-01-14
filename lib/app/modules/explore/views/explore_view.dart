@@ -117,7 +117,7 @@ class ExploreView extends GetView<ExploreController> {
             if (label == 'Penilaian' || label == 'Harga') ...[
               const SizedBox(width: 4),
               AppIcon(
-                AppAssets.iconsSvg.more,
+                AppAssets.icons.more,
                 size: 16,
                 color: isSelected ? AppColors.textOnPrimary : AppColors.primary,
               ),
@@ -173,7 +173,7 @@ class ExploreView extends GetView<ExploreController> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: AppIcon(AppAssets.iconsSvg.close),
+                  icon: AppIcon(AppAssets.icons.close),
                 ),
               ],
             ),
@@ -292,7 +292,7 @@ class ExploreView extends GetView<ExploreController> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: AppIcon(AppAssets.iconsSvg.close),
+                  icon: AppIcon(AppAssets.icons.close),
                 ),
               ],
             ),
@@ -413,7 +413,7 @@ class ExploreView extends GetView<ExploreController> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: AppIcon(AppAssets.iconsSvg.close),
+                  icon: AppIcon(AppAssets.icons.close),
                 ),
               ],
             ),
@@ -433,7 +433,7 @@ class ExploreView extends GetView<ExploreController> {
                         Text('$rating'),
                         const SizedBox(width: 8),
                         AppIcon(
-                          AppAssets.iconsSvg.rating,
+                          AppAssets.icons.rating,
                           color: AppColors.warning,
                           size: 16,
                         ),
@@ -503,7 +503,7 @@ class ExploreView extends GetView<ExploreController> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: AppIcon(AppAssets.iconsSvg.close),
+                  icon: AppIcon(AppAssets.icons.close),
                 ),
               ],
             ),
@@ -619,7 +619,7 @@ class ExploreView extends GetView<ExploreController> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 AppIcon(
-                  AppAssets.iconsSvg.location,
+                  AppAssets.icons.location,
                   size: 24,
                   color: AppColors.textSecondary,
                 ),
@@ -791,7 +791,7 @@ class ExploreView extends GetView<ExploreController> {
               IconButton(
                 onPressed: () => controller.clearFilters(),
                 icon: AppIcon(
-                  AppAssets.iconsSvg.close,
+                  AppAssets.icons.close,
                   color: AppColors.textSecondary,
                   size: 20,
                 ),
@@ -849,7 +849,7 @@ class ExploreView extends GetView<ExploreController> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 AppIcon(
-                  AppAssets.iconsSvg.search,
+                  AppAssets.icons.search,
                   size: 48,
                   color: AppColors.textSecondary,
                 ),

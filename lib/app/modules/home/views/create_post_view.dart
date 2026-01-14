@@ -224,7 +224,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                                       });
                                     },
                                     icon: AppIcon(
-                                      AppAssets.iconsSvg.close,
+                                      AppAssets.icons.close,
                                       color: AppColors.textOnPrimary,
                                     ),
                                     style: IconButton.styleFrom(
@@ -254,7 +254,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                                 ),
                               ),
                               deleteIcon: AppIcon(
-                                AppAssets.iconsSvg.close,
+                                AppAssets.icons.close,
                                 size: 18,
                                 color: AppColors.primary,
                               ),
@@ -303,7 +303,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                       ),
                       child: ListTile(
                         leading: AppIcon(
-                          AppAssets.iconsSvg.video,
+                          AppAssets.icons.video,
                           color: AppColors.primary,
                         ),
                         title: Text(
@@ -314,7 +314,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                           ),
                         ),
                         trailing: AppIcon(
-                          AppAssets.iconsSvg.moreOption3,
+                          AppAssets.icons.moreOption3,
                           color: AppColors.textSecondary,
                         ),
                         onTap: _pickImage,
@@ -337,7 +337,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                       ),
                       child: ListTile(
                         leading: AppIcon(
-                          AppAssets.iconsSvg.location,
+                          AppAssets.icons.location,
                           color: AppColors.error,
                         ),
                         title: Text(
@@ -348,7 +348,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                           ),
                         ),
                         trailing: AppIcon(
-                          AppAssets.iconsSvg.moreOption3,
+                          AppAssets.icons.moreOption3,
                           color: AppColors.textSecondary,
                         ),
                         onTap: _showPlaceSelection,
@@ -436,7 +436,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                   IconButton(
                     onPressed: () => Get.back(),
                     icon: AppIcon(
-                      AppAssets.iconsSvg.close,
+                      AppAssets.icons.close,
                       color: AppColors.textSecondary,
                     ),
                   ),

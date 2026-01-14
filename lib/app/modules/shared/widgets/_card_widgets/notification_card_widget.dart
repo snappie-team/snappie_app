@@ -74,7 +74,7 @@ class NotificationCardWidget extends StatelessWidget {
           ),
           IconButton(
             onPressed: onMoreTap,
-            icon: AppIcon(AppAssets.iconsSvg.moreDots, color: Colors.grey, size: 24),
+            icon: AppIcon(AppAssets.icons.moreDots, color: Colors.grey, size: 24),
           ),
         ],
       ),

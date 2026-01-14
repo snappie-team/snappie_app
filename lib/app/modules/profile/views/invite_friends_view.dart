@@ -240,7 +240,7 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
         backgroundColor: AppColors.backgroundContainer,
         elevation: 0,
         leading: IconButton(
-          icon: AppIcon(AppAssets.iconsSvg.back, color: AppColors.primary, size: 24),
+          icon: AppIcon(AppAssets.icons.back, color: AppColors.primary, size: 24),
           onPressed: () => Get.back(),
         ),
         title: Text(
@@ -280,7 +280,7 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
         decoration: InputDecoration(
           hintText: 'Nama atau username',
           hintStyle: TextStyle(color: AppColors.textSecondary),
-          prefixIcon: AppIcon(AppAssets.iconsSvg.search, color: AppColors.textSecondary, size: 24),
+          prefixIcon: AppIcon(AppAssets.icons.search, color: AppColors.textSecondary, size: 24),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
                   // TODO: Add clear.svg icon to assets/iconsvg/

@@ -119,19 +119,19 @@ class ProfileView extends GetView<ProfileController> {
               Row(
                 children: [
                   ButtonWidget(
-                    icon: AppIcon(AppAssets.iconsSvg.addFriend, color: AppColors.primary),
+                    icon: AppIcon(AppAssets.icons.addFriend, color: AppColors.primary),
                     backgroundColor: AppColors.backgroundContainer,
                     onPressed: () => Get.toNamed(Routes.INVITE_FRIENDS),
                   ),
                   const SizedBox(width: 8),
                   ButtonWidget(
-                    icon: AppIcon(AppAssets.iconsSvg.share, color: AppColors.primary),
+                    icon: AppIcon(AppAssets.icons.share, color: AppColors.primary),
                     backgroundColor: AppColors.backgroundContainer,
                     onPressed: () => _showShareProfileModal(),
                   ),
                   const SizedBox(width: 8),
                   ButtonWidget(
-                    icon: AppIcon(AppAssets.iconsSvg.setting, color: AppColors.primary),
+                    icon: AppIcon(AppAssets.icons.setting, color: AppColors.primary),
                     backgroundColor: AppColors.backgroundContainer,
                     onPressed: () => Get.toNamed(Routes.SETTINGS),
                   ),

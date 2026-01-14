@@ -83,7 +83,7 @@ class ArticlesView extends GetView<ArticlesController> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           AppIcon(
-                            AppAssets.iconsSvg.close,
+                            AppAssets.icons.close,
                             size: 16,
                             color: AppColors.textSecondary,
                           ),

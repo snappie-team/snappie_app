@@ -144,7 +144,7 @@ class _PostCardState extends State<PostCard> {
 
     return PopupMenuButton<String>(
       icon: AppIcon(
-        AppAssets.iconsSvg.moreDots,
+        AppAssets.icons.moreDots,
         color: AppColors.textSecondary,
         size: 18,
       ),
@@ -587,8 +587,8 @@ class _PostCardState extends State<PostCard> {
           children: [
             AppIcon(
               isLiked
-                  ? AppAssets.iconsSvg.loveActive
-                  : AppAssets.iconsSvg.loveInactive,
+                  ? AppAssets.icons.loveActive
+                  : AppAssets.icons.loveInactive,
               size: 24,
               color: AppColors.accent,
             ),
@@ -615,7 +615,7 @@ class _PostCardState extends State<PostCard> {
         child: Row(
           children: [
             AppIcon(
-              AppAssets.iconsSvg.comment,
+              AppAssets.icons.comment,
               color: AppColors.accent,
               size: 24,
             ),
@@ -637,7 +637,7 @@ class _PostCardState extends State<PostCard> {
     return GestureDetector(
       onTap: _showShare,
       child: AppIcon(
-        AppAssets.iconsSvg.share,
+        AppAssets.icons.share,
         color: AppColors.accent,
         size: 24,
       ),
@@ -710,8 +710,8 @@ class _PostCardState extends State<PostCard> {
           onTap: _savePost,
           child: AppIcon(
             isSaved
-                ? AppAssets.iconsSvg.saveActive
-                : AppAssets.iconsSvg.saveInactive,
+                ? AppAssets.icons.saveActive
+                : AppAssets.icons.saveInactive,
             color: AppColors.accent,
             size: 24,
           ),
@@ -722,7 +722,7 @@ class _PostCardState extends State<PostCard> {
       return GestureDetector(
         onTap: _savePost,
         child: AppIcon(
-          AppAssets.iconsSvg.saveInactive,
+          AppAssets.icons.saveInactive,
           color: AppColors.accent,
           size: 24,
         ),
@@ -837,7 +837,7 @@ class _PostCardState extends State<PostCard> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 AppIcon(
-                                  AppAssets.iconsSvg.comment,
+                                  AppAssets.icons.comment,
                                   size: 48,
                                   color: AppColors.textSecondary,
                                 ),

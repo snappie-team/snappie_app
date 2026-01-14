@@ -159,7 +159,7 @@ class ShareProfileModal extends StatelessWidget {
               ),
               IconButton(
                 onPressed: onClose ?? () => Get.back(),
-                icon: AppIcon(AppAssets.iconsSvg.close, color: AppColors.textSecondary, size: 24),
+                icon: AppIcon(AppAssets.icons.close, color: AppColors.textSecondary, size: 24),
               ),
             ],
           ),

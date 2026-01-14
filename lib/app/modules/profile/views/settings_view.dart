@@ -37,28 +37,28 @@ class SettingsView extends StatelessWidget {
 
                   // Info Personal
                   _buildMenuItem(
-                    iconAsset: AppAssets.iconsSvg.profile,
+                    iconAsset: AppAssets.icons.profile,
                     title: 'Info Personal',
                     onTap: () => Get.toNamed(AppPages.EDIT_PROFILE),
                   ),
 
                   // Bahasa
                   _buildMenuItem(
-                    iconAsset: AppAssets.iconsSvg.language,
+                    iconAsset: AppAssets.icons.language,
                     title: 'Bahasa',
                     onTap: () => Get.toNamed(AppPages.LANGUAGE),
                   ),
 
                   // Pusat Bantuan
                   _buildMenuItem(
-                    iconAsset: AppAssets.iconsSvg.helpCenter,
+                    iconAsset: AppAssets.icons.helpCenter,
                     title: 'Pusat Bantuan',
                     onTap: () => Get.toNamed(AppPages.HELP_CENTER),
                   ),
 
                   // FAQ
                   _buildMenuItem(
-                    iconAsset: AppAssets.iconsSvg.faq,
+                    iconAsset: AppAssets.icons.faq,
                     title: 'FAQ',
                     onTap: () => Get.toNamed(AppPages.FAQ),
                   ),
@@ -78,7 +78,7 @@ class SettingsView extends StatelessWidget {
 
                   // Keluar
                   _buildMenuItem(
-                    iconAsset: AppAssets.iconsSvg.logout,
+                    iconAsset: AppAssets.icons.logout,
                     title: 'Keluar',
                     onTap: () => _showLogoutConfirmation(context, authService),
                   ),
@@ -122,7 +122,7 @@ class SettingsView extends StatelessWidget {
               alignment: Alignment.topLeft,
               child: IconButton(
                 icon: AppIcon.forButton(
-                  AppAssets.iconsSvg.back,
+                  AppAssets.icons.back,
                   color: Colors.white,
                 ),
                 onPressed: () => Get.back(),

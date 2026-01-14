@@ -164,7 +164,7 @@ class _NotificationsViewState extends State<NotificationsView> {
             ),
           // More button
           PopupMenuButton<String>(
-            icon: AppIcon(AppAssets.iconsSvg.moreDots,
+            icon: AppIcon(AppAssets.icons.moreDots,
                 color: AppColors.textTertiary, size: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),

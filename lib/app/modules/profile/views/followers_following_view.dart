@@ -121,7 +121,7 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
         decoration: InputDecoration(
           hintText: 'Cari',
           hintStyle: TextStyle(color: AppColors.textSecondary),
-          prefixIcon: AppIcon(AppAssets.iconsSvg.search, color: AppColors.textSecondary, size: 24),
+          prefixIcon: AppIcon(AppAssets.icons.search, color: AppColors.textSecondary, size: 24),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
                   // TODO: Add clear.svg icon to assets/iconsvg/

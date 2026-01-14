@@ -144,7 +144,7 @@ class ScaffoldFrame extends StatelessWidget {
             ? Container(
                 margin: const EdgeInsets.all(8),
                 child: IconButton(
-                  icon: AppIcon(AppAssets.iconsSvg.back, color: AppColors.primary, size: 24),
+                  icon: AppIcon(AppAssets.icons.back, color: AppColors.primary, size: 24),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               )

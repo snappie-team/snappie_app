@@ -290,7 +290,7 @@ class _ReviewsViewState extends State<ReviewsView> {
                   ...List.generate(
                       rating,
                       (_) =>
-                          AppIcon(AppAssets.iconsSvg.rating, color: AppColors.warning, size: 16)),
+                          AppIcon(AppAssets.icons.rating, color: AppColors.warning, size: 16)),
                   // TODO: Add star_border.svg icon to assets/iconsvg/
                   ...List.generate(
                       5 - rating,
@@ -420,7 +420,7 @@ class _ReviewsViewState extends State<ReviewsView> {
             children: List.generate(5, (index) {
               final starValue = index + 1;
               if (avgRating >= starValue) {
-                return AppIcon(AppAssets.iconsSvg.rating, color: AppColors.warning, size: 28);
+                return AppIcon(AppAssets.icons.rating, color: AppColors.warning, size: 28);
               } else if (avgRating >= starValue - 0.5) {
                 // TODO: Add star_half.svg icon to assets/iconsvg/
                 return Icon(Icons.star_half,
@@ -463,7 +463,7 @@ class _ReviewsViewState extends State<ReviewsView> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  AppIcon(AppAssets.iconsSvg.rating, color: AppColors.warning, size: 16),
+                  AppIcon(AppAssets.icons.rating, color: AppColors.warning, size: 16),
                   const SizedBox(width: 8),
                   Expanded(
                     child: ClipRRect(

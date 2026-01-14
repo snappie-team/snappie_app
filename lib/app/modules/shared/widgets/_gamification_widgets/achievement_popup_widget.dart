@@ -99,7 +99,7 @@ class _AchievementPopupWidgetState extends State<AchievementPopupWidget>
               Align(
                 alignment: Alignment.topRight,
                 child: IconButton(
-                  icon: AppIcon(AppAssets.iconsSvg.close, color: Colors.white, size: 24),
+                  icon: AppIcon(AppAssets.icons.close, color: Colors.white, size: 24),
                   onPressed: () => Get.back(),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),

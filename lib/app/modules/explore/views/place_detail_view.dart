@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:snappie_app/app/core/constants/place_value.dart';
+import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/helpers/error_handler.dart';
@@ -13,7 +15,6 @@ import '../../../data/models/place_model.dart';
 import '../../../data/models/review_model.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../mission/controllers/mission_controller.dart';
-import '../../shared/widgets/_dialog_widgets/mission_confirm_modal.dart';
 
 class PlaceDetailView extends GetView<ExploreController> {
   const PlaceDetailView({super.key});
@@ -48,7 +49,8 @@ class PlaceDetailView extends GetView<ExploreController> {
           title: place.name ?? 'Place Name not available',
           actions: [
             Obx(() {
-              final isSaved = place.id != null && controller.isPlaceSaved(place.id!);
+              final isSaved =
+                  place.id != null && controller.isPlaceSaved(place.id!);
               final isLoading = controller.isTogglingFavorite;
               return IconButton(
                 icon: isLoading
@@ -60,15 +62,19 @@ class PlaceDetailView extends GetView<ExploreController> {
                           color: AppColors.primary,
                         ),
                       )
-                    : Icon(
-                        isSaved ? Icons.bookmark : Icons.bookmark_outline,
+                    : AppIcon(
+                        isSaved
+                            ? AppAssets.iconsSvg.saveActive
+                            : AppAssets.iconsSvg.saveInactive,
                         color: AppColors.primary,
+                        size: 24,
                       ),
                 onPressed: isLoading ? null : () => _toggleFavorite(place),
               );
             }),
             IconButton(
-              icon: Icon(Icons.share, color: AppColors.primary),
+              icon: AppIcon(AppAssets.iconsSvg.share,
+                  color: AppColors.primary, size: 24),
               onPressed: () => _showShareDialog(place),
             ),
           ],
@@ -96,7 +102,7 @@ class PlaceDetailView extends GetView<ExploreController> {
                       ),
                     if ((place.foodType?.isNotEmpty ?? false))
                       _buildChipSection(
-                        title: 'Tipe Kuliner',
+                        title: 'Katalog Makanan',
                         chips: place.foodType!,
                       ),
                     _buildInfoCard(place),
@@ -133,7 +139,7 @@ class PlaceDetailView extends GetView<ExploreController> {
     double imageHeight = 300;
     final imageUrls = place?.imageUrls ?? [];
     Logger.debug('imageUrls: $imageUrls', 'PlaceDetailView');
-    
+
     // If no images, show placeholder
     if (imageUrls.isEmpty) {
       return Container(
@@ -142,7 +148,7 @@ class PlaceDetailView extends GetView<ExploreController> {
         color: AppColors.background,
         child: Center(
           child: Icon(
-            Icons.restaurant,
+            Icons.image_not_supported,
             color: AppColors.textTertiary,
             size: imageHeight * 0.3,
           ),
@@ -164,7 +170,7 @@ class PlaceDetailView extends GetView<ExploreController> {
                 color: AppColors.background,
                 child: Center(
                   child: Icon(
-                    Icons.restaurant,
+                    Icons.image_not_supported,
                     color: AppColors.textTertiary,
                     size: imageHeight * 0.3,
                   ),
@@ -179,7 +185,7 @@ class PlaceDetailView extends GetView<ExploreController> {
     // Multiple images - show carousel
     final PageController pageController = PageController();
     final RxInt currentImageIndex = 0.obs;
-    
+
     return Container(
       height: imageHeight,
       child: PageView.builder(
@@ -189,12 +195,12 @@ class PlaceDetailView extends GetView<ExploreController> {
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () {
-               FullscreenImageViewer.show(
-                 context: context,
-                 imageUrls: imageUrls,
-                 initialIndex: index,
-               );
-             },
+              FullscreenImageViewer.show(
+                context: context,
+                imageUrls: imageUrls,
+                initialIndex: index,
+              );
+            },
             child: Container(
               width: double.infinity,
               child: Stack(
@@ -210,7 +216,7 @@ class PlaceDetailView extends GetView<ExploreController> {
                           color: AppColors.background,
                           child: Center(
                             child: Icon(
-                              Icons.restaurant,
+                              Icons.image_not_supported,
                               color: AppColors.textTertiary,
                               size: imageHeight * 0.3,
                             ),
@@ -224,7 +230,8 @@ class PlaceDetailView extends GetView<ExploreController> {
                     top: 16,
                     right: 16,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.black.withOpacity(0.6),
                         borderRadius: BorderRadius.circular(12),
@@ -242,10 +249,10 @@ class PlaceDetailView extends GetView<ExploreController> {
                 ],
               ),
             ),
-            );
-          },
-        ),
-      );
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildPlaceHeaderCard(PlaceModel place) {
@@ -286,10 +293,10 @@ class PlaceDetailView extends GetView<ExploreController> {
           Row(
             children: [
               ...List.generate(5, (index) {
-                return Icon(
+                return AppIcon(
                   index < (place.avgRating ?? 0).round()
-                      ? Icons.star
-                      : Icons.star_border,
+                      ? AppAssets.iconsSvg.rating
+                      : AppAssets.iconsSvg.ratingEmpty,
                   color: AppColors.warning,
                   size: 20,
                 );
@@ -352,6 +359,7 @@ class PlaceDetailView extends GetView<ExploreController> {
 
               return Expanded(
                 child: Container(
+                  height: 64,
                   margin: EdgeInsets.only(right: colIndex == 0 ? 8 : 0),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -360,7 +368,7 @@ class PlaceDetailView extends GetView<ExploreController> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       if (style.icon != null) ...[
@@ -373,7 +381,8 @@ class PlaceDetailView extends GetView<ExploreController> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: textColor,
-                            fontSize: 13,
+                            fontSize:
+                                FontSize.getSize(FontSizeOption.mediumSmall),
                             fontWeight: FontWeight.w500,
                           ),
                           maxLines: 2,
@@ -438,7 +447,9 @@ class PlaceDetailView extends GetView<ExploreController> {
 
   Widget _buildInfoCard(PlaceModel place) {
     final detail = place.placeDetail;
+    final openingDaysText = _formatOpeningDays(detail);
     final openingHoursText = _formatOperatingHours(detail);
+    final isOpen = _checkIsOpenNow(detail);
 
     return _buildSectionCard(
       child: Column(
@@ -446,31 +457,73 @@ class PlaceDetailView extends GetView<ExploreController> {
         children: [
           _buildInfoRow(
             title: 'Alamat',
-            value: detail?.address ?? 'Alamat belum tersedia',
-            icon: Icons.place_outlined,
+            content: Text(detail?.address ?? 'Alamat belum tersedia'),
+            icon: AppIcon(AppAssets.iconsSvg.location,
+                color: AppColors.textSecondary, size: 20),
             trailing: TextButton(
               onPressed: () => _openMap(place),
-              child: Text('Lihat di peta',
-                  style: TextStyle(
-                      color: AppColors.accent, fontWeight: FontWeight.w600)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
+                foregroundColor: AppColors.textOnPrimary,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(99)),
+              ),
+              child: Text('Lihat di peta'),
             ),
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
             title: 'Jam Buka',
-            value: detail?.openingDays?.join(', ') ?? '',
-            // value: openingText ?? 'Jam operasional belum tersedia',
-            icon: Icons.access_time,
-            trailing: Text(
-              openingHoursText ?? 'Jam operasional belum tersedia',
-              style: TextStyle(
-                  color: AppColors.success, fontWeight: FontWeight.w600),
+            content: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  openingDaysText ?? 'Jam operasional belum tersedia',
+                ),
+                Text(': '),
+                Text(
+                  openingHoursText ?? 'Jam operasional belum tersedia',
+                ),
+              ],
             ),
+            trailing: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: isOpen == null
+                      ? AppColors.textSecondary
+                      : isOpen
+                          ? AppColors.success
+                          : AppColors.error,
+                ),
+                borderRadius: BorderRadius.circular(99),
+              ),
+              child: Text(
+                isOpen == null
+                    ? 'Tidak ada data'
+                    : isOpen
+                        ? 'Buka Sekarang'
+                        : 'Tutup',
+                style: TextStyle(
+                  color: isOpen == null
+                      ? AppColors.textSecondary
+                      : isOpen
+                          ? AppColors.success
+                          : AppColors.error,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            icon: AppIcon(AppAssets.iconsSvg.clock,
+                color: AppColors.textSecondary, size: 20),
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
             title: 'Reservasi',
-            icon: Icons.headset_mic_outlined,
+            icon: AppIcon(AppAssets.iconsSvg.contact,
+                color: AppColors.textSecondary, size: 20),
             trailing: ElevatedButton(
               onPressed: () => _openReservation(detail?.contactNumber),
               style: ElevatedButton.styleFrom(
@@ -515,8 +568,10 @@ class PlaceDetailView extends GetView<ExploreController> {
                             width: 70,
                             height: 70,
                             color: AppColors.surfaceContainer,
-                            child: Icon(Icons.fastfood,
-                                color: AppColors.textSecondary),
+                            // TODO: Add fastfood.svg icon to assets/iconsvg/
+                            child: AppIcon(
+                              AppAssets.iconsSvg.camera,
+                            ),
                           ),
                   ),
                   const SizedBox(width: 12),
@@ -542,7 +597,7 @@ class PlaceDetailView extends GetView<ExploreController> {
                         const SizedBox(height: 6),
                         Text(
                           item.price != null
-                              ? 'Rp${item.price!.toStringAsFixed(0)}'
+                              ? 'Rp ${item.price!.toStringAsFixed(0)}'
                               : '-',
                           style: TextStyle(
                             color: AppColors.success,
@@ -562,7 +617,8 @@ class PlaceDetailView extends GetView<ExploreController> {
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.textOnPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(99)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(99)),
             ),
             child: const Text('Lihat Menu Lengkap'),
           ),
@@ -579,7 +635,8 @@ class PlaceDetailView extends GetView<ExploreController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('Fasilitas', onSeeAll: () => _showFacilitiesDialog(place, facilities)),
+          _buildSectionHeader('Fasilitas',
+              onSeeAll: () => _showFacilitiesDialog(place, facilities)),
           const SizedBox(height: 12),
           _buildChipGrid(visibleFacilities),
         ],
@@ -718,27 +775,29 @@ class PlaceDetailView extends GetView<ExploreController> {
                       Text(
                         review.user?.name ?? 'Anonim',
                         style: TextStyle(
+                            fontSize:
+                                FontSize.getSize(FontSizeOption.mediumSmall),
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary),
                       ),
                       Row(
                         children: List.generate(5, (index) {
-                          return Icon(
+                          return AppIcon(
                             index < (review.rating ?? 0)
-                                ? Icons.star
-                                : Icons.star_border,
+                                ? AppAssets.iconsSvg.rating
+                                : AppAssets.iconsSvg.ratingEmpty,
                             color: AppColors.warning,
                             size: 20,
                           );
                         }),
-                    ),
+                      ),
                     ],
                   ),
                 ),
                 Text(
                   _formatDate(review.createdAt ?? DateTime.now()),
-                  style: TextStyle(
-                      color: AppColors.textSecondary, fontSize: 12),
+                  style:
+                      TextStyle(color: AppColors.textSecondary, fontSize: 12),
                 ),
               ],
             ),
@@ -748,7 +807,10 @@ class PlaceDetailView extends GetView<ExploreController> {
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               review.content!,
-              style: TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: FontSize.getSize(FontSizeOption.mediumSmall),
+              ),
             ),
           ],
         ],
@@ -761,22 +823,79 @@ class PlaceDetailView extends GetView<ExploreController> {
     final max = place.maxPrice;
     if (min == null && max == null) return null;
     if (min != null && max != null) {
-      return 'Rp${min.toStringAsFixed(0)} - Rp${max.toStringAsFixed(0)}/orang';
+      return 'Rp ${min.toStringAsFixed(0)} - Rp ${max.toStringAsFixed(0)}/orang';
     }
     final value = min ?? max;
-    return value != null ? 'Mulai Rp${value.toStringAsFixed(0)}' : null;
+    return value != null ? 'Mulai Rp ${value.toStringAsFixed(0)}' : null;
+  }
+
+  bool? _checkIsOpenNow(PlaceDetail? detail) {
+    if (detail == null) return null;
+    if (detail.openingHours == null || detail.closingHours == null) return null;
+
+    try {
+      final now = DateTime.now();
+      final currentTime = TimeOfDay(hour: now.hour, minute: now.minute);
+
+      // Parse opening hours (format: "HH:MM" or "HH.MM")
+      final openingParts = detail.openingHours!.split(RegExp(r'[:.]'));
+      final openingTime = TimeOfDay(
+        hour: int.parse(openingParts[0]),
+        minute: openingParts.length > 1 ? int.parse(openingParts[1]) : 0,
+      );
+
+      // Parse closing hours
+      final closingParts = detail.closingHours!.split(RegExp(r'[:.]'));
+      final closingTime = TimeOfDay(
+        hour: int.parse(closingParts[0]),
+        minute: closingParts.length > 1 ? int.parse(closingParts[1]) : 0,
+      );
+
+      // Convert to minutes for comparison
+      final currentMinutes = currentTime.hour * 60 + currentTime.minute;
+      final openingMinutes = openingTime.hour * 60 + openingTime.minute;
+      final closingMinutes = closingTime.hour * 60 + closingTime.minute;
+
+      // Handle overnight hours (e.g., 22:00 - 02:00)
+      if (closingMinutes < openingMinutes) {
+        return currentMinutes >= openingMinutes ||
+            currentMinutes < closingMinutes;
+      }
+
+      return currentMinutes >= openingMinutes &&
+          currentMinutes < closingMinutes;
+    } catch (e) {
+      Logger.error('Error parsing opening hours: $e', 'PlaceDetailView');
+      return null;
+    }
+  }
+
+  String? _formatOpeningDays(PlaceDetail? detail) {
+    if (detail == null ||
+        detail.openingDays == null ||
+        detail.openingDays!.isEmpty) {
+      return null;
+    }
+
+    final days = detail.openingDays!;
+    if (days.length == 1) {
+      return days.first;
+    }
+
+    // Create range from first to last day
+    return '${days.first} - ${days.last}';
   }
 
   String? _formatOperatingHours(PlaceDetail? detail) {
     if (detail == null) return null;
     if (detail.openingHours == null || detail.closingHours == null) return null;
-    return 'Buka ${detail.openingHours} - ${detail.closingHours} WIB';
+    return '${detail.openingHours} - ${detail.closingHours} WIB';
   }
 
   void _openMap(PlaceModel place) async {
     final lat = place.latitude;
     final lng = place.longitude;
-    
+
     if (lat == null || lng == null) {
       Get.snackbar(
         'Petunjuk Arah',
@@ -787,18 +906,18 @@ class PlaceDetailView extends GetView<ExploreController> {
       );
       return;
     }
-    
+
     // Try Google Maps app first, fallback to browser
     final googleMapsUrl = Uri.parse(
       'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
     );
-    
+
     try {
       final launched = await launchUrl(
         googleMapsUrl,
         mode: LaunchMode.externalApplication,
       );
-      
+
       if (!launched) {
         Get.snackbar(
           'Error',
@@ -830,10 +949,10 @@ class PlaceDetailView extends GetView<ExploreController> {
       );
       return;
     }
-    
+
     // Format phone number: remove non-digit characters
     String formattedNumber = contactNumber.replaceAll(RegExp(r'[^0-9+]'), '');
-    
+
     // Handle various formats
     if (formattedNumber.startsWith('+62')) {
       formattedNumber = formattedNumber.substring(1); // Remove + for wa.me
@@ -844,7 +963,7 @@ class PlaceDetailView extends GetView<ExploreController> {
     } else {
       formattedNumber = '62$formattedNumber';
     }
-    
+
     final whatsappUrl = Uri.parse('https://wa.me/$formattedNumber');
 
     try {
@@ -852,7 +971,7 @@ class PlaceDetailView extends GetView<ExploreController> {
         whatsappUrl,
         mode: LaunchMode.externalApplication,
       );
-      
+
       if (!launched) {
         Get.snackbar(
           'Error',
@@ -876,12 +995,12 @@ class PlaceDetailView extends GetView<ExploreController> {
   void _startMission(PlaceModel place) async {
     // Show confirmation modal
     final result = await MissionConfirmModal.show(place: place);
-    
+
     if (result != null && result.confirmed) {
       // Initialize mission controller and navigate
       final missionController = Get.put(MissionController());
       missionController.initMission(place, hideUsername: result.hideUsername);
-      
+
       Get.toNamed(AppPages.MISSION_PHOTO);
     }
   }
@@ -890,38 +1009,37 @@ class PlaceDetailView extends GetView<ExploreController> {
     showModalBottomSheet(
       context: Get.context!,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
+        initialChildSize: 0.8,
         minChildSize: 0.4,
         maxChildSize: 0.9,
         expand: false,
         builder: (context, scrollController) => Container(
           padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppColors.backgroundContainer,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.shadowDark,
+                blurRadius: 8,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Daftar Menu',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
+              Text(
+                'Daftar Menu',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
               const SizedBox(height: 16),
-              
               if (menuImageUrl.isNotEmpty)
                 Expanded(
                   child: SingleChildScrollView(
@@ -943,7 +1061,6 @@ class PlaceDetailView extends GetView<ExploreController> {
                     ),
                   ),
                 ),
-              
               const SizedBox(height: 16),
             ],
           ),
@@ -1003,8 +1120,11 @@ class PlaceDetailView extends GetView<ExploreController> {
                             width: 70,
                             height: 70,
                             color: AppColors.surfaceContainer,
-                            child: Icon(Icons.image,
-                                color: AppColors.textSecondary),
+                            child: AppIcon(
+                              AppAssets.iconsSvg.camera,
+                              color: AppColors.textSecondary,
+                              size: 36,
+                            ),
                           ),
                   ),
                   const SizedBox(width: 12),
@@ -1028,12 +1148,13 @@ class PlaceDetailView extends GetView<ExploreController> {
                               color: AppColors.textSecondary, fontSize: 12),
                         ),
                         Row(
-                        children: [
-                          Icon(Icons.star, color: AppColors.warning, size: 16),
-                          const SizedBox(width: 4),
-                          Text((place.avgRating ?? 0).toStringAsFixed(1)),
-                        ],
-                      ),
+                          children: [
+                            AppIcon(AppAssets.iconsSvg.rating,
+                                color: AppColors.warning, size: 16),
+                            const SizedBox(width: 4),
+                            Text((place.avgRating ?? 0).toStringAsFixed(1)),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -1115,7 +1236,7 @@ class PlaceDetailView extends GetView<ExploreController> {
                 ),
                 IconButton(
                   onPressed: controller.hideMissionCta,
-                  icon: Icon(Icons.close,
+                  icon: AppIcon(AppAssets.iconsSvg.close,
                       color: AppColors.textSecondary, size: 20),
                   splashRadius: 18,
                   tooltip: 'Tutup',
@@ -1146,14 +1267,15 @@ class PlaceDetailView extends GetView<ExploreController> {
 
   Widget _buildInfoRow({
     required String title,
-    String? value,
-    required IconData icon,
+    // String? value,
+    required Widget icon,
+    Widget? content,
     Widget? trailing,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: AppColors.textSecondary),
+        icon,
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -1166,18 +1288,14 @@ class PlaceDetailView extends GetView<ExploreController> {
                   color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: 4),
-              if (value != null)
-                Text(
-                  value,
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                  ),
-                )
-              else
-                SizedBox.shrink(),
-              const SizedBox(height: 4),
-              if (trailing != null) trailing,
+              if (content != null) ...[
+                const SizedBox(height: 4),
+                content
+              ],
+              if (trailing != null) ...[
+                const SizedBox(height: 4),
+                trailing
+              ],
             ],
           ),
         ),
@@ -1217,16 +1335,17 @@ class PlaceDetailView extends GetView<ExploreController> {
     final description = place.description ?? '';
     final lat = place.latitude;
     final lng = place.longitude;
-    
+
     String shareText = '🍽️ $placeName\n';
     if (description.isNotEmpty) {
       shareText += '\n$description\n';
     }
     if (lat != null && lng != null) {
-      shareText += '\n📍 Lihat di Google Maps:\nhttps://www.google.com/maps/search/?api=1&query=$lat,$lng';
+      shareText +=
+          '\n📍 Lihat di Google Maps:\nhttps://www.google.com/maps/search/?api=1&query=$lat,$lng';
     }
     shareText += '\n\nTemukan di Snappie App! 📱';
-    
+
     await SharePlus.instance.share(
       ShareParams(
         text: shareText,
@@ -1249,10 +1368,10 @@ class PlaceDetailView extends GetView<ExploreController> {
 
     try {
       final isNowSaved = await controller.toggleSavedPlace(place.id!);
-      
+
       Get.snackbar(
         isNowSaved ? 'Disimpan' : 'Dihapus',
-        isNowSaved 
+        isNowSaved
             ? '${place.name} ditambahkan ke favorit'
             : '${place.name} dihapus dari favorit',
         snackPosition: SnackPosition.BOTTOM,

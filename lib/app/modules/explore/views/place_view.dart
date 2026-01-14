@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
+import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/detail_layout.dart';
 import '../../../core/services/logger_service.dart';
 import '../controllers/explore_controller.dart';
@@ -48,13 +49,13 @@ class PlaceView extends GetView<ExploreController> {
         title: currentPlace?.name ?? '',
         actions: [
           ButtonWidget(
-            icon: Icon(Icons.bookmark_outline),
+            icon: AppIcon(AppAssets.iconsSvg.saveInactive, size: 24),
             backgroundColor: AppColors.background,
             onPressed: () => {},
           ),
           const SizedBox(width: 8),
           ButtonWidget(
-            icon: Icon(Icons.share_outlined),
+            icon: AppIcon(AppAssets.iconsSvg.share, size: 24),
             backgroundColor: AppColors.background,
             onPressed: () => {},
           ),

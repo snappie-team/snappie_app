@@ -41,7 +41,7 @@ class _GalleryViewState extends State<GalleryView> {
     }
 
     return ScaffoldFrame.detail(
-      title: 'Galeri ${place!.name ?? ""}',
+      title: 'Galeri Bersama',
       onRefresh: () async {
         if (place?.id != null) {
           await controller.loadGalleryCheckins(place!.id!);
@@ -79,28 +79,32 @@ class _GalleryViewState extends State<GalleryView> {
   Widget _buildTabBar() {
     final tabs = ['Galeri Kami', 'Galeri Misi', 'Postingan Terkait'];
     
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: List.generate(tabs.length, (index) {
-          final isSelected = _selectedTabIndex == index;
-          return Padding(
-            padding: EdgeInsets.only(right: index < tabs.length - 1 ? 8 : 0),
-            child: GestureDetector(
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundContainer
+      ),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(4, 4, 4, 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(99),
+          color: AppColors.background
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(tabs.length, (index) {
+            final isSelected = _selectedTabIndex == index;
+            return GestureDetector(
               onTap: () {
                 setState(() {
                   _selectedTabIndex = index;
                 });
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
                 decoration: BoxDecoration(
                   color: isSelected ? AppColors.primary : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20),
-                  border: isSelected 
-                      ? null 
-                      : Border.all(color: AppColors.border, width: 1),
+                  borderRadius: BorderRadius.circular(99),
                 ),
                 child: Text(
                   tabs[index],
@@ -111,9 +115,9 @@ class _GalleryViewState extends State<GalleryView> {
                   ),
                 ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }
@@ -149,20 +153,26 @@ class _GalleryViewState extends State<GalleryView> {
     });
   }
 
-  /// Tab 3: Postingan Terkait - from post.imageUrls
+  /// Tab 3: Postingan Terkait - from posts related to this place
   Widget _buildPostinganTerkaitTab() {
     return Obx(() {
       if (controller.isLoadingGalleryPosts) {
         return const Center(child: CircularProgressIndicator());
       }
 
-      final photos = controller.galleryPostImages;
+      final posts = controller.galleryPosts;
       
-      if (photos.isEmpty) {
+      if (posts.isEmpty) {
         return _buildEmptyState('Belum ada postingan terkait');
       }
 
-      return _buildPhotoGrid(photos: photos);
+      return ListView.builder(
+        padding: EdgeInsets.zero,
+        itemCount: posts.length,
+        itemBuilder: (context, index) {
+          return PostCard(post: posts[index]);
+        },
+      );
     });
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../data/models/place_model.dart';
 import '../../../data/models/review_model.dart';
 import '../../../routes/app_pages.dart';
@@ -122,34 +123,38 @@ class _ReviewsViewState extends State<ReviewsView> {
       return const Center(child: LoadingStateWidget());
     }
 
-    return Column(
-      children: [
-        // Filter chips
-        _buildFilterChips(place),
-
-        // CTA Berikan Ulasan
-        _buildGiveReviewCTA(),
-
-        // Rating summary
-        _buildRatingSummary(place),
-
-        // Reviews list
-        if (controller.reviews.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(32),
-            child: NoDataEmptyState(
-              title: 'Belum ada ulasan',
-              subtitle: 'Jadilah yang pertama menulis ulasan',
-            ),
-          )
-        else
-          _buildReviewsList(),
-      ],
+    return Container(
+      color: AppColors.background,
+      child: Column(
+        children: [
+          // Filter chips
+          _buildFilterChips(place),
+      
+          // CTA Berikan Ulasan
+          _buildGiveReviewCTA(),
+                
+          // Rating summary
+          _buildRatingSummary(place),
+      
+          // Reviews list
+          if (controller.reviews.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(32),
+              child: NoDataEmptyState(
+                title: 'Belum ada ulasan',
+                subtitle: 'Jadilah yang pertama menulis ulasan',
+              ),
+            )
+          else
+            _buildReviewsList(),
+        ],
+      ),
     );
   }
 
   Widget _buildFilterChips(PlaceModel place) {
     return Container(
+      decoration: BoxDecoration(color: AppColors.backgroundContainer),
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: IntrinsicHeight(
         child: Row(
@@ -207,7 +212,7 @@ class _ReviewsViewState extends State<ReviewsView> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.background,
+          color: isSelected ? AppColors.primary : AppColors.backgroundContainer,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: AppColors.primary,
@@ -234,7 +239,7 @@ class _ReviewsViewState extends State<ReviewsView> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
         color:
-            _selectedRating != null ? AppColors.primary : AppColors.background,
+            _selectedRating != null ? AppColors.primary : AppColors.backgroundContainer,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: AppColors.primary,
@@ -285,7 +290,8 @@ class _ReviewsViewState extends State<ReviewsView> {
                   ...List.generate(
                       rating,
                       (_) =>
-                          Icon(Icons.star, color: AppColors.warning, size: 16)),
+                          AppIcon(AppAssets.iconsSvg.rating, color: AppColors.warning, size: 16)),
+                  // TODO: Add star_border.svg icon to assets/iconsvg/
                   ...List.generate(
                       5 - rating,
                       (_) => Icon(Icons.star_border,
@@ -312,7 +318,11 @@ class _ReviewsViewState extends State<ReviewsView> {
 
   Widget _buildGiveReviewCTA() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -349,7 +359,7 @@ class _ReviewsViewState extends State<ReviewsView> {
             onPressed: () {
               final PlaceModel? place = Get.arguments as PlaceModel?;
               if (place != null) {
-                Get.toNamed(AppPages.GIVE_REVIEW, arguments: place);
+                Get.toNamed(AppPages.MISSION_REVIEW, arguments: place);
               }
             },
             style: ElevatedButton.styleFrom(
@@ -370,6 +380,7 @@ class _ReviewsViewState extends State<ReviewsView> {
                   ),
                 ),
                 const SizedBox(width: 4),
+                // TODO: Add chevron_right.svg icon to assets/iconsvg/
                 Icon(Icons.chevron_right, size: 20),
               ],
             ),
@@ -383,7 +394,12 @@ class _ReviewsViewState extends State<ReviewsView> {
     final totalReviews = controller.reviews.length;
     final avgRating = place.avgRating ?? 0.0;
 
-    return Padding(
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -404,11 +420,13 @@ class _ReviewsViewState extends State<ReviewsView> {
             children: List.generate(5, (index) {
               final starValue = index + 1;
               if (avgRating >= starValue) {
-                return Icon(Icons.star, color: AppColors.warning, size: 28);
+                return AppIcon(AppAssets.iconsSvg.rating, color: AppColors.warning, size: 28);
               } else if (avgRating >= starValue - 0.5) {
+                // TODO: Add star_half.svg icon to assets/iconsvg/
                 return Icon(Icons.star_half,
                     color: AppColors.warning, size: 28);
               } else {
+                // TODO: Add star_border.svg icon to assets/iconsvg/
                 return Icon(Icons.star_border,
                     color: AppColors.warning, size: 28);
               }
@@ -445,7 +463,7 @@ class _ReviewsViewState extends State<ReviewsView> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  Icon(Icons.star, color: AppColors.warning, size: 16),
+                  AppIcon(AppAssets.iconsSvg.rating, color: AppColors.warning, size: 16),
                   const SizedBox(width: 8),
                   Expanded(
                     child: ClipRRect(
@@ -494,126 +512,125 @@ class _ReviewsViewState extends State<ReviewsView> {
       );
     }
 
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: reviews.length,
-      itemBuilder: (context, index) {
-        return _buildReviewCard(reviews[index]);
-      },
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.zero,
+        // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: reviews.length,
+        separatorBuilder: (context, index) => Divider(
+          height: 24,
+          thickness: 1,
+          color: AppColors.surfaceContainer,
+        ),
+        itemBuilder: (context, index) {
+          return _buildReviewCard(reviews[index]);
+        },
+      ),
     );
   }
 
   Widget _buildReviewCard(ReviewModel review) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowDark,
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // User info row
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AvatarWidget(
-                imageUrl: review.user?.imageUrl,
-                size: AvatarSize.medium,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      review.user?.name ?? 'Anonim',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: List.generate(5, (index) {
-                        return Icon(
-                          index < (review.rating ?? 0)
-                              ? Icons.star
-                              : Icons.star_border,
-                          color: AppColors.warning,
-                          size: 16,
-                        );
-                      }),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                _formatDate(review.createdAt ?? DateTime.now()),
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-
-          // Review content
-          if (review.content != null && review.content!.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Text(
-              review.content!,
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                height: 1.4,
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // User info row
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AvatarWidget(
+              imageUrl: review.user?.imageUrl,
+              size: AvatarSize.medium,
             ),
-          ],
-
-          // Review images
-          if (review.imageUrls != null && review.imageUrls!.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 80,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: review.imageUrls!.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      FullscreenImageViewer.show(
-                        context: context,
-                        imageUrls: review.imageUrls!,
-                        initialIndex: index,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    review.user?.name ?? 'Anonim',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: List.generate(5, (index) {
+                      return Icon(
+                        index < (review.rating ?? 0)
+                            ? Icons.star
+                            : Icons.star_border,
+                        color: AppColors.warning,
+                        size: 16,
                       );
-                    },
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: NetworkImageWidget(
-                        imageUrl: review.imageUrls![index],
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  );
-                },
+                    }),
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              _formatDate(review.createdAt ?? DateTime.now()),
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
               ),
             ),
           ],
+        ),
+    
+        // Review content
+        if (review.content != null && review.content!.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(
+            review.content!,
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              height: 1.4,
+            ),
+          ),
         ],
-      ),
+    
+        // Review images
+        if (review.imageUrls != null && review.imageUrls!.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 80,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: review.imageUrls!.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    FullscreenImageViewer.show(
+                      context: context,
+                      imageUrls: review.imageUrls!,
+                      initialIndex: index,
+                    );
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: NetworkImageWidget(
+                      imageUrl: review.imageUrls![index],
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ],
     );
   }
 

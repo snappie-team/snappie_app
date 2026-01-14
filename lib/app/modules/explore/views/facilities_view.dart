@@ -142,23 +142,29 @@ class _FacilitiesViewState extends State<FacilitiesView> {
     return ScaffoldFrame.detail(
       title: 'Fasilitas',
       slivers: [
-        _allFacilities.isEmpty
-            ? SliverFillRemaining(
-                child: _buildEmptyState(),
-              )
-            : SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    // Filter chips
-                    _buildFilterChips(),
-                    const SizedBox(height: 8),
-                  ],
-                ),
+        if (_allFacilities.isEmpty)
+          SliverFillRemaining(
+            child: _buildEmptyState(),
+          )
+        else ...[
+          SliverToBoxAdapter(
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.background,
               ),
-        if (_allFacilities.isNotEmpty)
+              child: Column(
+                children: [
+                  // Filter chips
+                  _buildFilterChips(),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ),
           SliverFillRemaining(
             child: _buildFacilitiesList(),
           ),
+        ],
       ],
     );
   }
@@ -187,9 +193,20 @@ class _FacilitiesViewState extends State<FacilitiesView> {
   }
 
   Widget _buildFilterChips() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.backgroundContainer,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: GridView.builder(
+        padding: EdgeInsets.zero,
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -219,7 +236,7 @@ class _FacilitiesViewState extends State<FacilitiesView> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.background,
+          color: isSelected ? AppColors.primary : AppColors.backgroundContainer,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: AppColors.primary,
@@ -254,6 +271,7 @@ class _FacilitiesViewState extends State<FacilitiesView> {
     }
 
     return ListView.builder(
+      padding: EdgeInsets.zero,
       itemCount: facilities.length,
       itemBuilder: (context, index) {
         final facility = facilities[index];
@@ -267,7 +285,7 @@ class _FacilitiesViewState extends State<FacilitiesView> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: AppColors.backgroundContainer,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(

@@ -79,7 +79,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
           child: Container(
             margin: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.background,
+              color: AppColors.backgroundContainer,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
@@ -285,7 +285,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Tambahkan foto dan video (maks $_maxImages)',
+                'Tambahkan foto dan video',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -481,6 +481,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
           ),
           const SizedBox(height: 12),
           GridView.builder(
+            padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -529,6 +530,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
           ),
           const SizedBox(height: 12),
           GridView.builder(
+            padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

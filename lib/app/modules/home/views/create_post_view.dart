@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
+import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:snappie_app/app/core/services/cloudinary_service.dart';
 import 'package:snappie_app/app/core/services/logger_service.dart';
 import 'package:snappie_app/app/core/helpers/error_handler.dart';
@@ -14,8 +15,10 @@ import 'package:snappie_app/app/data/repositories/place_repository_impl.dart';
 import 'package:snappie_app/app/data/repositories/post_repository_impl.dart';
 import 'package:snappie_app/app/data/repositories/user_repository_impl.dart';
 import 'package:snappie_app/app/modules/home/controllers/home_controller.dart';
+import 'package:snappie_app/app/modules/shared/layout/controllers/main_controller.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/modules/shared/widgets/index.dart';
+import 'package:snappie_app/app/routes/app_pages.dart';
 
 class CreatePostView extends StatefulWidget {
   const CreatePostView({super.key});
@@ -426,94 +429,164 @@ class _CreatePostViewState extends State<CreatePostView> {
   }
 
   void _showPlaceSelection({bool force = false}) {
+    final searchController = TextEditingController();
+    String query = '';
+
     Get.bottomSheet(
-      PopScope(
-        canPop: !force,
-        child: Container(
-          height: Get.height * 0.9,
-          decoration: BoxDecoration(
-            color: AppColors.backgroundContainer,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: AppColors.borderLight),
+      StatefulBuilder(
+        builder: (context, setModalState) {
+          final normalizedQuery = query.trim().toLowerCase();
+          final filteredPlaces = normalizedQuery.isEmpty
+              ? _places
+              : _places.where((place) {
+                  final name = (place.name ?? '').toLowerCase();
+                  final address = (place.placeDetail?.address ?? '').toLowerCase();
+                  return name.contains(normalizedQuery) ||
+                      address.contains(normalizedQuery);
+                }).toList();
+
+          return PopScope(
+            canPop: true,
+            child: Container(
+              height: Get.height * 0.9,
+              decoration: BoxDecoration(
+                color: AppColors.backgroundContainer,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    // decoration: BoxDecoration(
+                    //   border: Border(
+                    //     bottom: BorderSide(color: AppColors.borderLight),
+                    //   ),
+                    // ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Pilih Tempat',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            if (force) {
+                              _exitCreatePostToHome();
+                              return;
+                            }
+                            Get.back();
+                          },
+                          icon: AppIcon(
+                            AppAssets.icons.close,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Pilih Tempat',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: TextField(
+                      controller: searchController,
+                      onChanged: (value) => setModalState(() => query = value),
+                      decoration: InputDecoration(
+                        hintText: 'Cari tempat...',
+                        hintStyle: TextStyle(color: AppColors.textTertiary),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: AppColors.textSecondary,
+                        ),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(99),
+                          borderSide: BorderSide(color: AppColors.borderLight),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(99),
+                          borderSide: BorderSide(color: AppColors.borderLight),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(99),
+                          borderSide: BorderSide(color: AppColors.primary),
                         ),
                       ),
                     ),
-                    if (!force)
-                      IconButton(
-                        onPressed: () => Get.back(),
-                        icon: AppIcon(
-                          AppAssets.icons.close,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: _isLoadingPlaces
-                    ? const Center(child: CircularProgressIndicator())
-                    : _places.isEmpty
-                        ? Center(
-                            child: Text(
-                              'Tidak ada tempat tersedia',
-                              style: TextStyle(color: AppColors.textSecondary),
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount: _places.length,
-                            itemBuilder: (context, index) {
-                              final place = _places[index];
-                              return ListTile(
-                                title: Text(
-                                  place.name ?? 'Unknown',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
-                                  ),
+                  ),
+                  Expanded(
+                    child: _isLoadingPlaces
+                        ? const Center(child: CircularProgressIndicator())
+                        : filteredPlaces.isEmpty
+                            ? Center(
+                                child: Text(
+                                  normalizedQuery.isEmpty
+                                      ? 'Tidak ada tempat tersedia'
+                                      : 'Tempat tidak ditemukan',
+                                  style: TextStyle(color: AppColors.textSecondary),
                                 ),
-                                subtitle: Text(
-                                  place.placeDetail?.address ?? '',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                onTap: () {
-                                  setState(() => _selectedPlace = place);
-                                  Get.back();
+                              )
+                            : ListView.builder(
+                                itemCount: filteredPlaces.length,
+                                itemBuilder: (context, index) {
+                                  final place = filteredPlaces[index];
+                                  return ListTile(
+                                    title: Text(
+                                      place.name ?? 'Unknown',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      place.placeDetail?.address ?? '',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    onTap: () {
+                                      setState(() => _selectedPlace = place);
+                                      Get.back();
+                                    },
+                                  );
                                 },
-                              );
-                            },
-                          ),
+                              ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
       isScrollControlled: true,
       isDismissible: !force,
       enableDrag: !force,
-    );
+    ).whenComplete(searchController.dispose);
+  }
+
+  void _exitCreatePostToHome() {
+    if (Get.isBottomSheetOpen == true) {
+      Get.back();
+    }
+
+    Get.offAllNamed(AppPages.MAIN);
+
+    Future.delayed(Duration.zero, () {
+      try {
+        Get.find<MainController>().changeTab(0);
+      } catch (_) {}
+    });
   }
 
   Future<void> _pickImage() async {

@@ -139,6 +139,7 @@ class ArticleCardWidget extends StatelessWidget {
                 fontSize: 10,
                 color: AppColors.textTertiary,
               ),
+              overflow: TextOverflow.ellipsis,
             ),
 
             // Date
@@ -174,6 +175,8 @@ class ArticleCardWidget extends StatelessWidget {
         return '${difference.inDays} hari yang lalu';
       }
     }
+
+    // return article.createdAt;
 
     // Otherwise show full date
     return TimeFormatter.formatDate(article.createdAt!);

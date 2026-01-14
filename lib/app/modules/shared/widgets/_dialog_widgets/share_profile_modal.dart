@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_assets.dart';
 import '../_display_widgets/avatar_widget.dart';
+import '../_display_widgets/app_icon.dart';
 
 /// Reusable bottom sheet to share user profile with QR card + action bar.
 class ShareProfileModal extends StatelessWidget {
@@ -157,7 +159,7 @@ class ShareProfileModal extends StatelessWidget {
               ),
               IconButton(
                 onPressed: onClose ?? () => Get.back(),
-                icon: Icon(Icons.close, color: AppColors.textSecondary),
+                icon: AppIcon(AppAssets.iconsSvg.close, color: AppColors.textSecondary, size: 24),
               ),
             ],
           ),

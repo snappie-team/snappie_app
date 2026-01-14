@@ -150,6 +150,7 @@ class RectangleButtonWidget extends StatelessWidget {
       case ButtonType.icon:
         return IconButton(
           onPressed: isEnabled ? onPressed : null,
+          // TODO: Add add.svg icon to assets/iconsvg/
           icon: icon ?? const Icon(Icons.add),
           color: textColor ?? AppColors.primary,
           disabledColor: AppColors.textTertiary,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_assets.dart';
 import '../_display_widgets/avatar_widget.dart';
+import '../_display_widgets/app_icon.dart';
 
 /// Reusable notification card widget for displaying user notifications
 /// Can be used in notifications list, activity feeds, etc.
@@ -72,7 +74,7 @@ class NotificationCardWidget extends StatelessWidget {
           ),
           IconButton(
             onPressed: onMoreTap,
-            icon: const Icon(Icons.more_vert, color: Colors.grey),
+            icon: AppIcon(AppAssets.iconsSvg.moreDots, color: Colors.grey, size: 24),
           ),
         ],
       ),

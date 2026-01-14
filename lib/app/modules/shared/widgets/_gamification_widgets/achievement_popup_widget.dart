@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_assets.dart';
 import '../../../../data/models/gamification_response_model.dart';
+import '../_display_widgets/app_icon.dart';
 
 /// Animated popup widget for displaying unlocked achievements
 /// 
@@ -97,7 +99,7 @@ class _AchievementPopupWidgetState extends State<AchievementPopupWidget>
               Align(
                 alignment: Alignment.topRight,
                 child: IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white),
+                  icon: AppIcon(AppAssets.iconsSvg.close, color: Colors.white, size: 24),
                   onPressed: () => Get.back(),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),

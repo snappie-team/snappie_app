@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
+import '../../widgets/_display_widgets/app_icon.dart';
 
 /// Enhanced reusable scaffold layout with SliverAppBar and CustomScrollView
 ///
@@ -143,7 +144,7 @@ class ScaffoldFrame extends StatelessWidget {
             ? Container(
                 margin: const EdgeInsets.all(8),
                 child: IconButton(
-                  icon: Icon(Icons.arrow_back, color: AppColors.primary),
+                  icon: AppIcon(AppAssets.iconsSvg.back, color: AppColors.primary, size: 24),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               )

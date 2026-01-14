@@ -30,7 +30,6 @@ export '_navigation_widgets/button_widget.dart';
 export '_layout_widgets/search_bar_widget.dart';
 
 // Card Widgets
-export '_card_widgets/notification_card_widget.dart';
 export '_card_widgets/promotional_banner.dart';
 export '_card_widgets/article_card_widget.dart';
 export '_card_widgets/place_card_widget.dart';

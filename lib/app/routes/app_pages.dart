@@ -29,7 +29,6 @@ import '../modules/explore/views/place_detail_view.dart';
 import '../modules/explore/views/reviews_view.dart';
 import '../modules/explore/views/facilities_view.dart';
 import '../modules/explore/views/gallery_view.dart';
-import '../modules/explore/views/give_review_view.dart';
 import '../modules/explore/bindings/explore_binding.dart';
 import '../modules/shared/components/splash_view.dart';
 import '../modules/mission/views/mission_photo_view.dart';
@@ -161,11 +160,6 @@ class AppPages {
       binding: ExploreBinding(),
     ),
     GetPage(
-      name: GIVE_REVIEW,
-      page: () => const GiveReviewView(),
-      binding: ExploreBinding(),
-    ),
-    GetPage(
       name: FACILITIES,
       page: () => const FacilitiesView(),
     ),
@@ -238,7 +232,7 @@ class AppPages {
     GetPage(
       name: MISSION_REVIEW,
       page: () => const MissionReviewView(),
-      // Uses existing MissionController
+      binding: MissionBinding(),
     ),
 
     // Saved items pages (uses existing ProfileController from MainBinding)

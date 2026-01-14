@@ -29,7 +29,12 @@ android {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
-
+    externalNativeBuild {
+        cmake {
+            version = "4.1.2"
+            path = file("CMakeLists.txt")
+        }
+    }
     defaultConfig {
         applicationId = "com.justtffy.snappie_app"
         minSdk = flutter.minSdkVersion

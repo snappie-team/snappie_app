@@ -40,42 +40,49 @@ class MainLayout extends GetView<MainController> {
         ],
       )),
       bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Obx(() => Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              NavItem(
-                isActive: controller.currentIndex == 0,
-                inactiveIcon: AppIcon(AppAssets.icons.home),
-                activeIcon: AppIcon(AppAssets.icons.homeActive, color: AppColors.primary),
-                label: 'Beranda',
-                onTap: () => controller.changeTab(0),
+        child: Obx(() => Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Row(
+                children: [
+                  Expanded(
+                    child: NavItem(
+                      isActive: controller.currentIndex == 0,
+                      inactiveIcon: AppIcon(AppAssets.icons.home),
+                      activeIcon: AppIcon(AppAssets.icons.homeActive, color: AppColors.primary),
+                      label: 'Beranda',
+                      onTap: () => controller.changeTab(0),
+                    ),
+                  ),
+                  Expanded(
+                    child: NavItem(
+                      isActive: controller.currentIndex == 1,
+                      inactiveIcon: AppIcon(AppAssets.icons.explore),
+                      activeIcon: AppIcon(AppAssets.icons.exploreActive, color: AppColors.primary),
+                      label: 'Jelajahi',
+                      onTap: () => controller.changeTab(1),
+                    ),
+                  ),
+                  Expanded(
+                    child: NavItem(
+                      isActive: controller.currentIndex == 2,
+                      inactiveIcon: AppIcon(AppAssets.icons.article),
+                      activeIcon: AppIcon(AppAssets.icons.articleActive, color: AppColors.primary),
+                      label: 'Artikel',
+                      onTap: () => controller.changeTab(2),
+                    ),
+                  ),
+                  Expanded(
+                    child: NavItem(
+                      isActive: controller.currentIndex == 3,
+                      inactiveIcon: AppIcon(AppAssets.icons.profile),
+                      activeIcon: AppIcon(AppAssets.icons.profileActive, color: AppColors.primary),
+                      label: 'Akun',
+                      onTap: () => controller.changeTab(3),
+                    ),
+                  ),
+                ],
               ),
-              NavItem(
-                isActive: controller.currentIndex == 1,
-                inactiveIcon: AppIcon(AppAssets.icons.explore),
-                activeIcon: AppIcon(AppAssets.icons.exploreActive, color: AppColors.primary),
-                label: 'Jelajahi',
-                onTap: () => controller.changeTab(1),
-              ),
-              NavItem(
-                isActive: controller.currentIndex == 2,
-                inactiveIcon: AppIcon(AppAssets.icons.article),
-                activeIcon: AppIcon(AppAssets.icons.articleActive, color: AppColors.primary),
-                label: 'Artikel',
-                onTap: () => controller.changeTab(2),
-              ),
-              NavItem(
-                isActive: controller.currentIndex == 3,
-                inactiveIcon: AppIcon(AppAssets.icons.profile),
-                activeIcon: AppIcon(AppAssets.icons.profileActive, color: AppColors.primary),
-                label: 'Akun',
-                onTap: () => controller.changeTab(3),
-              ),
-            ],
-          )),
-        ),
+        )),
       ),
     );
   }

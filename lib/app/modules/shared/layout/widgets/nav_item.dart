@@ -27,12 +27,35 @@ class NavItem extends StatelessWidget {
     
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: double.infinity,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            isActive
+                ? SizedBox(
+                    width: double.infinity,
+                    child: AnimatedContainer(
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      duration: const Duration(milliseconds: 200),
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(99),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.withOpacity(AppColors.primary, 0.5),
+                            spreadRadius: 0,
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : const SizedBox(height: 6),
+            const SizedBox(height: 8),
             IconTheme(
               data: IconThemeData(color: color, size: 24),
               child: isActive ? activeIcon : inactiveIcon,

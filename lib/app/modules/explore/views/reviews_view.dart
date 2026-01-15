@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_assets.dart';
@@ -81,18 +82,23 @@ class _ReviewsViewState extends State<ReviewsView> {
       );
     }
 
-    return ScaffoldFrame.detail(
-      title: 'Ulasan',
-      onRefresh: () async {
-        await controller.loadPlaceReviews(place.id!);
-      },
-      slivers: [
-        // Content
-        SliverToBoxAdapter(
-          child: Obx(() => _buildContent(context, place)),
+    return Obx(() {
+      return LoadingOverlayWidget(
+        isLoading: controller.isLoadingReviews,
+        message: 'Memuat ulasan...',
+        child: ScaffoldFrame.detail(
+          title: 'Ulasan',
+          onRefresh: () async {
+            await controller.loadPlaceReviews(place.id!);
+          },
+          slivers: [
+            SliverToBoxAdapter(
+              child: _buildContent(context, place),
+            ),
+          ],
         ),
-      ],
-    );
+      );
+    });
   }
 
   Widget _buildEmptyState(String message) {
@@ -119,34 +125,24 @@ class _ReviewsViewState extends State<ReviewsView> {
   }
 
   Widget _buildContent(BuildContext context, PlaceModel place) {
-    if (controller.isLoadingReviews) {
-      return const Center(child: LoadingStateWidget());
-    }
-
     return Container(
       color: AppColors.background,
       child: Column(
         children: [
-          // Filter chips
           _buildFilterChips(place),
-      
-          // CTA Berikan Ulasan
-          _buildGiveReviewCTA(),
-                
-          // Rating summary
-          _buildRatingSummary(place),
-      
-          // Reviews list
+          _buildGiveReviewCTA(place),
+          if (_selectedFilter == 'all') _buildRatingSummary(place),
           if (controller.reviews.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(32),
-              child: NoDataEmptyState(
-                title: 'Belum ada ulasan',
-                subtitle: 'Jadilah yang pertama menulis ulasan',
-              ),
-            )
-          else
-            _buildReviewsList(),
+            controller.isLoadingReviews
+                ? const SizedBox(height: 240)
+                : const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: NoDataEmptyState(
+                      title: 'Belum ada ulasan',
+                      subtitle: 'Jadilah yang pertama menulis ulasan',
+                    ),
+                  )
+          else _buildReviewsList(),
         ],
       ),
     );
@@ -161,18 +157,16 @@ class _ReviewsViewState extends State<ReviewsView> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Semua chip
-            Expanded(
-              child: _buildFilterChip(
-                label: 'Semua',
-                count: controller.reviews.length,
-                isSelected: _selectedFilter == 'all' && _selectedRating == null,
-                onTap: () {
-                  setState(() {
-                    _selectedFilter = 'all';
-                    _selectedRating = null;
-                  });
-                },
-              ),
+            _buildFilterChip(
+              label: 'Semua',
+              count: controller.reviews.length,
+              isSelected: _selectedFilter == 'all' && _selectedRating == null,
+              onTap: () {
+                setState(() {
+                  _selectedFilter = 'all';
+                  _selectedRating = null;
+                });
+              },
             ),
             const SizedBox(width: 8),
 
@@ -191,9 +185,15 @@ class _ReviewsViewState extends State<ReviewsView> {
             ),
             const SizedBox(width: 8),
 
-            // Bintang dropdown
-            Expanded(
-              child: _buildRatingDropdown(),
+            // Bintang filter
+            _buildFilterChip(
+              label: 'Bintang ★',
+              subtitle: _selectedRating != null ? '$_selectedRating' : 'Semua',
+              showDropdownIcon: true,
+              isSelected: _selectedRating != null,
+              onTap: () {
+                _showRatingBottomSheet();
+              },
             ),
           ],
         ),
@@ -203,10 +203,15 @@ class _ReviewsViewState extends State<ReviewsView> {
 
   Widget _buildFilterChip({
     required String label,
+    String? subtitle,
     int? count,
+    bool showDropdownIcon = false,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    final effectiveSubtitle = subtitle ?? (count != null ? '$count' : null);
+    final text = effectiveSubtitle != null ? '$label\n($effectiveSubtitle)' : label;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -219,104 +224,222 @@ class _ReviewsViewState extends State<ReviewsView> {
           ),
         ),
         child: Center(
-          child: Text(
-            count != null ? '$label\n($count)' : label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: isSelected ? Colors.white : AppColors.primary,
-              height: 1.2,
-            ),
-          ),
+          child: showDropdownIcon
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      text,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: FontSize.getSize(FontSizeOption.regular),
+                        fontWeight: FontWeight.w500,
+                        color: isSelected ? Colors.white : AppColors.primary,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    AppIcon(
+                      AppAssets.icons.more,
+                      size: 16,
+                      color: isSelected ? Colors.white : AppColors.primary,
+                    ),
+                  ],
+                )
+              : Text(
+                  text,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: FontSize.getSize(FontSizeOption.regular),
+                    fontWeight: FontWeight.w500,
+                    color: isSelected ? Colors.white : AppColors.primary,
+                    height: 1.2,
+                  ),
+                ),
         ),
       ),
     );
   }
 
-  Widget _buildRatingDropdown() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      decoration: BoxDecoration(
-        color:
-            _selectedRating != null ? AppColors.primary : AppColors.backgroundContainer,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: AppColors.primary,
-        ),
+  void _showRatingBottomSheet() {
+    final maxCount = _ratingCounts.values.fold<int>(0, (prev, el) => el > prev ? el : prev);
+    int? tempSelected = _selectedRating;
+
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      child: PopupMenuButton<int?>(
-        offset: const Offset(0, 40),
-        padding: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Bintang ★\n(${_selectedRating != null ? '$_selectedRating' : 'Semua'})',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: _selectedRating != null
-                      ? Colors.white
-                      : AppColors.primary,
-                  height: 1.2,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          Widget buildRatingRow(int rating) {
+            final count = _ratingCounts[rating] ?? 0;
+            final value = maxCount == 0 ? 0.0 : (count / maxCount);
+            final isSelected = tempSelected == rating;
+
+            return InkWell(
+              onTap: () => setModalState(() => tempSelected = rating),
+              child: SizedBox(
+                height: 44,
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 36,
+                      child: Center(
+                        child: Container(
+                          width: 18,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.primary,
+                              width: 2,
+                            ),
+                          ),
+                          child: isSelected
+                              ? Center(
+                                  child: Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                )
+                              : null,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 44,
+                      child: Row(
+                        children: [
+                          Text(
+                            '$rating',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight:
+                                  isSelected ? FontWeight.w600 : FontWeight.w500,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          AppIcon(
+                            AppAssets.icons.rating,
+                            color: AppColors.warning,
+                            size: 14,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(99),
+                        child: LinearProgressIndicator(
+                          value: value,
+                          minHeight: 6,
+                          backgroundColor: AppColors.surfaceContainer,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(AppColors.primary),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    SizedBox(
+                      width: 24,
+                      child: Text(
+                        '$count',
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 4),
-              Icon(
-                Icons.keyboard_arrow_down,
-                size: 16,
-                color:
-                    _selectedRating != null ? Colors.white : AppColors.primary,
-              ),
-            ],
-          ),
-        ),
-        itemBuilder: (context) => [
-          PopupMenuItem<int?>(
-            value: null,
-            child: Text('Semua'),
-          ),
-          ...List.generate(5, (index) {
-            final rating = 5 - index;
-            return PopupMenuItem<int?>(
-              value: rating,
-              child: Row(
+            );
+          }
+
+          return SafeArea(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ...List.generate(
-                      rating,
-                      (_) =>
-                          AppIcon(AppAssets.icons.rating, color: AppColors.warning, size: 16)),
-                  // TODO: Add star_border.svg icon to assets/icons/
-                  ...List.generate(
-                      5 - rating,
-                      (_) => Icon(Icons.star_border,
-                          color: AppColors.textTertiary, size: 16)),
-                  const SizedBox(width: 8),
-                  Text('(${_ratingCounts[rating] ?? 0})'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '(${controller.reviews.length} Ulasan)',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: AppIcon(AppAssets.icons.close),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  buildRatingRow(5),
+                  buildRatingRow(4),
+                  buildRatingRow(3),
+                  buildRatingRow(2),
+                  buildRatingRow(1),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _selectedRating = null;
+                            });
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Hapus'),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _selectedRating = tempSelected;
+                              if (tempSelected != null) {
+                                _selectedFilter = 'all';
+                              }
+                            });
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: AppColors.textOnPrimary,
+                          ),
+                          child: const Text('Ok'),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-            );
-          }),
-        ],
-        onSelected: (value) {
-          setState(() {
-            _selectedRating = value;
-            if (value != null) {
-              _selectedFilter =
-                  'all'; // Reset media filter when selecting rating
-            }
-          });
+            ),
+          );
         },
       ),
     );
   }
 
-  Widget _buildGiveReviewCTA() {
+  Widget _buildGiveReviewCTA(PlaceModel place) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       decoration: BoxDecoration(
@@ -330,13 +453,13 @@ class _ReviewsViewState extends State<ReviewsView> {
             textAlign: TextAlign.center,
             text: TextSpan(
               style: TextStyle(
-                fontSize: 14,
+                fontSize: FontSize.getSize(FontSizeOption.regular),
                 color: AppColors.textPrimary,
               ),
               children: [
                 const TextSpan(text: 'Berikan ulasan untuk mendapatkan '),
                 TextSpan(
-                  text: '50 XP',
+                  text: '${place.expReward} XP',
                   style: TextStyle(
                     color: AppColors.accent,
                     fontWeight: FontWeight.w600,
@@ -344,7 +467,7 @@ class _ReviewsViewState extends State<ReviewsView> {
                 ),
                 const TextSpan(text: ' dan '),
                 TextSpan(
-                  text: '25 Koin',
+                  text: '${place.coinReward} Koin',
                   style: TextStyle(
                     color: AppColors.accent,
                     fontWeight: FontWeight.w600,
@@ -357,17 +480,14 @@ class _ReviewsViewState extends State<ReviewsView> {
           const SizedBox(height: 12),
           ElevatedButton(
             onPressed: () {
-              final PlaceModel? place = Get.arguments as PlaceModel?;
-              if (place != null) {
-                Get.toNamed(AppPages.MISSION_REVIEW, arguments: place);
-              }
+              Get.toNamed(AppPages.MISSION_REVIEW, arguments: place);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.surfaceContainer,
+              backgroundColor: AppColors.surface,
               foregroundColor: AppColors.textPrimary,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(99),
               ),
             ),
             child: Row(
@@ -376,12 +496,14 @@ class _ReviewsViewState extends State<ReviewsView> {
                 Text(
                   'Berikan Ulasan',
                   style: TextStyle(
+                    fontSize: FontSize.getSize(FontSizeOption.regular),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+                
                 const SizedBox(width: 4),
-                // TODO: Add chevron_right.svg icon to assets/icons/
-                Icon(Icons.chevron_right, size: 20),
+
+                AppIcon(AppAssets.icons.moreOption3, size: 20),
               ],
             ),
           ),
@@ -391,8 +513,11 @@ class _ReviewsViewState extends State<ReviewsView> {
   }
 
   Widget _buildRatingSummary(PlaceModel place) {
-    final totalReviews = controller.reviews.length;
-    final avgRating = place.avgRating ?? 0.0;
+    final selectedRating = _selectedRating;
+    final totalReviews = selectedRating != null
+        ? (_ratingCounts[selectedRating] ?? 0)
+        : controller.reviews.length;
+    final avgRating = selectedRating?.toDouble() ?? (place.avgRating ?? 0.0);
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -403,52 +528,68 @@ class _ReviewsViewState extends State<ReviewsView> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Big rating number
-          Text(
-            avgRating.toStringAsFixed(1).replaceAll('.', ','),
-            style: TextStyle(
-              fontSize: 56,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+          if (selectedRating == null) ...[
+            // Big rating number
+            Text(
+              avgRating.toStringAsFixed(1).replaceAll('.', ','),
+              style: TextStyle(
+                fontSize: FontSize.getSize(FontSizeOption.xl8),
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
 
-          // Stars
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(5, (index) {
-              final starValue = index + 1;
-              if (avgRating >= starValue) {
-                return AppIcon(AppAssets.icons.rating, color: AppColors.warning, size: 28);
-              } else if (avgRating >= starValue - 0.5) {
-                // TODO: Add star_half.svg icon to assets/icons/
-                return Icon(Icons.star_half,
-                    color: AppColors.warning, size: 28);
-              } else {
-                // TODO: Add star_border.svg icon to assets/icons/
-                return Icon(Icons.star_border,
-                    color: AppColors.warning, size: 28);
-              }
-            }),
-          ),
-          const SizedBox(height: 4),
+            const SizedBox(height: 4),
 
-          // Total reviews
-          Text(
-            '($totalReviews Ulasan)',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
+            // Stars
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(5, (index) {
+                final starValue = index + 1;
+                if (avgRating >= starValue) {
+                  return AppIcon(
+                    AppAssets.icons.rating,
+                    color: AppColors.warning,
+                    size: FontSize.getSize(FontSizeOption.xl2),
+                  );
+                } else if (avgRating >= starValue - 0.5) {
+                  // TODO: Add star_half.svg icon to assets/icons/
+                  return AppIcon(
+                    AppAssets.icons.ratingAlt,
+                    color: AppColors.warning,
+                    size: FontSize.getSize(FontSizeOption.xl2),
+                  );
+                } else {
+                  // TODO: Add star_border.svg icon to assets/icons/
+                  return AppIcon(
+                    AppAssets.icons.ratingEmpty,
+                    color: AppColors.warning,
+                    size: FontSize.getSize(FontSizeOption.xl2),
+                  );
+                }
+              }),
             ),
-          ),
-          const SizedBox(height: 16),
+
+            const SizedBox(height: 8),
+
+            // Total reviews
+            Text(
+              '($totalReviews Ulasan)',
+              style: TextStyle(
+                fontSize: FontSize.getSize(FontSizeOption.regular),
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
 
           // Rating breakdown bars
-          ...List.generate(5, (index) {
-            final rating = 5 - index;
+          ...List.generate(selectedRating != null ? 1 : 5, (index) {
+            final rating = selectedRating ?? (5 - index);
             final count = _ratingCounts[rating] ?? 0;
-            final percentage = totalReviews > 0 ? count / totalReviews : 0.0;
+            final percentage = selectedRating != null
+                ? (count > 0 ? 1.0 : 0.0)
+                : (totalReviews > 0 ? count / totalReviews : 0.0);
 
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
@@ -457,13 +598,17 @@ class _ReviewsViewState extends State<ReviewsView> {
                   Text(
                     '$rating',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: FontSize.getSize(FontSizeOption.regular),
                       fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(width: 4),
-                  AppIcon(AppAssets.icons.rating, color: AppColors.warning, size: 16),
+                  AppIcon(
+                    AppAssets.icons.rating,
+                    color: AppColors.warning,
+                    size: FontSize.getSize(FontSizeOption.regular),
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: ClipRRect(
@@ -481,7 +626,7 @@ class _ReviewsViewState extends State<ReviewsView> {
                   Text(
                     '($count)',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: FontSize.getSize(FontSizeOption.regular),
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -523,13 +668,8 @@ class _ReviewsViewState extends State<ReviewsView> {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.zero,
-        // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         itemCount: reviews.length,
-        separatorBuilder: (context, index) => Divider(
-          height: 24,
-          thickness: 1,
-          color: AppColors.surfaceContainer,
-        ),
+        separatorBuilder: (context, index) => SizedBox(height: 24),
         itemBuilder: (context, index) {
           return _buildReviewCard(reviews[index]);
         },
@@ -557,6 +697,7 @@ class _ReviewsViewState extends State<ReviewsView> {
                   Text(
                     review.user?.name ?? 'Anonim',
                     style: TextStyle(
+                      fontSize: FontSize.getSize(FontSizeOption.regular),
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
@@ -564,12 +705,12 @@ class _ReviewsViewState extends State<ReviewsView> {
                   const SizedBox(height: 4),
                   Row(
                     children: List.generate(5, (index) {
-                      return Icon(
+                      return AppIcon(
                         index < (review.rating ?? 0)
-                            ? Icons.star
-                            : Icons.star_border,
+                            ? AppAssets.icons.rating
+                            : AppAssets.icons.ratingEmpty,
                         color: AppColors.warning,
-                        size: 16,
+                        size: FontSize.getSize(FontSizeOption.medium),
                       );
                     }),
                   ),
@@ -580,7 +721,7 @@ class _ReviewsViewState extends State<ReviewsView> {
               _formatDate(review.createdAt ?? DateTime.now()),
               style: TextStyle(
                 color: AppColors.textSecondary,
-                fontSize: 12,
+                fontSize: FontSize.getSize(FontSizeOption.mediumSmall),
               ),
             ),
           ],
@@ -588,10 +729,11 @@ class _ReviewsViewState extends State<ReviewsView> {
     
         // Review content
         if (review.content != null && review.content!.isNotEmpty) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 4),
           Text(
             review.content!,
             style: TextStyle(
+              fontSize: FontSize.getSize(FontSizeOption.regular),
               color: AppColors.textPrimary,
               height: 1.4,
             ),
@@ -600,7 +742,7 @@ class _ReviewsViewState extends State<ReviewsView> {
     
         // Review images
         if (review.imageUrls != null && review.imageUrls!.isNotEmpty) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           SizedBox(
             height: 80,
             child: ListView.separated(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/services/logger_service.dart';
 import '../../../../data/models/articles_model.dart';
@@ -28,7 +29,7 @@ class ArticleCardWidget extends StatelessWidget {
       margin: margin ?? const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(4),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -40,9 +41,9 @@ class ArticleCardWidget extends StatelessWidget {
       ),
       child: InkWell(
         onTap: _handleTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(4),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(8),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -62,7 +63,7 @@ class ArticleCardWidget extends StatelessWidget {
 
   Widget _buildArticleImage() {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(4),
       child: NetworkImageWidget(
         imageUrl: article.imageUrl ?? 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT03PO9JTj8_-WxAUE02ehEJj3WoR9lPv22VA&s',
         width: 90,
@@ -91,12 +92,12 @@ class ArticleCardWidget extends StatelessWidget {
         Text(
           article.title ?? 'No Title',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: FontSize.getSize(FontSizeOption.regular),
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
             height: 1.3,
           ),
-          maxLines: 2,
+          maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
 
@@ -107,7 +108,7 @@ class ArticleCardWidget extends StatelessWidget {
           Text(
             article.description ?? 'No Description',
             style: TextStyle(
-              fontSize: 12,
+              fontSize: FontSize.getSize(FontSizeOption.mediumSmall),
               color: AppColors.textSecondary,
               height: 1.4,
             ),
@@ -118,40 +119,39 @@ class ArticleCardWidget extends StatelessWidget {
         const SizedBox(height: 8),
 
         // Category
-        Text(
-          article.category ?? 'Uncategorized',
-          style: TextStyle(
-            fontSize: 10,
-            color: AppColors.primary,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-
-        const SizedBox(height: 4),
-
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Author
             Text(
-              'oleh ${article.author ?? 'Unknown'}',
+              article.category ?? 'Uncategorized',
               style: TextStyle(
-                fontSize: 10,
-                color: AppColors.textTertiary,
+                fontSize: FontSize.getSize(FontSizeOption.mediumSmall),
+                color: AppColors.primary,
+                fontWeight: FontWeight.w500,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
 
             // Date
             Text(
               _formatDate(),
               style: TextStyle(
-                fontSize: 10,
+                fontSize: FontSize.getSize(FontSizeOption.mediumSmall),
                 color: AppColors.textTertiary,
               ),
               overflow: TextOverflow.ellipsis,
             ),
           ],
+        ),
+
+        const SizedBox(height: 4),
+
+        Text(
+          'oleh ${article.author ?? 'Unknown'}',
+          style: TextStyle(
+            fontSize: FontSize.getSize(FontSizeOption.mediumSmall),
+            color: AppColors.textTertiary,
+          ),
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     ));
@@ -175,9 +175,7 @@ class ArticleCardWidget extends StatelessWidget {
         return '${difference.inDays} hari yang lalu';
       }
     }
-
-    // return article.createdAt;
-
+    
     // Otherwise show full date
     return TimeFormatter.formatDate(article.createdAt!);
   }

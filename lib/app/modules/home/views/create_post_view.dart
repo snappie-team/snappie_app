@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
-import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:snappie_app/app/core/services/cloudinary_service.dart';
 import 'package:snappie_app/app/core/services/logger_service.dart';
 import 'package:snappie_app/app/core/helpers/error_handler.dart';

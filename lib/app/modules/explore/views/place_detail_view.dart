@@ -476,7 +476,7 @@ class PlaceDetailView extends GetView<ExploreController> {
           const SizedBox(height: 12),
           _buildInfoRow(
             title: 'Jam Buka',
-            content: Row(
+            trailing: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -488,32 +488,19 @@ class PlaceDetailView extends GetView<ExploreController> {
                 ),
               ],
             ),
-            trailing: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: isOpen == null
-                      ? AppColors.textSecondary
-                      : isOpen
-                          ? AppColors.success
-                          : AppColors.error,
-                ),
-                borderRadius: BorderRadius.circular(99),
-              ),
-              child: Text(
-                isOpen == null
-                    ? 'Tidak ada data'
+            content: Text(
+              isOpen == null
+                  ? 'Tidak ada data'
+                  : isOpen
+                      ? 'Buka Sekarang'
+                      : 'Tutup',
+              style: TextStyle(
+                color: isOpen == null
+                    ? AppColors.textSecondary
                     : isOpen
-                        ? 'Buka Sekarang'
-                        : 'Tutup',
-                style: TextStyle(
-                  color: isOpen == null
-                      ? AppColors.textSecondary
-                      : isOpen
-                          ? AppColors.success
-                          : AppColors.error,
-                  fontWeight: FontWeight.w500,
-                ),
+                        ? AppColors.success
+                        : AppColors.error,
+                fontWeight: FontWeight.w500,
               ),
             ),
             icon: AppIcon(AppAssets.icons.clock,

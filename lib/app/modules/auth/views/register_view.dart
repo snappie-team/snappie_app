@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:snappie_app/app/core/constants/app_assets.dart';
@@ -105,12 +106,12 @@ class RegisterView extends GetView<AuthController> {
                                 case 1:
                                   // Page 2: Check if exactly 3 food types selected
                                   canProceed =
-                                      controller.selectedFoodTypes.length == 3;
+                                      controller.selectedFoodTypes.length >= 3;
                                   break;
                                 case 2:
                                   // Page 3: Check if exactly 3 place values selected
                                   canProceed =
-                                      controller.selectedPlaceValues.length ==
+                                      controller.selectedPlaceValues.length >=
                                           3;
                                   break;
                               }
@@ -185,19 +186,28 @@ class RegisterView extends GetView<AuthController> {
         // Progress Indicator
         Obx(
           () => Container(
+            // decoration: BoxDecoration(
+            //   border: Border.all(
+            //     color: AppColors.accent,
+            //     width: 2,
+            //   ),
+            // ),
             padding: const EdgeInsets.symmetric(vertical: 16),
+            width: double.infinity,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(3, (index) {
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  height: 8,
-                  width: 90,
-                  decoration: BoxDecoration(
-                    color: index <= controller.selectedPageIndex
-                        ? AppColors.accent
-                        : AppColors.accent.withAlpha(75),
-                    borderRadius: BorderRadius.circular(4),
+                return Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Container(
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: index <= controller.selectedPageIndex
+                            ? AppColors.accent
+                            : AppColors.accent.withAlpha(75),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
                   ),
                 );
               }),
@@ -275,6 +285,9 @@ class RegisterView extends GetView<AuthController> {
             Expanded(
               child: TextField(
                 controller: controller.firstnameController,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z]')),
+                ],
                 decoration: InputDecoration(
                   hintText: tr(LocaleKeys.register_first_name),
                   border: OutlineInputBorder(
@@ -299,6 +312,9 @@ class RegisterView extends GetView<AuthController> {
             Expanded(
               child: TextField(
                 controller: controller.lastnameController,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z]')),
+                ],
                 decoration: InputDecoration(
                   hintText: tr(LocaleKeys.register_last_name),
                   border: OutlineInputBorder(
@@ -513,8 +529,11 @@ class RegisterView extends GetView<AuthController> {
         const SizedBox(height: 8),
         TextField(
           controller: controller.usernameController,
+          inputFormatters: [
+            FilteringTextInputFormatter.deny(RegExp(r'\s')),
+          ],
           decoration: InputDecoration(
-            hintText: tr(LocaleKeys.register_username_hint),
+            hintText: 'ex: JohnDoe.13',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(color: Colors.grey),
@@ -571,54 +590,47 @@ class RegisterView extends GetView<AuthController> {
               () {
                 final isSelected =
                     controller.selectedFoodTypes.contains(foodType);
-                final isLimitReached = controller.selectedFoodTypes.length >= 3;
-                final isDisabled = !isSelected && isLimitReached;
 
                 return GestureDetector(
                   onTap: () {
                     controller.toggleFoodTypeSelection(foodType);
                   },
-                  child: Opacity(
-                    opacity: isDisabled ? 0.4 : 1.0,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primary.withAlpha(50)
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isSelected
-                              ? AppColors.primary
-                              : Colors.transparent,
-                          width: isSelected ? 2.5 : 1.5,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primary.withAlpha(50)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color:
+                            isSelected ? AppColors.primary : Colors.transparent,
+                        width: isSelected ? 2.5 : 1.5,
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Image.asset(
+                          imagePath!,
+                          fit: BoxFit.contain,
                         ),
-                      ),
-                      padding: const EdgeInsets.all(4),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Image.asset(
-                            imagePath!,
-                            fit: BoxFit.contain,
+                        const SizedBox(height: 6),
+                        Text(
+                          foodType,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w500,
+                            color:
+                                isSelected ? AppColors.primary : Colors.black87,
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            foodType,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w500,
-                              color: isSelected
-                                  ? AppColors.primary
-                                  : Colors.black87,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -666,42 +678,34 @@ class RegisterView extends GetView<AuthController> {
               () {
                 final isSelected =
                     controller.selectedPlaceValues.contains(placeValue);
-                final isLimitReached =
-                    controller.selectedPlaceValues.length >= 3;
-                final isDisabled = !isSelected && isLimitReached;
 
                 return GestureDetector(
                   onTap: () {
                     controller.togglePlaceValueSelection(placeValue);
                   },
-                  child: Opacity(
-                    opacity: isDisabled ? 0.4 : 1.0,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primary.withAlpha(100)
-                            : Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: isSelected
-                              ? AppColors.primary
-                              : Colors.transparent,
-                          width: 2,
-                        ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primary.withAlpha(100)
+                          : Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color:
+                            isSelected ? AppColors.primary : Colors.transparent,
+                        width: 2,
                       ),
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 8),
-                      child: Text(
-                        placeValue,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color:
-                              isSelected ? AppColors.primary : Colors.black87,
-                        ),
-                        textAlign: TextAlign.center,
+                    ),
+                    alignment: Alignment.center,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    child: Text(
+                      placeValue,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: isSelected ? AppColors.primary : Colors.black87,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 );

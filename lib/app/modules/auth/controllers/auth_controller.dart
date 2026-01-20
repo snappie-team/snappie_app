@@ -94,7 +94,10 @@ class AuthController extends GetxController {
     });
 
     usernameController.addListener(() {
-      _isUsernameValid.value = usernameController.text.trim().length >= 8;
+      final username = usernameController.text.trim();
+      _isUsernameValid.value = RegExp(
+        r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*._-])[A-Za-z\d!@#$%^&*._-]{8,}$',
+      ).hasMatch(username);
     });
   }
 
@@ -384,20 +387,22 @@ class AuthController extends GetxController {
 
     // Basic username validation
     final username = usernameController.text.trim();
-    if (username.length < 3) {
+    if (username.length < 8) {
       _showSnackbar(
         'Error',
-        'Username must be at least 3 characters long',
+        'Username must be at least 8 characters long',
         Colors.red,
       );
       return false;
     }
 
-    // Check for valid username characters
-    if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(username)) {
+    final usernamePattern = RegExp(
+      r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*._-])[A-Za-z\d!@#$%^&*._-]{8,}$',
+    );
+    if (!usernamePattern.hasMatch(username)) {
       _showSnackbar(
         'Error',
-        'Username can only contain letters, numbers, and underscores',
+        'Username must contain letters, numbers, and special characters',
         Colors.red,
       );
       return false;
@@ -532,22 +537,11 @@ class AuthController extends GetxController {
     }
   }
 
-  static const int maxSelectionLimit = 3;
-
   void toggleFoodTypeSelection(String foodType) {
     if (_selectedFoodTypes.contains(foodType)) {
       _selectedFoodTypes.remove(foodType);
       Logger.debug('Food type removed: $foodType', 'AuthController');
     } else {
-      // Check max limit
-      if (_selectedFoodTypes.length >= maxSelectionLimit) {
-        _showSnackbar(
-          'Batas Tercapai',
-          'Kamu hanya dapat memilih maksimal $maxSelectionLimit tipe kuliner',
-          Colors.orange,
-        );
-        return;
-      }
       _selectedFoodTypes.add(foodType);
       Logger.debug('Food type selected: $foodType', 'AuthController');
     }
@@ -561,15 +555,6 @@ class AuthController extends GetxController {
       _selectedPlaceValues.remove(placeValue);
       Logger.debug('Place value removed: $placeValue', 'AuthController');
     } else {
-      // Check max limit
-      if (_selectedPlaceValues.length >= maxSelectionLimit) {
-        _showSnackbar(
-          'Batas Tercapai',
-          'Kamu hanya dapat memilih maksimal $maxSelectionLimit nilai tempat',
-          Colors.orange,
-        );
-        return;
-      }
       _selectedPlaceValues.add(placeValue);
       Logger.debug('Place value selected: $placeValue', 'AuthController');
     }

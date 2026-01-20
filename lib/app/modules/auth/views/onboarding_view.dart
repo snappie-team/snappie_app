@@ -25,16 +25,19 @@ class OnboardingView extends GetView<OnboardingController> {
                 children: [
                   _buildOnboardingPage(
                     imagePath: AppAssets.images.onboarding1,
+                    height: 300,
                     title: tr(LocaleKeys.onboarding_page1_title),
                     description: tr(LocaleKeys.onboarding_page1_description),
                   ),
                   _buildOnboardingPage(
                     imagePath: AppAssets.images.onboarding2,
+                    height: 200,
                     title: tr(LocaleKeys.onboarding_page2_title),
                     description: tr(LocaleKeys.onboarding_page2_description),
                   ),
                   _buildOnboardingPage(
                     imagePath: AppAssets.images.onboarding3,
+                    height: 300,
                     title: tr(LocaleKeys.onboarding_page3_title),
                     description: tr(LocaleKeys.onboarding_page3_description),
                   ),
@@ -44,8 +47,6 @@ class OnboardingView extends GetView<OnboardingController> {
             _buildBottomSection(),
               ],
             ),
-            // Language Toggle - positioned at top-right
-            _buildLanguageToggle(context),
           ],
         ),
       ),
@@ -54,6 +55,7 @@ class OnboardingView extends GetView<OnboardingController> {
 
   Widget _buildOnboardingPage({
     required String imagePath,
+    required double height,
     required String title,
     required String description,
   }) {
@@ -65,10 +67,10 @@ class OnboardingView extends GetView<OnboardingController> {
           // Image
           Image.asset(
             imagePath,
-            height: 300,
+            height: height,
             fit: BoxFit.contain,
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: 16),
           // Title
           Text(
             title,
@@ -179,65 +181,11 @@ class OnboardingView extends GetView<OnboardingController> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.symmetric(horizontal: 4),
-      height: 8,
-      width: isActive ? 24 : 8,
+      height: isActive ? 10 : 8,
+      width: isActive ? 10 : 8,
       decoration: BoxDecoration(
         color: isActive ? AppColors.accent : Colors.grey.shade300,
         borderRadius: BorderRadius.circular(4),
-      ),
-    );
-  }
-
-  Widget _buildLanguageToggle(BuildContext context) {
-    return Positioned(
-      top: 16,
-      right: 16,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        padding: const EdgeInsets.all(8),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildLanguageButton(context, 'ID', 'id'),
-            const SizedBox(width: 8),
-            _buildLanguageButton(context, 'EN', 'en'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLanguageButton(BuildContext context, String label, String languageCode) {
-    final currentLocale = context.locale.languageCode;
-    final isSelected = currentLocale == languageCode;
-
-    return GestureDetector(
-      onTap: () async {
-        final newLocale = Locale(languageCode);
-        await context.setLocale(newLocale);
-        Get.updateLocale(newLocale);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.accent : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.accent : Colors.grey.shade400,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            color: isSelected ? Colors.white : Colors.grey.shade700,
-          ),
-        ),
       ),
     );
   }

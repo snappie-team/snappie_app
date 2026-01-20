@@ -198,64 +198,9 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
                 ),
-                // Language Toggle - positioned at top-right
-                Positioned(
-                  top: 16,
-                  right: 16,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    padding: const EdgeInsets.all(8),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildLanguageButton(context, 'ID', 'id'),
-                        const SizedBox(width: 8),
-                        _buildLanguageButton(context, 'EN', 'en'),
-                      ],
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
         ));
-  }
-
-  Widget _buildLanguageButton(
-      BuildContext context, String label, String languageCode) {
-    final isSelected = _currentLocale == languageCode;
-
-    return GestureDetector(
-      onTap: () async {
-        final newLocale = Locale(languageCode);
-        await context.setLocale(newLocale);
-        Get.updateLocale(newLocale);
-        setState(() {
-          _currentLocale = languageCode;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            color: isSelected ? AppColors.accent : Colors.white,
-          ),
-        ),
-      ),
-    );
   }
 }

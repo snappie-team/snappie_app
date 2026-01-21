@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/core/constants/font_size.dart';
+import 'package:snappie_app/app/modules/mission/controllers/mission_controller.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_assets.dart';
@@ -23,6 +24,7 @@ class _ReviewsViewState extends State<ReviewsView> {
   // Filter state
   String _selectedFilter = 'all'; // 'all', 'with_media'
   int? _selectedRating; // null = semua, 1-5 = rating tertentu
+  final bool _isMissionCompleted = false;
 
   @override
   void initState() {
@@ -480,7 +482,11 @@ class _ReviewsViewState extends State<ReviewsView> {
           const SizedBox(height: 12),
           ElevatedButton(
             onPressed: () {
-              Get.toNamed(AppPages.MISSION_REVIEW, arguments: place);
+              if (_isMissionCompleted) {
+                Get.toNamed(AppPages.MISSION_REVIEW, arguments: place);
+                return;
+              }
+              _showMissionRequiredModal(place);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.surface,
@@ -774,6 +780,134 @@ class _ReviewsViewState extends State<ReviewsView> {
         ],
       ],
     );
+  }
+
+  void _showMissionRequiredModal(PlaceModel place) {
+    Get.dialog(
+      Dialog(
+        backgroundColor: AppColors.background,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                AppAssets.images.mission,
+                height: 100,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    height: 100,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.flag_outlined,
+                      size: 48,
+                      color: AppColors.primary,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Selesaikan Misi Dulu',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.accent,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Untuk memberikan ulasan dan mendapatkan reward, kamu harus menyelesaikan misi foto.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              Column(
+                children: [
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Get.back(),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: AppColors.textOnPrimary,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            side: BorderSide(
+                              color: AppColors.accent,
+                              width: 2,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(99),
+                            ),
+                          ),
+                          child: Text(
+                            'Mengerti',
+                            style: TextStyle(
+                              color: AppColors.accent,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Get.back();
+                            _startMission(place);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.accent,
+                            foregroundColor: AppColors.textOnPrimary,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(99),
+                            ),
+                          ),
+                          child: const Text(
+                            'Misi Foto',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: true,
+    );
+  }
+
+  void _startMission(PlaceModel place) async {
+    // Show confirmation modal
+    final result = await MissionConfirmModal.show(place: place);
+
+    if (result != null && result.confirmed) {
+      // Initialize mission controller and navigate
+      final missionController = Get.put(MissionController());
+      missionController.initMission(place, hideUsername: result.hideUsername);
+
+      Get.toNamed(AppPages.MISSION_PHOTO);
+    }
   }
 
   String _formatDate(DateTime dateTime) {

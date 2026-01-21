@@ -228,12 +228,22 @@ class _MissionReviewViewState extends State<MissionReviewView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Penilaian',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+          Text.rich(
+            TextSpan(
+              text: 'Penilaian',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+              children: [
+                TextSpan(
+                  text: ' *',
+                  style: TextStyle(
+                    color: AppColors.error,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 12),
@@ -471,12 +481,22 @@ class _MissionReviewViewState extends State<MissionReviewView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Katalog Makanan di Tempat Ini',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+          Text.rich(
+            TextSpan(
+              text: 'Katalog Makanan di Tempat Ini',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+              children: [
+                TextSpan(
+                  text: ' *',
+                  style: TextStyle(
+                    color: AppColors.error,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 12),
@@ -520,12 +540,22 @@ class _MissionReviewViewState extends State<MissionReviewView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Kesesuaian Tempat',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+          Text.rich(
+            TextSpan(
+              text: 'Kesesuaian Tempat',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+              children: [
+                TextSpan(
+                  text: ' *',
+                  style: TextStyle(
+                    color: AppColors.error,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 12),
@@ -605,7 +635,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Tuliskan ulasan minimal 25 karakter',
+            'Tuliskan ulasan',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -938,10 +968,21 @@ class _MissionReviewViewState extends State<MissionReviewView> {
       return;
     }
 
-    if (_reviewController.text.trim().isEmpty) {
+    if (_selectedPlaceValues.isEmpty) {
       Get.snackbar(
         'Error',
-        'Silakan tulis ulasan terlebih dahulu',
+        'Silakan pilih kesesuaian tempat terlebih dahulu',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.warning,
+        colorText: AppColors.textOnPrimary,
+      );
+      return;
+    }
+
+    if (_selectedFoodTypes.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Silakan pilih tipe makanan terlebih dahulu',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.warning,
         colorText: AppColors.textOnPrimary,

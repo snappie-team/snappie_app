@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../controllers/profile_controller.dart';
 import '../../../core/constants/app_assets.dart';
@@ -22,42 +21,67 @@ class ProfileView extends GetView<ProfileController> {
       controller.initializeIfNeeded();
     });
 
-    return ScaffoldFrame(
-      controller: controller,
-      headerHeight: 340,
-      headerContent: _buildHeader(),
-      slivers: [
-        // Tab Bar (Clickable)
-        SliverToBoxAdapter(
-          child: Container(
-            color: AppColors.backgroundContainer,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                color: AppColors.surface,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildTabItem('Postingan Saya', 0),
-                  _buildTabItem('Tersimpan', 1),
-                  _buildTabItem('Pencapaian', 2),
-                ],
-              ),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: RefreshIndicator(
+        onRefresh: controller.refreshData,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverToBoxAdapter(
+              child: _buildScrollableHeader(),
             ),
-          ),
+            SliverToBoxAdapter(
+              child: _buildTabBar(),
+            ),
+            Obx(() => SliverList(
+                  delegate: SliverChildListDelegate(_buildTabContent()),
+                )),
+          ],
         ),
-
-        // Tab Content - wrapped in Obx for reactivity
-        Obx(() => SliverList(
-              delegate: SliverChildListDelegate(_buildTabContent()),
-            )),
-      ],
+      ),
     );
     // ]);
+  }
+
+  Widget _buildScrollableHeader() {
+    return Container(
+      height: 340,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(AppAssets.images.background),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 36, 16, 8),
+        child: _buildHeader(),
+      ),
+    );
+  }
+
+  Widget _buildTabBar() {
+    return Container(
+      color: AppColors.backgroundContainer,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          color: AppColors.surface,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildTabItem('Postingan Saya', 0),
+            _buildTabItem('Tersimpan', 1),
+            _buildTabItem('Pencapaian', 2),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildHeader() {
@@ -361,31 +385,6 @@ class ProfileView extends GetView<ProfileController> {
                 child: Padding(
                   padding: EdgeInsets.all(32.0),
                   child: CircularProgressIndicator(),
-                ),
-              );
-            }
-
-            // Empty state
-            if (controller.savedPlaces.isEmpty &&
-                controller.savedPosts.isEmpty) {
-              return Container(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.bookmark_outline,
-                      size: 48,
-                      color: AppColors.textSecondary,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Belum ada yang tersimpan',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
                 ),
               );
             }

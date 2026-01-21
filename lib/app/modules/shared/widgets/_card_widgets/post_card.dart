@@ -17,10 +17,12 @@ import '../../../../routes/app_pages.dart';
 
 class PostCard extends StatefulWidget {
   final PostModel post;
+  final bool? isOthersProfile;
 
   const PostCard({
     super.key,
     required this.post,
+    this.isOthersProfile = false,
   });
 
   @override
@@ -127,8 +129,10 @@ class _PostCardState extends State<PostCard> {
               ],
             ),
           ),
-          _buildFollowButton(),
-          _buildMoreButton(),
+          if (!(widget.isOthersProfile ?? false)) ...[
+            _buildFollowButton(),
+            _buildMoreButton(),
+          ],
         ],
       ),
     );
@@ -494,7 +498,9 @@ class _PostCardState extends State<PostCard> {
           FullscreenImageViewer.show(
             context: context,
             imageUrls: imageUrls,
+            postOverlay: post,
             initialIndex: 0,
+            postActionsBuilder: (_) => _buildOverlayPostActions(),
           );
         },
         child: Container(
@@ -539,6 +545,8 @@ class _PostCardState extends State<PostCard> {
                 context: context,
                 imageUrls: imageUrls,
                 initialIndex: index,
+                postOverlay: post,
+                postActionsBuilder: (_) => _buildOverlayPostActions(),
               );
             },
             child: Container(
@@ -614,6 +622,17 @@ class _PostCardState extends State<PostCard> {
           _buildSaveButton(),
         ],
       ),
+    );
+  }
+
+  Widget _buildOverlayPostActions() {
+    return Row(
+      children: [
+        Expanded(child: Center(child: _buildLikeButton())),
+        Expanded(child: Center(child: _buildCommentButton())),
+        Expanded(child: Center(child: _buildShareButton())),
+        Expanded(child: Center(child: _buildSaveButton())),
+      ],
     );
   }
 
@@ -716,6 +735,10 @@ class _PostCardState extends State<PostCard> {
 
         return RectangleButtonWidget(
           text: label,
+          textStyle: TextStyle(
+            fontSize: FontSize.getSize(FontSizeOption.mediumSmall),
+            fontWeight: FontWeight.bold,
+          ),
           type: isOutline ? ButtonType.outline : ButtonType.primary,
           backgroundColor: isOutline ? null : AppColors.accent,
           textColor: isOutline ? AppColors.accent : AppColors.textOnPrimary,

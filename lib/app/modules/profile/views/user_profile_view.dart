@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/services/auth_service.dart';
 import '../../../data/models/post_model.dart';
+import '../../../data/repositories/achievement_repository_impl.dart';
 import '../../../data/repositories/user_repository_impl.dart';
 import '../../../data/repositories/post_repository_impl.dart';
 import '../../shared/widgets/index.dart';
+import '../../home/controllers/home_controller.dart';
 
 /// Read-only profile view untuk user lain
 /// Menerima userId dari arguments: {'userId': int}
@@ -20,6 +24,8 @@ class _UserProfileViewState extends State<UserProfileView> {
   // Dependencies
   final _userRepository = Get.find<UserRepository>();
   final _postRepository = Get.find<PostRepository>();
+  final _achievementRepository = Get.find<AchievementRepository>();
+  final _authService = Get.find<AuthService>();
 
   // User ID from arguments
   late int _userId;
@@ -33,10 +39,9 @@ class _UserProfileViewState extends State<UserProfileView> {
   String _userUsername = '';
   String _userImageUrl = '';
   int _totalPosts = 0;
-  int _totalCoins = 0;
-  int _totalExp = 0;
   int _totalFollowers = 0;
   int _totalFollowing = 0;
+  int? _userRank;
 
   // User posts
   List<PostModel> _userPosts = [];
@@ -67,22 +72,24 @@ class _UserProfileViewState extends State<UserProfileView> {
 
       // Get user profile by ID
       final user = await _userRepository.getUserById(_userId);
+      if (!mounted) return;
       
       setState(() {
         _userName = user.name ?? '';
         _userUsername = user.username ?? '';
         _userImageUrl = user.imageUrl ?? '';
         _totalPosts = user.totalPost ?? 0;
-        _totalCoins = user.totalCoin ?? 0;
-        _totalExp = user.totalExp ?? 0;
         _totalFollowers = user.totalFollower ?? 0;
         _totalFollowing = user.totalFollowing ?? 0;
         _isLoading = false;
       });
 
+      _loadUserRank();
+
       // Load user posts
       _loadUserPosts();
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Gagal memuat profil';
         _isLoading = false;
@@ -92,18 +99,34 @@ class _UserProfileViewState extends State<UserProfileView> {
 
   Future<void> _loadUserPosts() async {
     try {
+      if (!mounted) return;
       setState(() => _isLoadingPosts = true);
       
       final posts = await _postRepository.getPostsByUserId(_userId);
+      if (!mounted) return;
       
       setState(() {
         _userPosts = posts;
         _isLoadingPosts = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isLoadingPosts = false);
     }
   }
+
+  Future<void> _loadUserRank() async {
+    try {
+      final entries = await _achievementRepository.getMonthlyLeaderboard();
+      final userEntry = entries.firstWhereOrNull((e) => e.userId == _userId);
+      if (!mounted) return;
+      setState(() => _userRank = userEntry?.rank);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _userRank = null);
+    }
+  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -164,18 +187,10 @@ class _UserProfileViewState extends State<UserProfileView> {
   }
 
   Widget _buildContent() {
-    return CustomScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      slivers: [
-        // Header
-        SliverToBoxAdapter(
-          child: _buildHeader(),
-        ),
-        
-        // Posts list
-        SliverToBoxAdapter(
-          child: _buildPostsSection(),
-        ),
+    return Column(
+      children: [
+        _buildHeader(),
+        _buildPostsSection(),
       ],
     );
   }
@@ -186,8 +201,8 @@ class _UserProfileViewState extends State<UserProfileView> {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Column(
         children: [
-          // XP & Coins row
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -196,30 +211,15 @@ class _UserProfileViewState extends State<UserProfileView> {
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Text(
-                  '$_totalExp XP',
+                  'Peringkat ${_userRank ?? '-'}',
                   style: TextStyle(
                     color: AppColors.accent,
-                    fontSize: 14,
+                    fontSize: FontSize.getSize(FontSizeOption.mediumSmall),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: Text(
-                  '$_totalCoins Koin',
-                  style: TextStyle(
-                    color: AppColors.accent,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+              _buildFollowButton(),
             ],
           ),
           
@@ -294,6 +294,68 @@ class _UserProfileViewState extends State<UserProfileView> {
     );
   }
 
+  Widget _buildFollowButton() {
+    final currentUserId = _authService.userData?.id;
+    if (currentUserId == null || currentUserId == _userId) {
+      return const SizedBox.shrink();
+    }
+
+    try {
+      final controller = Get.find<HomeController>();
+      return Obx(() {
+        final state = controller.getFollowState(_userId);
+        final isOutline = state == PostFollowState.friend ||
+            state == PostFollowState.following;
+
+        final label = switch (state) {
+          PostFollowState.friend => 'Teman',
+          PostFollowState.following => 'Mengikuti',
+          PostFollowState.followBack => 'Ikuti Balik',
+          PostFollowState.follow => 'Ikuti',
+        };
+
+        return RectangleButtonWidget(
+          text: label,
+          textStyle: TextStyle(
+            fontSize: FontSize.getSize(FontSizeOption.mediumSmall),
+            fontWeight: FontWeight.bold,
+          ),
+          type: ButtonType.primary,
+          backgroundColor: isOutline ? AppColors.backgroundContainer : AppColors.accent,
+          textColor: isOutline ? AppColors.accent : AppColors.textOnPrimary,
+          borderColor: isOutline ? AppColors.accent : null,
+          size: RectangleButtonSize.small,
+          borderRadius: BorderRadius.circular(24),
+          onPressed: _handleFollow,
+        );
+      });
+    } catch (e) {
+      return const SizedBox.shrink();
+    }
+  }
+
+  void _handleFollow() async {
+    try {
+      final controller = Get.find<HomeController>();
+      await controller.toggleFollowUser(_userId);
+      Get.snackbar(
+        'Berhasil',
+        'Status mengikuti diperbarui',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.success,
+        colorText: AppColors.textPrimary,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Gagal',
+        'Tidak dapat mengikuti: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.error,
+        colorText: AppColors.textPrimary,
+      );
+    }
+  }
+
   Widget _buildStatColumn(String count, String label) {
     return Column(
       children: [
@@ -323,19 +385,6 @@ class _UserProfileViewState extends State<UserProfileView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section header
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'Postingan',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-          
           // Posts content
           _isLoadingPosts
               ? const Center(
@@ -382,6 +431,7 @@ class _UserProfileViewState extends State<UserProfileView> {
       children: _userPosts.map((post) {
         return PostCard(
           post: post,
+          isOthersProfile: true,
         );
       }).toList(),
     );

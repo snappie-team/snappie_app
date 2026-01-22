@@ -236,6 +236,7 @@ class _GalleryViewState extends State<GalleryView> {
           context: context,
           imageUrls: photos,
           initialIndex: index,
+          isCarousel: true
         );
       },
       child: ClipRRect(

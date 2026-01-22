@@ -114,7 +114,7 @@ class ExploreView extends GetView<ExploreController> {
                 color: isSelected ? AppColors.textOnPrimary : AppColors.primary,
               ),
             ),
-            if (label == 'Penilaian' || label == 'Harga') ...[
+            if (label != "Terdekat") ...[
               const SizedBox(width: 4),
               AppIcon(
                 AppAssets.icons.more,
@@ -181,13 +181,14 @@ class ExploreView extends GetView<ExploreController> {
             
             // Place value selection grid
             GridView.builder(
+              padding: EdgeInsets.zero,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 2.5,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 2,
               ),
               itemCount: controller.placeValues.length,
               itemBuilder: (context, index) {
@@ -218,6 +219,7 @@ class ExploreView extends GetView<ExploreController> {
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                         child: Text(
                           placeValue,
+                          maxLines: 2,
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
@@ -300,13 +302,14 @@ class ExploreView extends GetView<ExploreController> {
             
             // Place value selection grid
             GridView.builder(
+              padding: EdgeInsets.zero,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 2.5,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 2,
               ),
               itemCount: controller.foodTypes.length,
               itemBuilder: (context, index) {
@@ -337,6 +340,7 @@ class ExploreView extends GetView<ExploreController> {
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                         child: Text(
                           foodType,
+                          maxLines: 2,
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:snappie_app/app/core/constants/font_size.dart';
 import '../../../../core/constants/app_colors.dart';
 
 enum ButtonType {
@@ -231,11 +232,11 @@ class RectangleButtonWidget extends StatelessWidget {
   double _getFontSize() {
     switch (size) {
       case RectangleButtonSize.small:
-        return 12;
+        return FontSize.getSize(FontSizeOption.mediumSmall);
       case RectangleButtonSize.medium:
-        return 14;
+        return FontSize.getSize(FontSizeOption.regular);
       case RectangleButtonSize.large:
-        return 16;
+        return FontSize.getSize(FontSizeOption.medium);
     }
   }
 

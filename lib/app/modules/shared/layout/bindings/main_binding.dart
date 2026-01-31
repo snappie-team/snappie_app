@@ -12,6 +12,7 @@ import '../../../../data/repositories/checkin_repository_impl.dart';
 import '../../../../data/repositories/user_repository_impl.dart';
 import '../../../../data/repositories/achievement_repository_impl.dart';
 import '../../../../data/repositories/social_repository_impl.dart';
+import '../../../../data/repositories/gamification_repository_impl.dart';
 
 /// Binding untuk MainLayout
 /// Inject semua controllers yang dibutuhkan oleh tabs di MainLayout
@@ -51,6 +52,7 @@ class MainBinding extends Bindings {
         checkinRepository: Get.find<CheckinRepository>(),
         postRepository: Get.find<PostRepository>(),
         authService: Get.find<AuthService>(),
+        gamificationRepository: Get.find<GamificationRepository>(),
       ),
     );
 

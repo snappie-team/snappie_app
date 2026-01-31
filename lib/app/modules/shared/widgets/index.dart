@@ -2,6 +2,7 @@
 export '_state_widgets/empty_state_widget.dart';
 export '_state_widgets/empty_state_variants.dart';
 export '_state_widgets/error_state_widget.dart';
+export '_state_widgets/loading_overlay_widget.dart';
 export '_state_widgets/loading_state_widget.dart';
 
 // Form Widgets

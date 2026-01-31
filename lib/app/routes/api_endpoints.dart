@@ -33,6 +33,7 @@ class ApiEndpoints {
 
   // Gamification endpoints
   static const String userAchievementsProgress = '/gamification/achievements';
+  static const String gamificationPlaceStatus = '/gamification/place-status';
 
   // App endpoints
   static const String appUpdate = '/app/update';

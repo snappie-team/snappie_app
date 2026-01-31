@@ -40,7 +40,7 @@ class AppColors {
   // ============================================================================
   
   /// Background colors for different surfaces
-  static Color background = MetaColors.meta100; // Light Grey
+  static Color background = MetaColors.meta50; // Light Grey
   static Color backgroundContainer = Colors.white; // White
   
   static Color surface = MetaColors.meta100; // White

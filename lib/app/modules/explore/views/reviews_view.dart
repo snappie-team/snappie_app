@@ -24,7 +24,6 @@ class _ReviewsViewState extends State<ReviewsView> {
   // Filter state
   String _selectedFilter = 'all'; // 'all', 'with_media'
   int? _selectedRating; // null = semua, 1-5 = rating tertentu
-  final bool _isMissionCompleted = false;
 
   @override
   void initState() {
@@ -33,6 +32,7 @@ class _ReviewsViewState extends State<ReviewsView> {
     if (place != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.loadPlaceReviews(place.id!);
+        controller.loadPlaceGamificationStatus(place.id!);
       });
     }
   }
@@ -482,7 +482,17 @@ class _ReviewsViewState extends State<ReviewsView> {
           const SizedBox(height: 12),
           ElevatedButton(
             onPressed: () {
-              if (_isMissionCompleted) {
+              if (!controller.canReview) {
+                Get.snackbar(
+                  'Ulasan sudah selesai',
+                  'Kamu sudah mengulas tempat ini bulan ini.',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: AppColors.warning,
+                  colorText: AppColors.textOnPrimary,
+                );
+                return;
+              }
+              if (controller.hasCheckinThisMonth && !controller.hasReviewThisMonth) {
                 Get.toNamed(AppPages.MISSION_REVIEW, arguments: place);
                 return;
               }
@@ -684,6 +694,11 @@ class _ReviewsViewState extends State<ReviewsView> {
   }
 
   Widget _buildReviewCard(ReviewModel review) {
+    final hideUsername =
+        review.additionalInfo?['hide_username'] == true;
+    final displayName =
+        hideUsername ? 'Anonim' : (review.user?.name ?? 'Anonim');
+    final displayImageUrl = hideUsername ? null : review.user?.imageUrl;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -692,7 +707,7 @@ class _ReviewsViewState extends State<ReviewsView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AvatarWidget(
-              imageUrl: review.user?.imageUrl,
+              imageUrl: displayImageUrl,
               size: AvatarSize.medium,
             ),
             const SizedBox(width: 12),
@@ -701,7 +716,7 @@ class _ReviewsViewState extends State<ReviewsView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    review.user?.name ?? 'Anonim',
+                    displayName,
                     style: TextStyle(
                       fontSize: FontSize.getSize(FontSizeOption.regular),
                       fontWeight: FontWeight.w600,
@@ -898,7 +913,18 @@ class _ReviewsViewState extends State<ReviewsView> {
   }
 
   void _startMission(PlaceModel place) async {
-    // Show confirmation modal
+    await controller.loadPlaceGamificationStatus(place.id!);
+    if (!controller.canCheckin || !controller.canReview) {
+      Get.snackbar(
+        'Misi sudah selesai',
+        'Kamu sudah menyelesaikan misi atau ulasan untuk tempat ini bulan ini.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.warning,
+        colorText: AppColors.textOnPrimary,
+      );
+      return;
+    }
+
     final result = await MissionConfirmModal.show(place: place);
 
     if (result != null && result.confirmed) {

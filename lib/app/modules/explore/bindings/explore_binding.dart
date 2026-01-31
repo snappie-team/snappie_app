@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:snappie_app/app/data/repositories/gamification_repository_impl.dart';
 import '../controllers/explore_controller.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../data/repositories/place_repository_impl.dart';
@@ -14,6 +15,7 @@ class ExploreBinding extends Bindings {
   void dependencies() {
     Get.lazyPut<ExploreController>(
       () => ExploreController(
+        gamificationRepository: Get.find<GamificationRepository>(),
         placeRepository: Get.find<PlaceRepository>(),
         reviewRepository: Get.find<ReviewRepository>(),
         checkinRepository: Get.find<CheckinRepository>(),

@@ -10,11 +10,13 @@ import '../../../data/models/place_model.dart';
 import '../../../data/models/review_model.dart';
 import '../../../data/models/checkin_model.dart';
 import '../../../data/models/post_model.dart';
+import '../../../data/models/gamification_model.dart';
 import '../../../data/repositories/place_repository_impl.dart';
 import '../../../data/repositories/review_repository_impl.dart';
 import '../../../data/repositories/checkin_repository_impl.dart';
 import '../../../data/repositories/post_repository_impl.dart';
 import '../../../data/repositories/user_repository_impl.dart';
+import '../../../data/repositories/gamification_repository_impl.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/helpers/error_handler.dart';
@@ -25,6 +27,7 @@ class ExploreController extends GetxController {
   final CheckinRepository checkinRepository;
   final PostRepository postRepository;
   final UserRepository userRepository;
+  final GamificationRepository gamificationRepository;
   final AuthService authService;
 
   ExploreController({
@@ -33,6 +36,7 @@ class ExploreController extends GetxController {
     required this.checkinRepository,
     required this.postRepository,
     required this.userRepository,
+    required this.gamificationRepository,
     required this.authService,
   });
 
@@ -75,6 +79,8 @@ class ExploreController extends GetxController {
   final _isTogglingFavorite = false.obs;
   final _savedPlaces = <int>[].obs;
   final _isLoadingSavedPlaces = false.obs;
+  final _isLoadingPlaceStatus = false.obs;
+  final _placeStatus = Rxn<PlaceGamificationStatus>();
 
   // Initialization flag
   final _isInitialized = false.obs;
@@ -99,6 +105,7 @@ class ExploreController extends GetxController {
   bool get isLoadingGalleryPosts => _isLoadingGalleryPosts.value;
   bool get isTogglingFavorite => _isTogglingFavorite.value;
   bool get isLoadingSavedPlaces => _isLoadingSavedPlaces.value;
+  bool get isLoadingPlaceStatus => _isLoadingPlaceStatus.value;
   bool get isSearching => _isSearching.value;
   List<int> get savedPlaces => _savedPlaces;
 
@@ -112,6 +119,7 @@ class ExploreController extends GetxController {
   PlaceModel? get selectedPlace => _selectedPlace.value;
   List<String>? get selectedImageUrls => _selectedImageUrls.value;
   ReviewModel? get selectedReview => _selectedReview.value;
+  PlaceGamificationStatus? get placeStatus => _placeStatus.value;
 
   String get errorMessage => _errorMessage.value;
   String get searchQuery => _searchQuery.value;
@@ -144,6 +152,15 @@ class ExploreController extends GetxController {
   int get currentPage => _currentPage.value;
   bool get showBanner => _showBanner.value;
   bool get showMissionCta => _showMissionCta.value;
+  bool get hasCheckinThisMonth =>
+      _placeStatus.value?.hasCheckinThisMonth ?? false;
+  bool get hasReviewThisMonth => _placeStatus.value?.hasReviewThisMonth ?? false;
+  bool get appReviewSubmittedThisMonth =>
+      _placeStatus.value?.appReviewSubmittedThisMonth ?? false;
+  bool get canCheckin => _placeStatus.value?.canCheckin ?? true;
+  bool get canReview => _placeStatus.value?.canReview ?? true;
+  bool get canSubmitAppReview =>
+      _placeStatus.value?.canSubmitAppReview ?? true;
 
   void hideBanner() => _showBanner.value = false;
   void hideMissionCta() => _showMissionCta.value = false;
@@ -450,6 +467,19 @@ class ExploreController extends GetxController {
   void selectPlace(PlaceModel? place) {
     _selectedPlace.value = place;
     _selectedImageUrls.value = place?.imageUrls;
+  }
+
+  Future<void> loadPlaceGamificationStatus(int placeId) async {
+    _isLoadingPlaceStatus.value = true;
+    try {
+      final status =
+          await gamificationRepository.getPlaceStatus(placeId: placeId);
+      _placeStatus.value = status;
+    } catch (e) {
+      Logger.error('Error loading place status', e, null, 'ExploreController');
+    } finally {
+      _isLoadingPlaceStatus.value = false;
+    }
   }
 
   Future<void> loadPlaceById(int placeId) async {

@@ -4,6 +4,7 @@ import '../../../core/network/dio_client.dart';
 import '../../../routes/api_endpoints.dart';
 import '../../../core/helpers/api_response_helper.dart';
 import 'package:snappie_app/app/core/utils/api_response.dart';
+import '../../../core/services/logger_service.dart';
 import '../../models/review_model.dart';
 
 abstract class ReviewRemoteDataSource {
@@ -51,9 +52,19 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
         payload['image_urls'] = imageUrls;
       }
 
+      Logger.debug(
+        'createReview payload: placeId=$placeId, content=$content, rating=$rating, images=${imageUrls?.length ?? 0}, additionalKeys=${additionalInfo.keys.toList()}',
+        'ReviewRemoteDataSource',
+      );
+
       final response = await dioClient.dio.post(
         ApiEndpoints.reviewPlace,
         data: payload,
+      );
+
+      Logger.debug(
+        'createReview response: status=${response.statusCode}, data=${response.data}',
+        'ReviewRemoteDataSource',
       );
 
       return extractApiResponseData<ReviewModel>(
@@ -61,10 +72,13 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
         (json) => ReviewModel.fromJson(json as Map<String, dynamic>),
       );
     } on ApiResponseException catch (e) {
+      Logger.error('createReview api response error', e, null, 'ReviewRemoteDataSource');
       throw ServerException(e.message, e.statusCode ?? 500);
     } on DioException catch (e) {
+      Logger.error('createReview dio error', e, null, 'ReviewRemoteDataSource');
       throw _mapDioException(e);
     } catch (e) {
+      Logger.error('createReview unexpected error', e, null, 'ReviewRemoteDataSource');
       throw ServerException('Unexpected error occurred: $e', 500);
     }
   }

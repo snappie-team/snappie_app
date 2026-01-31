@@ -31,6 +31,7 @@ class PlaceDetailView extends GetView<ExploreController> {
         controller.selectPlace(place);
         controller.loadPlaceReviews(place.id!);
         controller.loadSavedPlaces();
+        controller.loadPlaceGamificationStatus(place.id!);
       }
     });
 
@@ -82,6 +83,7 @@ class PlaceDetailView extends GetView<ExploreController> {
             if (place.id != null) {
               await controller.loadPlaceReviews(place.id!);
               await controller.loadSavedPlaces();
+              await controller.loadPlaceGamificationStatus(place.id!);
             }
           },
           slivers: [
@@ -979,7 +981,18 @@ class PlaceDetailView extends GetView<ExploreController> {
   }
 
   void _startMission(PlaceModel place) async {
-    // Show confirmation modal
+    await controller.loadPlaceGamificationStatus(place.id!);
+    if (!controller.canCheckin || !controller.canReview) {
+      Get.snackbar(
+        'Misi sudah selesai',
+        'Kamu sudah menyelesaikan misi atau ulasan untuk tempat ini bulan ini.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.warning,
+        colorText: AppColors.textOnPrimary,
+      );
+      return;
+    }
+
     final result = await MissionConfirmModal.show(place: place);
 
     if (result != null && result.confirmed) {

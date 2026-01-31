@@ -147,3 +147,49 @@ class PaginatedCoinTransactions {
 
   Map<String, dynamic> toJson() => _$PaginatedCoinTransactionsToJson(this);
 }
+
+@JsonSerializable()
+class PlaceGamificationStatus {
+  @JsonKey(name: 'place_id')
+  final int? placeId;
+
+  final String? month;
+
+  @JsonKey(name: 'has_checkin_this_month')
+  final bool? hasCheckinThisMonth;
+
+  @JsonKey(name: 'has_review_this_month')
+  final bool? hasReviewThisMonth;
+
+  @JsonKey(name: 'app_review_submitted_this_month')
+  final bool? appReviewSubmittedThisMonth;
+
+  @JsonKey(name: 'review_id')
+  final int? reviewId;
+
+  @JsonKey(name: 'can_checkin')
+  final bool? canCheckin;
+
+  @JsonKey(name: 'can_review')
+  final bool? canReview;
+
+  @JsonKey(name: 'can_submit_app_review')
+  final bool? canSubmitAppReview;
+
+  PlaceGamificationStatus({
+    this.placeId,
+    this.month,
+    this.hasCheckinThisMonth,
+    this.hasReviewThisMonth,
+    this.appReviewSubmittedThisMonth,
+    this.reviewId,
+    this.canCheckin,
+    this.canReview,
+    this.canSubmitAppReview,
+  });
+
+  factory PlaceGamificationStatus.fromJson(Map<String, dynamic> json) =>
+      _$PlaceGamificationStatusFromJson(json);
+
+  Map<String, dynamic> toJson() => _$PlaceGamificationStatusToJson(this);
+}

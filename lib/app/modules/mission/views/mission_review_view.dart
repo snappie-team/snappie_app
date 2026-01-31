@@ -46,6 +46,11 @@ class _MissionReviewViewState extends State<MissionReviewView> {
   @override
   void initState() {
     super.initState();
+    final PlaceModel? argPlace = Get.arguments as PlaceModel?;
+    if (controller.currentPlace == null && argPlace != null) {
+      controller.currentPlace = argPlace;
+      controller.currentStep.value = MissionStep.review;
+    }
   }
 
   @override
@@ -1032,9 +1037,15 @@ class _MissionReviewViewState extends State<MissionReviewView> {
     MissionLoadingModal.hide();
     MissionLoadingModal.show(message: 'Mengirim ulasan...');
 
+    if (controller.currentPlace == null && place != null) {
+      controller.currentPlace = place;
+      controller.currentStep.value = MissionStep.review;
+    }
+
     // Set controller values for submission
     controller.rating.value = _rating;
-    controller.reviewController.text = _reviewController.text.trim();
+    final trimmedReview = _reviewController.text.trim();
+    controller.reviewController.text = trimmedReview.isEmpty ? 'oi' : trimmedReview;
     controller.hideUsername.value = _hideUsername;
     
     // Set selected food types
@@ -1089,7 +1100,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
               await MissionSuccessModal.show(
                 title: 'Feedback Terkirim!',
                 description:
-                    'Terima kasih atas partisipasimu!\nKamu mendapatkan ${controller.coinReward} Koin!',
+                    'Terima kasih atas partisipasimu!\nKamu mendapatkan ${controller.expReward} XP dan ${controller.coinReward} Koin!',
               );
             }
           }
@@ -1104,6 +1115,10 @@ class _MissionReviewViewState extends State<MissionReviewView> {
         }
       }
     } else {
+      Logger.warning(
+        'Review submission failed: error=${controller.errorMessage.value}, conflict=${controller.isConflictError.value}',
+        'MissionReviewView',
+      );
       // Show failed modal - check if it's a conflict error
       final failureType = controller.isConflictError.value
           ? MissionFailureType.alreadyCompleted

@@ -17,6 +17,7 @@ import '../../../data/repositories/review_repository_impl.dart';
 import '../../../core/errors/exceptions.dart';
 import '../../../core/constants/food_type.dart';
 import '../../../core/constants/place_value.dart';
+import '../../profile/controllers/profile_controller.dart';
 
 /// Mission Step Enum
 enum MissionStep {
@@ -315,8 +316,8 @@ class MissionController extends GetxController {
 
   /// Submit review mission (includes survey in additional_info)
   Future<bool> submitReview() async {
-    if (reviewController.text.trim().isEmpty || currentPlace == null) {
-      errorMessage.value = 'Review content is empty or place not set';
+    if (currentPlace == null) {
+      errorMessage.value = 'Place not set';
       return false;
     }
 
@@ -354,10 +355,16 @@ class MissionController extends GetxController {
         additionalInfo['survey'] = Map<String, dynamic>.from(surveyAnswers);
       }
 
+      Logger.debug(
+        'Submitting review: placeId=${currentPlace!.id}, rating=${rating.value}, images=${imageUrls.length}, foodTypes=${selectedFoodTypes.length}, placeValues=${selectedPlaceValues.length}',
+        'MissionController',
+      );
+
       // Create review
+      final trimmedContent = reviewController.text.trim();
       final review = await _reviewRepository.createReview(
         placeId: currentPlace!.id!,
-        content: reviewController.text.trim(),
+        content: trimmedContent.isEmpty ? 'oi' : trimmedContent,
         rating: rating.value,
         imageUrls: imageUrls.isNotEmpty ? imageUrls : null,
         additionalInfo: additionalInfo,
@@ -367,19 +374,28 @@ class MissionController extends GetxController {
       isConflictError.value = false;
       return true;
     } on NetworkException catch (e) {
+      Logger.error('Submit review network error', e, null, 'MissionController');
       errorMessage.value = e.message;
       isConflictError.value = false;
       return false;
     } on ServerException catch (e) {
+      Logger.error(
+        'Submit review server error (status=${e.statusCode})',
+        e,
+        null,
+        'MissionController',
+      );
       errorMessage.value = e.message;
       // Check for 409 Conflict - already reviewed
       isConflictError.value = e.statusCode == 409;
       return false;
     } on ValidationException catch (e) {
+      Logger.error('Submit review validation error', e, null, 'MissionController');
       errorMessage.value = e.message;
       isConflictError.value = false;
       return false;
     } catch (e) {
+      Logger.error('Submit review unexpected error', e, null, 'MissionController');
       errorMessage.value = ErrorHandler.getReadableMessage(e, tag: 'MissionController');
       isConflictError.value = false;
       return false;
@@ -442,9 +458,14 @@ class MissionController extends GetxController {
 
       // Merge with existing additional_info
       final existingInfo = reviewResult.value!.additionalInfo ?? {};
+      if (existingInfo['is_submitted_app_review'] == true) {
+        errorMessage.value = 'Feedback sudah dikirim';
+        return false;
+      }
       final updatedInfo = <String, dynamic>{
         ...existingInfo,
         'feedback': feedbackData,
+        'is_submitted_app_review': true,
       };
 
       // Update review with feedback data
@@ -454,6 +475,17 @@ class MissionController extends GetxController {
       );
 
       reviewResult.value = updatedReview;
+      try {
+        final profileController = Get.find<ProfileController>();
+        if (coinReward > 0) {
+          await profileController.addCoins(coinReward);
+        }
+        if (expReward > 0) {
+          await profileController.addExp(expReward);
+        }
+      } catch (e) {
+        Logger.error('Error updating profile rewards', e, null, 'MissionController');
+      }
       return true;
     } on NetworkException catch (e) {
       errorMessage.value = e.message;

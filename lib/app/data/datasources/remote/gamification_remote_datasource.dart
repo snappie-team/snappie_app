@@ -9,6 +9,7 @@ import '../../models/gamification_model.dart';
 abstract class GamificationRemoteDataSource {
   Future<List<ExpTransaction>> getExpTransactions({String? period});
   Future<List<CoinTransaction>> getCoinTransactions({String? period});
+  Future<PlaceGamificationStatus> getPlaceStatus({required int placeId});
 }
 
 class GamificationRemoteDataSourceImpl implements GamificationRemoteDataSource {
@@ -70,6 +71,29 @@ class GamificationRemoteDataSourceImpl implements GamificationRemoteDataSource {
       throw _handleDioException(e);
     } catch (e) {
       throw ServerException('Failed to get coin transactions: $e', 500);
+    }
+  }
+
+  @override
+  Future<PlaceGamificationStatus> getPlaceStatus({required int placeId}) async {
+    try {
+      final resp = await dioClient.dio.get(
+        ApiEndpoints.gamificationPlaceStatus,
+        queryParameters: {'place_id': placeId},
+      );
+
+      return extractApiResponseData<PlaceGamificationStatus>(
+        resp,
+        (json) => PlaceGamificationStatus.fromJson(
+          json as Map<String, dynamic>,
+        ),
+      );
+    } on ApiResponseException catch (e) {
+      throw ServerException(e.message, e.statusCode ?? 500);
+    } on DioException catch (e) {
+      throw _handleDioException(e);
+    } catch (e) {
+      throw ServerException('Failed to get place status: $e', 500);
     }
   }
 

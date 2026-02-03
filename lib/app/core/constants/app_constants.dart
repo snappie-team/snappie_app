@@ -16,8 +16,8 @@ class AppConstants {
   
   // App Info
   static const String appName = 'Snappie App';
-  static const String appVersion = '1.2.1';
-  static const int appVersionCode = 6;
+  static const String appVersion = '1.2.2';
+  static const int appVersionCode = 7;
   static const String appDescription = 'Discover and explore amazing places';
   
   // Pagination

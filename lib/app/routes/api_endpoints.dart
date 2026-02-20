@@ -38,6 +38,8 @@ class ApiEndpoints {
   // App endpoints
   static const String appUpdate = '/app/update';
   static const String userChallengesProgress = '/gamification/challenges';
+  static const String gamificationRewards = '/gamification/rewards';
+  static const String redeemReward = '/gamification/rewards/{id}/redeem';
 
   // Place endpoints
   static const String places = '/places';
@@ -70,6 +72,12 @@ class ApiEndpoints {
   // Social endpoints
   static const String socialFollow = '/social/follow';
   static const String socialFollowUser = '/social/follow/id/{user_id}';
+
+  // Notification endpoints
+  static const String notifications = '/notifications';
+  static const String notificationsUnreadCount = '/notifications/unread-count';
+  static const String notificationMarkRead = '/notifications/{notification_id}/read';
+  static const String notificationsReadAll = '/notifications/read-all';
 
   // Utility methods
   static String getFullUrl(String endpoint) => '$baseUrl$apiVersion$endpoint';

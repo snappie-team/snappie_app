@@ -4,6 +4,9 @@ import 'package:snappie_app/app/core/constants/app_colors.dart';
 import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
+import '../../../data/models/notification_model.dart';
+import '../../../data/repositories/notification_repository_impl.dart';
+import '../../../data/repositories/social_repository_impl.dart';
 import '../../shared/widgets/index.dart';
 import '../../shared/widgets/_display_widgets/app_icon.dart';
 import '../controllers/notification_controller.dart';
@@ -24,7 +27,12 @@ class _NotificationsViewState extends State<NotificationsView> {
     // Create controller if not exists
     if (!Get.isRegistered<NotificationController>()) {
       Get.put(NotificationController(
-        socialRepository: Get.isRegistered() ? Get.find() : null,
+        notificationRepository: Get.isRegistered<NotificationRepository>()
+            ? Get.find<NotificationRepository>()
+            : null,
+        socialRepository: Get.isRegistered<SocialRepository>()
+            ? Get.find<SocialRepository>()
+            : null,
       ));
     }
     controller = Get.find<NotificationController>();
@@ -35,6 +43,7 @@ class _NotificationsViewState extends State<NotificationsView> {
   Widget build(BuildContext context) {
     return ScaffoldFrame.detail(
       title: 'Notifikasi',
+      onRefresh: controller.refreshNotifications,
       slivers: [
         Obx(() {
           if (controller.isLoading) {
@@ -62,6 +71,24 @@ class _NotificationsViewState extends State<NotificationsView> {
             padding: const EdgeInsets.all(16),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
+                // Mark all as read button
+                if (controller.hasUnread)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: controller.markAllAsRead,
+                      icon: const Icon(Icons.done_all, size: 16),
+                      label: const Text(
+                        'Tandai sudah baca semua',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                  ),
                 // Today section
                 if (controller.todayNotifications.isNotEmpty) ...[
                   _buildSectionHeader('Hari ini'),
@@ -98,15 +125,18 @@ class _NotificationsViewState extends State<NotificationsView> {
     );
   }
 
-  Widget _buildNotificationCard(NotificationItem notification) {
+  Widget _buildNotificationCard(NotificationModel notification) {
+    final isUnread = !notification.isRead;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: notification.isRead
-            ? AppColors.backgroundContainer.withAlpha(200)
-            : AppColors.backgroundContainer,
+        color: AppColors.backgroundContainer,
         borderRadius: BorderRadius.circular(10),
+        border: isUnread
+            ? Border.all(color: AppColors.primary.withOpacity(0.4), width: 1.5)
+            : Border.all(color: Colors.transparent, width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -127,14 +157,25 @@ class _NotificationsViewState extends State<NotificationsView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  notification.title,
+                  notification.title ?? '',
                   style: TextStyle(
                     fontSize: 12,
-                    fontWeight:
-                        notification.isRead ? FontWeight.w500 : FontWeight.w700,
+                    fontWeight: isUnread ? FontWeight.w700 : FontWeight.w400,
                     color: Colors.black,
                   ),
                 ),
+                if (notification.subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    notification.subtitle!,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ],
             ),
           ),
@@ -175,7 +216,9 @@ class _NotificationsViewState extends State<NotificationsView> {
             onSelected: (value) {
               switch (value) {
                 case 'read':
-                  controller.markAsRead(notification.id);
+                  if (notification.id != null) {
+                    controller.markAsRead(notification.id!);
+                  }
                   break;
                 case 'profile':
                   if (notification.relatedUserId != null) {
@@ -188,7 +231,7 @@ class _NotificationsViewState extends State<NotificationsView> {
               }
             },
             itemBuilder: (context) => [
-              if (!notification.isRead)
+              if (isUnread)
                 const PopupMenuItem<String>(
                   value: 'read',
                   child: Row(
@@ -198,7 +241,8 @@ class _NotificationsViewState extends State<NotificationsView> {
                     ],
                   ),
                 ),
-              if (!notification.isRead && notification.relatedUserId != null) const PopupMenuDivider(),
+              if (isUnread && notification.relatedUserId != null)
+                const PopupMenuDivider(),
               if (notification.relatedUserId != null)
                 const PopupMenuItem<String>(
                   value: 'profile',
@@ -216,7 +260,7 @@ class _NotificationsViewState extends State<NotificationsView> {
     );
   }
 
-  Widget _buildLeadingWidget(NotificationItem notification) {
+  Widget _buildLeadingWidget(NotificationModel notification) {
     if (notification.avatarUrl != null) {
       return AvatarWidget(
         imageUrl: notification.avatarUrl,
@@ -228,7 +272,7 @@ class _NotificationsViewState extends State<NotificationsView> {
     IconData iconData;
     Color iconColor;
 
-    switch (notification.type) {
+    switch (notification.notificationType) {
       case NotificationType.follow:
         iconData = Icons.person_add;
         iconColor = AppColors.primary;

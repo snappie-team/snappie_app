@@ -11,6 +11,7 @@ import '../../data/datasources/remote/post_remote_datasource.dart';
 import '../../data/datasources/remote/achievement_remote_datasource.dart';
 import '../../data/datasources/remote/social_remote_datasource.dart';
 import '../../data/datasources/remote/gamification_remote_datasource.dart';
+import '../../data/datasources/remote/notification_remote_datasource.dart';
 import '../../data/repositories/user_repository_impl.dart';
 import '../../data/repositories/place_repository_impl.dart';
 import '../../data/repositories/checkin_repository_impl.dart';
@@ -20,6 +21,7 @@ import '../../data/repositories/post_repository_impl.dart';
 import '../../data/repositories/achievement_repository_impl.dart';
 import '../../data/repositories/social_repository_impl.dart';
 import '../../data/repositories/gamification_repository_impl.dart';
+import '../../data/repositories/notification_repository_impl.dart';
 
 /// Data layer dependencies: DataSources & Repositories
 /// Shared across modules, permanent untuk menghindari disposal
@@ -55,6 +57,9 @@ class DataDependencies {
     );
     Get.lazyPut<GamificationRemoteDataSource>(
       () => GamificationRemoteDataSourceImpl(Get.find<DioClient>()),
+    );
+    Get.lazyPut<NotificationRemoteDataSource>(
+      () => NotificationRemoteDataSourceImpl(Get.find<DioClient>()),
     );
     
     // Repositories - PERMANENT untuk menghindari disposal
@@ -119,6 +124,13 @@ class DataDependencies {
     Get.put<GamificationRepository>(
       GamificationRepositoryImpl(
         remoteDataSource: Get.find<GamificationRemoteDataSource>(),
+        networkInfo: Get.find<NetworkInfo>(),
+      ),
+      permanent: true,
+    );
+    Get.put<NotificationRepository>(
+      NotificationRepository(
+        remoteDataSource: Get.find<NotificationRemoteDataSource>(),
         networkInfo: Get.find<NetworkInfo>(),
       ),
       permanent: true,

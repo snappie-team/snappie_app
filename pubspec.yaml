@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.2.2+7
+version: 1.2.3+8
 
 environment:
   sdk: ^3.5.0
@@ -69,6 +69,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -80,6 +82,7 @@ dev_dependencies:
   build_runner: ^2.4.7 # Code generation runner
   json_serializable: ^6.7.1 # JSON serialization code generation
   easy_localization_loader: ^2.0.2 # Easy localization code generation
+  mockito: ^5.4.4
 
   # dart run easy_localization:generate ` -S assets/translations ` -O lib/app/core/localization ` -o locale_keys.g.dart ` -f keys
 

@@ -7,6 +7,7 @@ import '../services/app_update_service.dart';
 import '../services/cloudinary_service.dart';
 import '../services/google_auth_service.dart';
 import '../services/location_service.dart';
+import '../services/onboarding_service.dart';
 
 /// Core dependencies yang selalu dibutuhkan di seluruh aplikasi
 /// Diinisialisasi sekali saat app startup
@@ -16,14 +17,14 @@ class CoreDependencies {
     Get.lazyPut<Connectivity>(() => Connectivity());
     Get.lazyPut<NetworkInfo>(() => NetworkInfoImpl(Get.find()));
     Get.lazyPut<DioClient>(() => DioClient());
-    
+
     // Auth Services - Permanent karena dipakai di banyak tempat
     Get.put<AuthService>(AuthService(), permanent: true);
     Get.put<GoogleAuthService>(GoogleAuthService(), permanent: true);
-    
+
     // Location Service - Permanent untuk akses lokasi di seluruh app
     Get.put<LocationService>(LocationService(), permanent: true);
-    
+
     // Cloudinary Service - For image uploads
     Get.put<CloudinaryService>(CloudinaryService(), permanent: true);
 
@@ -31,6 +32,8 @@ class CoreDependencies {
       AppUpdateService(dioClient: Get.find<DioClient>()),
       permanent: true,
     );
+
+    // Onboarding Service — tracks post-registration tab tour state
+    Get.put<OnboardingService>(OnboardingService(), permanent: true);
   }
 }
-

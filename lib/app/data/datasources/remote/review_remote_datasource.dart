@@ -6,9 +6,10 @@ import '../../../core/helpers/api_response_helper.dart';
 import 'package:snappie_app/app/core/utils/api_response.dart';
 import '../../../core/services/logger_service.dart';
 import '../../models/review_model.dart';
+import '../../models/gamification_response_model.dart';
 
 abstract class ReviewRemoteDataSource {
-  Future<ReviewModel> createReview({
+  Future<ActionResponseWithGamification<ReviewModel>> createReview({
     required int placeId,
     required String content,
     required int rating,
@@ -33,7 +34,7 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
   ReviewRemoteDataSourceImpl(this.dioClient);
 
   @override
-  Future<ReviewModel> createReview({
+  Future<ActionResponseWithGamification<ReviewModel>> createReview({
     required int placeId,
     required String content,
     required int rating,
@@ -67,9 +68,39 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
         'ReviewRemoteDataSource',
       );
 
-      return extractApiResponseData<ReviewModel>(
-        response,
-        (json) => ReviewModel.fromJson(json as Map<String, dynamic>),
+      final responseData = response.data;
+      if (responseData is Map<String, dynamic> && responseData['success'] == true) {
+        final data = responseData['data'] as Map<String, dynamic>;
+
+        // Parse review data (may be nested under 'review' key)
+        final reviewJson = data['review'] ?? data;
+        final review = ReviewModel.fromJson(reviewJson as Map<String, dynamic>);
+
+        // Parse gamification data (optional)
+        GamificationResult? gamification;
+        if (data['gamification'] != null) {
+          try {
+            gamification = GamificationResult.fromJson(
+              data['gamification'] as Map<String, dynamic>,
+            );
+            Logger.debug(
+              'Gamification data found: achievements=${gamification.achievementsUnlocked?.length}, challenges=${gamification.challengesCompleted?.length}',
+              'ReviewRemoteDataSource',
+            );
+          } catch (e) {
+            Logger.warning('Failed to parse gamification data: $e', 'ReviewRemoteDataSource');
+          }
+        }
+
+        return ActionResponseWithGamification<ReviewModel>(
+          actionData: review,
+          gamification: gamification,
+        );
+      }
+
+      throw ServerException(
+        responseData is Map ? responseData['message'] ?? 'Failed to create review' : 'Failed to create review',
+        response.statusCode ?? 500,
       );
     } on ApiResponseException catch (e) {
       Logger.error('createReview api response error', e, null, 'ReviewRemoteDataSource');
@@ -78,6 +109,7 @@ class ReviewRemoteDataSourceImpl implements ReviewRemoteDataSource {
       Logger.error('createReview dio error', e, null, 'ReviewRemoteDataSource');
       throw _mapDioException(e);
     } catch (e) {
+      if (e is ServerException) rethrow;
       Logger.error('createReview unexpected error', e, null, 'ReviewRemoteDataSource');
       throw ServerException('Unexpected error occurred: $e', 500);
     }

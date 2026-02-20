@@ -269,13 +269,21 @@ class MissionController extends GetxController {
 
     try {
       // Create review via repository
-      await _reviewRepository.createReview(
+      final response = await _reviewRepository.createReview(
         placeId: place.id!,
         content: content,
         rating: vote,
         imageUrls: imageUrls,
         additionalInfo: additionalInfo,
       );
+
+      // Handle gamification if present
+      if (response.hasGamification) {
+        Logger.debug('Review gamification data received, processing...', 'MissionController');
+        await GamificationHandlerService.handleGamificationResult(
+          response.gamification!,
+        );
+      }
 
       // Show success and go back
       Get.snackbar(
@@ -362,7 +370,7 @@ class MissionController extends GetxController {
 
       // Create review
       final trimmedContent = reviewController.text.trim();
-      final review = await _reviewRepository.createReview(
+      final response = await _reviewRepository.createReview(
         placeId: currentPlace!.id!,
         content: trimmedContent.isEmpty ? 'oi' : trimmedContent,
         rating: rating.value,
@@ -370,7 +378,16 @@ class MissionController extends GetxController {
         additionalInfo: additionalInfo,
       );
 
-      reviewResult.value = review;
+      reviewResult.value = response.actionData;
+
+      // Handle gamification if present
+      if (response.hasGamification) {
+        Logger.debug('Review gamification data received, processing...', 'MissionController');
+        await GamificationHandlerService.handleGamificationResult(
+          response.gamification!,
+        );
+      }
+
       isConflictError.value = false;
       return true;
     } on NetworkException catch (e) {

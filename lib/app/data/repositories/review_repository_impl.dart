@@ -1,4 +1,5 @@
 import 'package:snappie_app/app/data/models/review_model.dart';
+import 'package:snappie_app/app/data/models/gamification_response_model.dart';
 
 import '../../core/errors/exceptions.dart';
 import '../../core/network/network_info.dart';
@@ -18,8 +19,9 @@ class ReviewRepository {
   });
 
   /// Create a new review
+  /// Returns ActionResponseWithGamification to include gamification data
   /// Throws: [ServerException], [NetworkException], [AuthenticationException]
-  Future<ReviewModel> createReview({
+  Future<ActionResponseWithGamification<ReviewModel>> createReview({
     required int placeId,
     required String content,
     required int rating,

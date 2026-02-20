@@ -28,7 +28,10 @@ class NetworkImageWidget extends StatelessWidget {
     Widget imageWidget = Container(
       width: width,
       height: height,
-      color: backgroundColor ?? AppColors.surfaceContainer,
+      decoration: BoxDecoration(
+        color: backgroundColor ?? AppColors.surfaceContainer,
+        borderRadius: borderRadius,
+      ),
       child: Image.network(
         imageUrl,
         fit: fit,
@@ -38,7 +41,10 @@ class NetworkImageWidget extends StatelessWidget {
           if (loadingProgress == null) return child;
           return placeholder ??
               Container(
-                color: backgroundColor ?? AppColors.surfaceContainer,
+                decoration: BoxDecoration(
+                  borderRadius: borderRadius,
+                  color: backgroundColor ?? AppColors.surfaceContainer,
+                ),
                 child: Center(
                   child: CircularProgressIndicator(
                     color: AppColors.primary,
@@ -53,7 +59,10 @@ class NetworkImageWidget extends StatelessWidget {
         errorBuilder: (context, error, stackTrace) {
           return errorWidget ??
               Container(
-                color: backgroundColor ?? AppColors.surfaceContainer,
+                decoration: BoxDecoration(
+                  color: backgroundColor ?? AppColors.surfaceContainer,
+                  borderRadius: borderRadius,
+                ),
                 child: Icon(
                   Icons.image_not_supported,
                   color: AppColors.textTertiary,

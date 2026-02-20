@@ -15,6 +15,9 @@ class AvatarWidget extends StatelessWidget {
   final AvatarSize size;
   final VoidCallback? onTap;
   final String? frameUrl;
+  final bool showCrown;
+  final String? topRankCrown;
+  final Color? topRankColor;
 
   const AvatarWidget({
     super.key,
@@ -22,42 +25,58 @@ class AvatarWidget extends StatelessWidget {
     this.size = AvatarSize.medium,
     this.onTap,
     this.frameUrl,
+    this.showCrown = false,
+    this.topRankCrown,
+    this.topRankColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final avatarSize = _getSize();
 
-    Widget avatar = Container(
+    Widget avatarCircle = Container(
       width: avatarSize,
       height: avatarSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: _getAvatarBackgroundColor(),
-        border: Border.all(
-          color: AppColors.textOnPrimary,
-          width: avatarSize * 0.05,
-        ),
       ),
-      padding: EdgeInsets.all(avatarSize * 0.05),
+      padding: EdgeInsets.all(avatarSize * 0.12),
       child: _buildContent(),
     );
 
-    // Add frame if provided
-    if (frameUrl != null && frameUrl!.isNotEmpty) {
-      final frameSize = avatarSize * 1.3;
-      avatar = SizedBox(
-        width: frameSize,
-        height: frameSize,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            avatar,
-            _buildFrame(),
-          ],
+    final bool hasFrame = frameUrl != null && frameUrl!.isNotEmpty;
+    final bool hasCrown =
+        showCrown && topRankCrown != null && topRankCrown!.isNotEmpty;
+
+    // Apply ranking border if needed
+    if (hasCrown) {
+      final isLarge = size == AvatarSize.large || size == AvatarSize.extraLarge;
+      final offset = isLarge ? avatarSize * 0.28 : avatarSize * 0.3;
+      avatarCircle = Container(
+        margin: EdgeInsets.only(top: offset),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: topRankColor != null
+              ? Border.all(
+                  color: topRankColor!,
+                  width: isLarge ? 4.0 : 3.0,
+                )
+              : null,
         ),
+        child: avatarCircle,
       );
     }
+
+    Widget avatar = Stack(
+      alignment: Alignment.center,
+      clipBehavior: Clip.none,
+      children: [
+        avatarCircle,
+        if (hasFrame) _buildFrameWidget(avatarSize),
+        if (hasCrown) _buildCrownWidget(avatarSize),
+      ],
+    );
 
     if (onTap != null) {
       avatar = GestureDetector(
@@ -109,36 +128,51 @@ class AvatarWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildFrame() {
-    final frameSize = _getSize() * 1.15; // Frame lebih besar dari avatar
-    return Image.network(
-      frameUrl!,
-      width: frameSize,
-      height: frameSize,
-      fit: BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) {
-        // Fallback to local asset if network fails
-        final filename = RemoteAssets.getExactFilename(frameUrl!)
-            .toLowerCase()
-            .replaceAll('.png', '')
-            .replaceAll('.webp', '');
-        final localFramePath = _getLocalFramePath(filename);
-
-        if (localFramePath == null) {
-          return const SizedBox.shrink();
-        }
-
-        return Image.asset(
-          localFramePath,
+  Widget _buildFrameWidget(double avatarSize) {
+    final frameSize = avatarSize * 1.2;
+    return Positioned(
+      bottom: 0,
+      child: IgnorePointer(
+        child: Image.network(
+          frameUrl!,
           width: frameSize,
           height: frameSize,
           fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
-            // If both fail, don't show frame
-            return const SizedBox.shrink();
+            final filename = RemoteAssets.getExactFilename(frameUrl!)
+                .toLowerCase()
+                .replaceAll('.png', '')
+                .replaceAll('.webp', '');
+            final localFramePath = _getLocalFramePath(filename);
+
+            if (localFramePath == null) return const SizedBox.shrink();
+
+            return Image.asset(
+              localFramePath,
+              width: frameSize,
+              height: frameSize,
+              fit: BoxFit.contain,
+            );
           },
-        );
-      },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCrownWidget(double avatarSize) {
+    final isLarge = size == AvatarSize.large || size == AvatarSize.extraLarge;
+    final crownSize = isLarge ? avatarSize * 0.7 : avatarSize * 0.75;
+
+    return Positioned(
+      bottom: avatarSize * 0.85,
+      child: IgnorePointer(
+        child: Image.asset(
+          topRankCrown!,
+          width: crownSize,
+          height: crownSize,
+          fit: BoxFit.contain,
+        ),
+      ),
     );
   }
 

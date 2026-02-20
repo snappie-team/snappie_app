@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/data/models/leaderboard_model.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
@@ -37,11 +38,14 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
       } else {
         await _profileController.loadMonthlyLeaderboard();
       }
-      
+
       // Make a copy of the list to ensure state updates correctly
-      final entries = List<LeaderboardEntry>.from(_profileController.leaderboard);
-      Logger.debug('Loaded ${entries.length} leaderboard entries for ${_selectedTab == 0 ? "weekly" : "monthly"}', 'Leaderboard');
-      
+      final entries =
+          List<LeaderboardEntry>.from(_profileController.leaderboard);
+      Logger.debug(
+          'Loaded ${entries.length} leaderboard entries for ${_selectedTab == 0 ? "weekly" : "monthly"}',
+          'Leaderboard');
+
       setState(() => _leaderboardData = entries);
     } catch (e) {
       Logger.error('Error loading leaderboard', e, null, 'Leaderboard');
@@ -100,52 +104,52 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
         children: [
           // User avatar
           Obx(() => AvatarWidget(
-            imageUrl: _profileController.userAvatar,
-            size: AvatarSize.large,
-          )),
-          
+                imageUrl: _profileController.userAvatar,
+                size: AvatarSize.large,
+              )),
+
           const SizedBox(width: 16),
-          
+
           // User XP and rank
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Obx(() => Text(
-                  '${_profileController.totalExp} XP',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )),
+                      '${_profileController.totalExp} XP',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )),
                 const SizedBox(height: 4),
                 Obx(() => Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      _profileController.userData?.username ?? '',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      '  •  ',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      'Peringkat ${_profileController.userRank ?? '-'}',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                )),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          _profileController.userData?.username ?? '',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          '  •  ',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'Peringkat ${_profileController.userRank ?? '-'}',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    )),
               ],
             ),
           ),
@@ -172,14 +176,18 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: _selectedTab == 0 ? AppColors.primary : Colors.transparent,
+                    color: _selectedTab == 0
+                        ? AppColors.primary
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Text(
                     'Minggu Ini',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: _selectedTab == 0 ? Colors.white : AppColors.textSecondary,
+                      color: _selectedTab == 0
+                          ? Colors.white
+                          : AppColors.textSecondary,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
@@ -193,14 +201,18 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: _selectedTab == 1 ? AppColors.primary : Colors.transparent,
+                    color: _selectedTab == 1
+                        ? AppColors.primary
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Text(
                     'Bulan Ini',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: _selectedTab == 1 ? Colors.white : AppColors.textSecondary,
+                      color: _selectedTab == 1
+                          ? Colors.white
+                          : AppColors.textSecondary,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
@@ -215,36 +227,16 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.leaderboard_outlined,
-              size: 64,
-              color: AppColors.textSecondary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Belum ada data',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Data peringkat ${_selectedTab == 0 ? 'mingguan' : 'bulanan'} belum tersedia',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
+    return Padding(
+      padding: const EdgeInsets.all(64.0),
+      child: Center(
+        child: Text(
+          'Belum ada data ${_selectedTab == 0 ? "minggu ini" : "bulan ini"}', // TODO: use Language Local Keys
+          style: TextStyle(
+            fontWeight: FontWeight.w400,
+            color: AppColors.textSecondary,
+            fontSize: 16,
+          ),
         ),
       ),
     );
@@ -273,12 +265,12 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
             children: [
               // Top 3 Section (show even if less than 3)
               if (_leaderboardData.isNotEmpty) _buildTop3Section(),
-              
+
               const SizedBox(height: 16),
 
               // Remaining rankings (position 4+)
               _buildRankingList(),
-              
+
               const SizedBox(height: 24),
             ],
           ),
@@ -289,9 +281,9 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
 
   Widget _buildTop3Section() {
     final top3 = _leaderboardData.take(3).toList();
-    
+
     if (top3.isEmpty) return const SizedBox.shrink();
-    
+
     return Column(
       children: [
         Text(
@@ -303,7 +295,7 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
           ),
         ),
         const SizedBox(height: 24),
-        
+
         // Top 3 avatars - 2nd, 1st, 3rd order
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -314,11 +306,10 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
               _buildTopRankItem(top3[1], 2)
             else
               const SizedBox(width: 80),
-            
+
             // 1st place (center, bigger)
-            if (top3.isNotEmpty)
-              _buildTopRankItem(top3[0], 1),
-            
+            if (top3.isNotEmpty) _buildTopRankItem(top3[0], 1),
+
             // 3rd place (right) - show placeholder if no entry
             if (top3.length > 2)
               _buildTopRankItem(top3[2], 3)
@@ -333,54 +324,42 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
   Widget _buildTopRankItem(LeaderboardEntry entry, int position) {
     // Crown color based on position
     Color crownColor;
+    String crownImage;
+
     switch (position) {
       case 1:
-        crownColor = Colors.amber;
+        crownColor = Color(0xFFAD7A10);
+        crownImage = AppAssets.frames.crownGold;
         break;
       case 2:
-        crownColor = Colors.grey[400]!;
+        crownColor = Color(0xFF758691);
+        crownImage = AppAssets.frames.crownSilver;
         break;
       case 3:
-        crownColor = Colors.brown[300]!;
+        crownColor = Color(0xFF58290F);
+        crownImage = AppAssets.frames.crownBronze;
         break;
       default:
         crownColor = Colors.transparent;
+        crownImage = '';
     }
 
     // Size based on position
     final isFirst = position == 1;
     final avatarSize = isFirst ? AvatarSize.large : AvatarSize.medium;
-    final crownSize = isFirst ? 28.0 : 22.0;
-    final borderWidth = isFirst ? 3.0 : 2.0;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Crown
-        Icon(
-          Icons.workspace_premium,
-          color: crownColor,
-          size: crownSize,
-        ),
-        const SizedBox(height: 4),
-        
-        // Avatar with border
-        Container(
-          padding: EdgeInsets.all(borderWidth),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: crownColor,
-              width: borderWidth,
-            ),
-          ),
-          child: AvatarWidget(
-            imageUrl: entry.imageUrl ?? 'avatar_f1_hdpi.png',
-            size: avatarSize,
-          ),
+        AvatarWidget(
+          imageUrl: entry.imageUrl ?? 'avatar_f1_hdpi.png',
+          size: avatarSize,
+          showCrown: true,
+          topRankCrown: crownImage,
+          topRankColor: crownColor,
         ),
         const SizedBox(height: 8),
-        
+
         // Username
         SizedBox(
           width: 85,
@@ -397,7 +376,7 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
           ),
         ),
         const SizedBox(height: 2),
-        
+
         // XP
         Text(
           '${entry.totalExp ?? 0} XP',
@@ -413,10 +392,10 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
 
   Widget _buildRankingList() {
     // Skip top 3, show rest
-    final remainingEntries = _leaderboardData.length > 3 
-        ? _leaderboardData.sublist(3) 
+    final remainingEntries = _leaderboardData.length > 3
+        ? _leaderboardData.sublist(3)
         : <LeaderboardEntry>[];
-    
+
     if (remainingEntries.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -431,7 +410,6 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
           ),
         ),
         const SizedBox(height: 8),
-        
         ...remainingEntries.asMap().entries.map((mapEntry) {
           final index = mapEntry.key;
           final entry = mapEntry.value;
@@ -444,16 +422,18 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
 
   Widget _buildRankingItem(LeaderboardEntry entry, bool isLast) {
     final isCurrentUser = entry.userId == _profileController.userData?.id;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        border: isLast ? null : Border(
-          bottom: BorderSide(
-            color: AppColors.backgroundContainer,
-            width: 1,
-          ),
-        ),
+        border: isLast
+            ? null
+            : Border(
+                bottom: BorderSide(
+                  color: AppColors.backgroundContainer,
+                  width: 1,
+                ),
+              ),
       ),
       child: Row(
         children: [
@@ -465,21 +445,22 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: isCurrentUser ? AppColors.primary : AppColors.textPrimary,
+                color:
+                    isCurrentUser ? AppColors.primary : AppColors.textPrimary,
               ),
             ),
           ),
-          
+
           const SizedBox(width: 12),
-          
+
           // Avatar
           AvatarWidget(
             imageUrl: entry.imageUrl ?? 'avatar_f1_hdpi.png',
             size: AvatarSize.small,
           ),
-          
+
           const SizedBox(width: 12),
-          
+
           // Username
           Expanded(
             child: Text(
@@ -487,13 +468,14 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: isCurrentUser ? FontWeight.bold : FontWeight.w500,
-                color: isCurrentUser ? AppColors.primary : AppColors.textPrimary,
+                color:
+                    isCurrentUser ? AppColors.primary : AppColors.textPrimary,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          
+
           // XP
           Text(
             '${entry.totalExp ?? 0} XP',

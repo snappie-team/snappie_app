@@ -68,7 +68,8 @@ class _UserChallengesViewState extends State<UserChallengesView> {
           SliverFillRemaining(
             child: _buildEmptyState(),
           )
-        else ..._buildChallengeSliversBySchedule(),
+        else
+          ..._buildChallengeSliversBySchedule(),
       ],
     );
   }
@@ -155,6 +156,57 @@ class _UserChallengesViewState extends State<UserChallengesView> {
     );
   }
 
+  /// Returns the appropriate asset path based on criteria_action
+  String _getChallengeAsset(String? criteriaAction) {
+    switch (criteriaAction?.toLowerCase()) {
+      // Content creation → camera
+      case 'checkin':
+      case 'post':
+        return AppAssets.images.camera;
+      // Writing review → review
+      case 'review':
+        return AppAssets.images.review;
+      // Social engagement → photo
+      case 'like':
+      case 'comment':
+      case 'follow':
+        return AppAssets.images.photo;
+      // Rewards & ranking → rating
+      case 'coin_earned':
+      case 'xp_earned':
+      case 'top_rank':
+        return AppAssets.images.rating;
+      default:
+        return AppAssets.images.camera;
+    }
+  }
+
+  /// Returns the action button label based on criteria_action
+  String _getChallengeActionLabel(String? criteriaAction) {
+    switch (criteriaAction?.toLowerCase()) {
+      case 'checkin':
+        return 'Check-in Sekarang';
+      case 'review':
+        return 'Cari Tempat Favoritmu';
+      case 'post':
+        return 'Buat Postingan';
+      case 'like':
+        return 'Jelajahi Postingan';
+      case 'comment':
+        return 'Berikan Komentar';
+      case 'follow':
+        return 'Temukan Teman';
+      case 'coin_earned':
+        return 'Kumpulkan Koin';
+      case 'xp_earned':
+        return 'Raih XP';
+      case 'top_rank':
+        return 'Lihat Leaderboard';
+      default:
+        return 'Mulai Tantangan';
+    }
+  }
+
   Widget _buildChallengeItem(UserAchievement challenge) {
     final isCompleted = challenge.isCompleted ?? false;
 
@@ -166,50 +218,27 @@ class _UserChallengesViewState extends State<UserChallengesView> {
         decoration: BoxDecoration(
           color: challenge.isCompleted == true
               ? AppColors.primaryLight.withAlpha(75)
-              : AppColors.accent.withAlpha(75),
+              : AppColors.warning.withAlpha(25),
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
         child: Row(
           children: [
-            // Icon from iconUrl or default
-            challenge.iconUrl != null && challenge.iconUrl!.isNotEmpty
-                ? Image.network(
-                    challenge.iconUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(
-                        Icons.flag,
-                        color:
-                            isCompleted ? AppColors.success : AppColors.primary,
-                        size: 24,
-                      );
-                    },
-                  )
-                : Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: isCompleted
-                          ? AppColors.successSurface
-                          : AppColors.primarySurface,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.flag,
-                      color: isCompleted ? AppColors.success : AppColors.primary,
-                      size: 24,
-                    ),
-                  ),
-      
+            Image.asset(
+              _getChallengeAsset(challenge.criteriaAction),
+              width: 56,
+              height: 56,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(
+                  Icons.flag,
+                  color: isCompleted ? AppColors.success : AppColors.primary,
+                  size: 24,
+                );
+              },
+            ),
+
             const SizedBox(width: 12),
-      
+
             // Name, progress, target
             Expanded(
               child: Column(
@@ -245,7 +274,8 @@ class _UserChallengesViewState extends State<UserChallengesView> {
                         ),
                       ),
                     )
-                  else if (challenge.progress != null && challenge.target != null)
+                  else if (challenge.progress != null &&
+                      challenge.target != null)
                     Stack(
                       alignment: Alignment.center,
                       children: [
@@ -264,8 +294,8 @@ class _UserChallengesViewState extends State<UserChallengesView> {
                               value: (challenge.progress ?? 0) /
                                   (challenge.target ?? 1),
                               backgroundColor: Colors.transparent,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(AppColors.accent),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.accent),
                             ),
                           ),
                         ),
@@ -282,16 +312,16 @@ class _UserChallengesViewState extends State<UserChallengesView> {
                 ],
               ),
             ),
-      
+
             const SizedBox(width: 12),
-      
+
             // Detail arrow
             if (!isCompleted)
-            AppIcon(
-              AppAssets.icons.moreOption3,
-              color: AppColors.textSecondary,
-              size: 24,
-            ),
+              AppIcon(
+                AppAssets.icons.moreOption3,
+                color: AppColors.textSecondary,
+                size: 24,
+              ),
           ],
         ),
       ),
@@ -332,157 +362,78 @@ class _UserChallengesViewState extends State<UserChallengesView> {
               child: Container(
                 width: 100,
                 height: 100,
-                decoration: BoxDecoration(
-                  color: isCompleted
-                      ? AppColors.successSurface
-                      : AppColors.primarySurface,
-                  borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  _getChallengeAsset(challenge.criteriaAction),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(
+                      Icons.flag,
+                      color:
+                          isCompleted ? AppColors.success : AppColors.primary,
+                      size: 50,
+                    );
+                  },
                 ),
-                child: challenge.iconUrl != null &&
-                        challenge.iconUrl!.isNotEmpty
-                    ? Image.network(
-                        challenge.iconUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            Icons.flag,
-                            color: isCompleted
-                                ? AppColors.success
-                                : AppColors.primary,
-                            size: 50,
-                          );
-                        },
-                      )
-                    : Icon(
-                        Icons.flag,
-                        color:
-                            isCompleted ? AppColors.success : AppColors.primary,
-                        size: 50,
-                      ),
               ),
             ),
 
             // Content
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Description
-                  if (challenge.description != null &&
-                      challenge.description!.isNotEmpty) ...[
-                    Text(
-                      challenge.description!,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Description
+                if (challenge.subtitle != null &&
+                    challenge.subtitle!.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      challenge.subtitle!,
                       style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.textSecondary,
+                        color: AppColors.textPrimary,
                         height: 1.5,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 20),
-                  ],
-
-                  // Progress section
-                  if (!isCompleted &&
-                      challenge.progress != null &&
-                      challenge.target != null) ...[
-                    Text(
-                      'Progress',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: (challenge.progress ?? 0) /
-                                  (challenge.target ?? 1),
-                              backgroundColor: AppColors.border,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.primary),
-                              minHeight: 8,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          '${challenge.progress ?? 0}/${challenge.target ?? 0}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-
-                  // Rewards section
-                  if (challenge.rewardCoins != null ||
-                      challenge.rewardXp != null) ...[
-                    Text(
-                      'Hadiah',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        if (challenge.rewardCoins != null)
-                          Expanded(
-                            child: _buildSimpleRewardCard(
-                              icon: Icons.monetization_on,
-                              label: 'Coins',
-                              value: challenge.rewardCoins.toString(),
-                              color: AppColors.accent,
-                            ),
-                          ),
-                        if (challenge.rewardCoins != null &&
-                            challenge.rewardXp != null)
-                          const SizedBox(width: 12),
-                        if (challenge.rewardXp != null)
-                          Expanded(
-                            child: _buildSimpleRewardCard(
-                              icon: Icons.star,
-                              label: 'XP',
-                              value: challenge.rewardXp.toString(),
-                              color: AppColors.warning,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
+                  ),
+                  const SizedBox(height: 20),
                 ],
-              ),
+                if (challenge.description != null &&
+                    challenge.description!.isNotEmpty) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      challenge.description!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textPrimary,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ],
             ),
 
-            // Close button
+            // Action button
             Padding(
               padding: const EdgeInsets.all(20),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: AppColors.accent,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(99),
                     ),
                   ),
+                  // TODO: Navigate to the corresponding action page
                   onPressed: () => Navigator.pop(context),
                   child: Text(
-                    'Tutup',
+                    _getChallengeActionLabel(challenge.criteriaAction),
                     style: TextStyle(
                       color: AppColors.textOnPrimary,
                       fontSize: 14,

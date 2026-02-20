@@ -42,7 +42,8 @@ class _UserAchievementViewState extends State<UserAchievementView> {
         });
       }
     } catch (e) {
-      Logger.error('Error loading achievements', e, null, 'UserAchievementView');
+      Logger.error(
+          'Error loading achievements', e, null, 'UserAchievementView');
     }
 
     setState(() => _isLoading = false);
@@ -119,38 +120,31 @@ class _UserAchievementViewState extends State<UserAchievementView> {
 
   Widget _buildAchievementItem(UserAchievement userAchievement) {
     final isUnlocked = userAchievement.isCompleted ?? false;
+    final iconUrl = userAchievement.iconUrl;
+
+    // Build the achievement image widget
+    final imageWidget = (iconUrl != null && iconUrl.isNotEmpty)
+        ? Image.asset(
+            'assets/images/achievement/$iconUrl.png',
+            fit: BoxFit.cover,
+            width: 100,
+          )
+        : Image.asset(
+            AppAssets.images.unlocked,
+            fit: BoxFit.cover,
+            width: 75,
+          );
 
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        // border: Border.all(color: AppColors.primary)
       ),
-      // : const EdgeInsets.all(16),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // Trophy icon
-          isUnlocked
-              ? Image.network(
-                  userAchievement.iconUrl ?? '',
-                  fit: BoxFit.cover,
-                  width: 75,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      AppAssets.images.unlocked,
-                      fit: BoxFit.cover,
-                      width: 80,
-                    );
-                  },
-                )
-              : Image.asset(
-                  AppAssets.images.unlocked,
-                  fit: BoxFit.cover,
-                  width: 80,
-                ),
-
-          const SizedBox(height: 12),
+          // Achievement icon with locked/unlocked visual state
+          imageWidget,
 
           // Name
           Padding(
@@ -163,7 +157,8 @@ class _UserAchievementViewState extends State<UserAchievementView> {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color:
+                    isUnlocked ? AppColors.textPrimary : AppColors.textTertiary,
               ),
             ),
           ),

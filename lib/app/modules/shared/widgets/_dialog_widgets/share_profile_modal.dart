@@ -13,6 +13,7 @@ class ShareProfileModal extends StatelessWidget {
   final String username;
   final String displayName;
   final String? avatarUrl;
+  final String? frameUrl;
   final VoidCallback? onClose;
   final VoidCallback? onSave;
   final VoidCallback? onShareMore;
@@ -23,11 +24,12 @@ class ShareProfileModal extends StatelessWidget {
     required this.username,
     required this.displayName,
     this.avatarUrl,
+    this.frameUrl,
     this.onClose,
     this.onSave,
     this.onShareMore,
   });
- 
+
   @override
   Widget build(BuildContext context) {
     final hasUsername = username.isNotEmpty;
@@ -120,6 +122,7 @@ class ShareProfileModal extends StatelessWidget {
               AvatarWidget(
                 imageUrl: avatarUrl ?? 'avatar_f1_hdpi.png',
                 size: AvatarSize.large,
+                frameUrl: frameUrl,
               ),
             ],
           ),
@@ -159,7 +162,8 @@ class ShareProfileModal extends StatelessWidget {
               ),
               IconButton(
                 onPressed: onClose ?? () => Get.back(),
-                icon: AppIcon(AppAssets.icons.close, color: AppColors.textSecondary, size: 24),
+                icon: AppIcon(AppAssets.icons.close,
+                    color: AppColors.textSecondary, size: 24),
               ),
             ],
           ),
@@ -170,23 +174,26 @@ class ShareProfileModal extends StatelessWidget {
               _buildShareActionButton(
                 icon: Icons.download_rounded,
                 label: 'Simpan',
-                onTap: onSave ?? () {
-                  Get.back();
-                  Get.snackbar(
-                    'Segera',
-                    'Fitur simpan QR akan segera hadir',
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
-                },
+                onTap: onSave ??
+                    () {
+                      Get.back();
+                      Get.snackbar(
+                        'Segera',
+                        'Fitur simpan QR akan segera hadir',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    },
               ),
               const SizedBox(width: 24),
               _buildShareActionButton(
                 icon: Icons.more_vert,
                 label: 'Lainnya',
-                onTap: onShareMore ?? () {
-                  Get.back();
-                  Share.share(profileLink, subject: 'Ikuti saya di Snappie');
-                },
+                onTap: onShareMore ??
+                    () {
+                      Get.back();
+                      Share.share(profileLink,
+                          subject: 'Ikuti saya di Snappie');
+                    },
               ),
             ],
           ),

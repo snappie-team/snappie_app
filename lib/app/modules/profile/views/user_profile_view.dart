@@ -34,10 +34,11 @@ class _UserProfileViewState extends State<UserProfileView> {
   bool _isLoading = true;
   bool _isLoadingPosts = false;
   String _errorMessage = '';
-  
+
   String _userName = '';
   String _userUsername = '';
   String _userImageUrl = '';
+  String? _userFrameUrl;
   int _totalPosts = 0;
   int _totalFollowers = 0;
   int _totalFollowing = 0;
@@ -52,7 +53,7 @@ class _UserProfileViewState extends State<UserProfileView> {
     // Get userId from arguments
     final args = Get.arguments as Map<String, dynamic>?;
     _userId = args?['userId'] ?? 0;
-    
+
     if (_userId == 0) {
       setState(() {
         _errorMessage = 'User ID tidak valid';
@@ -73,11 +74,17 @@ class _UserProfileViewState extends State<UserProfileView> {
       // Get user profile by ID
       final user = await _userRepository.getUserById(_userId);
       if (!mounted) return;
-      
+
+      // DEBUG: Trace user data
+      debugPrint('[getUserById] user: $user');
+      debugPrint('[getUserById] userSettings: ${user.userSettings}');
+      debugPrint('[getUserById] frameUrl: ${user.userSettings?.frameUrl}');
+
       setState(() {
         _userName = user.name ?? '';
         _userUsername = user.username ?? '';
         _userImageUrl = user.imageUrl ?? '';
+        _userFrameUrl = user.userSettings?.frameUrl;
         _totalPosts = user.totalPost ?? 0;
         _totalFollowers = user.totalFollower ?? 0;
         _totalFollowing = user.totalFollowing ?? 0;
@@ -101,10 +108,10 @@ class _UserProfileViewState extends State<UserProfileView> {
     try {
       if (!mounted) return;
       setState(() => _isLoadingPosts = true);
-      
+
       final posts = await _postRepository.getPostsByUserId(_userId);
       if (!mounted) return;
-      
+
       setState(() {
         _userPosts = posts;
         _isLoadingPosts = false;
@@ -126,7 +133,6 @@ class _UserProfileViewState extends State<UserProfileView> {
       setState(() => _userRank = null);
     }
   }
-  
 
   @override
   Widget build(BuildContext context) {
@@ -205,7 +211,8 @@ class _UserProfileViewState extends State<UserProfileView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: AppColors.background,
                   borderRadius: BorderRadius.circular(100),
@@ -222,17 +229,19 @@ class _UserProfileViewState extends State<UserProfileView> {
               _buildFollowButton(),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Avatar
           AvatarWidget(
-            imageUrl: _userImageUrl.isNotEmpty ? _userImageUrl : 'avatar_f1_hdpi.png',
+            imageUrl:
+                _userImageUrl.isNotEmpty ? _userImageUrl : 'avatar_f1_hdpi.png',
             size: AvatarSize.extraLarge,
+            frameUrl: _userFrameUrl,
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Name
           Text(
             _userName,
@@ -242,7 +251,7 @@ class _UserProfileViewState extends State<UserProfileView> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          
+
           // Username
           Text(
             '@$_userUsername',
@@ -252,9 +261,9 @@ class _UserProfileViewState extends State<UserProfileView> {
               fontWeight: FontWeight.w400,
             ),
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Stats row
           Container(
             decoration: BoxDecoration(
@@ -321,7 +330,8 @@ class _UserProfileViewState extends State<UserProfileView> {
             fontWeight: FontWeight.bold,
           ),
           type: ButtonType.primary,
-          backgroundColor: isOutline ? AppColors.backgroundContainer : AppColors.accent,
+          backgroundColor:
+              isOutline ? AppColors.backgroundContainer : AppColors.accent,
           textColor: isOutline ? AppColors.accent : AppColors.textOnPrimary,
           borderColor: isOutline ? AppColors.accent : null,
           size: RectangleButtonSize.small,

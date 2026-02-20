@@ -12,7 +12,6 @@ import '../../../core/helpers/error_handler.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/models/post_model.dart';
 
-
 class ProfileController extends GetxController {
   final AuthService authService;
   final UserRepository userRepository;
@@ -39,6 +38,9 @@ class ProfileController extends GetxController {
   final _isLoadingAchievements = false.obs;
   final _isInitialized = false.obs;
   final _selectedTabIndex = 0.obs;
+
+  // Avatar frame state
+  final Rx<String?> selectedFrameUrl = Rx<String?>(null);
 
   UserModel? get userData => _userData.value;
   List<PostModel> get userPosts => _userPosts;
@@ -68,23 +70,23 @@ class ProfileController extends GetxController {
   int get totalReviews => _userData.value?.totalReview ?? 0;
   int get totalAchievements => _userData.value?.totalAchievement ?? 0;
   int get totalChallenges => _userData.value?.totalChallenge ?? 0;
-  
+
   // Gamification challenge badge counter
   final _completedChallengesCount = 0.obs;
   int get completedChallengesCount => _completedChallengesCount.value;
-  
+
   // Add stats getter for compatibility with profile_view
   Map<String, dynamic> get stats => {
-    'total_checkins': totalCheckins,
-    'total_reviews': totalReviews,
-    'total_posts': totalPosts,
-  };
+        'total_checkins': totalCheckins,
+        'total_reviews': totalReviews,
+        'total_posts': totalPosts,
+      };
 
   @override
   void onInit() {
     super.onInit();
     Logger.debug('ProfileController created (not initialized yet)', 'Profile');
-    
+
     // Listen for auth status changes
     ever(authService.isLoggedInObs, (isLoggedIn) {
       if (isLoggedIn && _isInitialized.value) {
@@ -92,7 +94,7 @@ class ProfileController extends GetxController {
       }
     });
   }
-  
+
   /// Initialize data hanya saat tab pertama kali dibuka
   void initializeIfNeeded() {
     if (!_isInitialized.value) {
@@ -106,7 +108,7 @@ class ProfileController extends GetxController {
   Future<void> _loadAllData() async {
     // First load user profile to get userId
     await loadUserProfile();
-    
+
     // Then load posts, saved items, and leaderboard in parallel
     await Future.wait([
       loadUserPosts(),
@@ -117,12 +119,15 @@ class ProfileController extends GetxController {
 
   Future<void> loadUserProfile() async {
     _setLoading(true);
-    
+
     try {
       // Fetch fresh user data from API via repository
       final userData = await userRepository.getUserProfile();
       _userData.value = userData;
-      
+
+      // Sync frameUrl from backend to reactive state
+      selectedFrameUrl.value = userData.userSettings?.frameUrl;
+
       Logger.info('User profile loaded from API: ${userData.name}', 'Profile');
       Logger.debug('   - Image: ${userData.imageUrl}', 'Profile');
       Logger.debug('   - Email: ${userData.email}', 'Profile');
@@ -131,11 +136,12 @@ class ProfileController extends GetxController {
       Logger.debug('   - Checkins: ${userData.totalCheckin}', 'Profile');
       Logger.debug('   - Reviews: ${userData.totalReview}', 'Profile');
       Logger.debug('   - Posts: ${userData.totalPost}', 'Profile');
+      Logger.debug('   - Frame: ${userData.userSettings?.frameUrl}', 'Profile');
     } catch (e) {
       Logger.error('Error loading user profile', e, null, 'Profile');
       _userData.value = null;
     }
-    
+
     _setLoading(false);
   }
 
@@ -145,9 +151,9 @@ class ProfileController extends GetxController {
       Logger.warning('Cannot load posts: User ID not available', 'Profile');
       return;
     }
-    
+
     _isLoadingPosts.value = true;
-    
+
     try {
       final posts = await postRepository.getPostsByUserId(
         userId,
@@ -159,28 +165,30 @@ class ProfileController extends GetxController {
       Logger.error('Error loading user posts', e, null, 'Profile');
       _userPosts.clear();
     }
-    
+
     _isLoadingPosts.value = false;
   }
 
   Future<void> loadSavedItems() async {
     _isLoadingSaved.value = true;
-    
+
     try {
       // Get saved items with preview data directly from API
       final userSaved = await userRepository.getUserSaved();
-      
+
       // Directly assign - no need to fetch individual items anymore!
       _savedPlaces.assignAll(userSaved.savedPlaces ?? []);
       _savedPosts.assignAll(userSaved.savedPosts ?? []);
-      
-      Logger.info('Loaded ${_savedPlaces.length} saved places, ${_savedPosts.length} saved posts', 'Profile');
+
+      Logger.info(
+          'Loaded ${_savedPlaces.length} saved places, ${_savedPosts.length} saved posts',
+          'Profile');
     } catch (e) {
       Logger.error('Error loading saved items', e, null, 'Profile');
       _savedPlaces.clear();
       _savedPosts.clear();
     }
-    
+
     _isLoadingSaved.value = false;
   }
 
@@ -191,49 +199,53 @@ class ProfileController extends GetxController {
 
   Future<void> loadWeeklyLeaderboard() async {
     _isLoadingAchievements.value = true;
-    
+
     try {
       final entries = await achievementRepository.getWeeklyLeaderboard();
       _leaderboard.assignAll(entries);
-      
+
       // Find current user's rank
       final userId = _userData.value?.id;
       if (userId != null) {
         final userEntry = entries.firstWhereOrNull((e) => e.userId == userId);
         _userRank.value = userEntry?.rank;
       }
-      
-      Logger.info('Weekly Leaderboard loaded: ${entries.length} entries, user rank: ${_userRank.value}', 'Profile');
+
+      Logger.info(
+          'Weekly Leaderboard loaded: ${entries.length} entries, user rank: ${_userRank.value}',
+          'Profile');
     } catch (e) {
       Logger.error('Error loading weekly leaderboard', e, null, 'Profile');
       _leaderboard.clear();
       _userRank.value = null;
     }
-    
+
     _isLoadingAchievements.value = false;
   }
 
   Future<void> loadMonthlyLeaderboard() async {
     _isLoadingAchievements.value = true;
-    
+
     try {
       final entries = await achievementRepository.getMonthlyLeaderboard();
       _leaderboard.assignAll(entries);
-      
+
       // Find current user's rank
       final userId = _userData.value?.id;
       if (userId != null) {
         final userEntry = entries.firstWhereOrNull((e) => e.userId == userId);
         _userRank.value = userEntry?.rank;
       }
-      
-      Logger.info('Monthly Leaderboard loaded: ${entries.length} entries, user rank: ${_userRank.value}', 'Profile');
+
+      Logger.info(
+          'Monthly Leaderboard loaded: ${entries.length} entries, user rank: ${_userRank.value}',
+          'Profile');
     } catch (e) {
       Logger.error('Error loading monthly leaderboard', e, null, 'Profile');
       _leaderboard.clear();
       _userRank.value = null;
     }
-    
+
     _isLoadingAchievements.value = false;
   }
 
@@ -281,7 +293,7 @@ class ProfileController extends GetxController {
           ],
         ),
       );
-      
+
       if (confirmed == true) {
         // Show loading
         Get.dialog(
@@ -290,13 +302,13 @@ class ProfileController extends GetxController {
           ),
           barrierDismissible: false,
         );
-        
+
         // Call logout API
         await authService.logout();
-        
+
         // Close loading dialog
         Get.back();
-        
+
         // Show success message
         Get.snackbar(
           'Logout Berhasil',
@@ -305,7 +317,7 @@ class ProfileController extends GetxController {
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
-        
+
         // Navigate back to login screen
         Get.offAllNamed(AppPages.LOGIN);
       }
@@ -314,7 +326,7 @@ class ProfileController extends GetxController {
       if (Get.isDialogOpen == true) {
         Get.back();
       }
-      
+
       // Show error message
       Get.snackbar(
         'Gagal',
@@ -351,7 +363,9 @@ class ProfileController extends GetxController {
   /// Increment completed challenges badge counter
   void incrementCompletedChallenges(int count) {
     _completedChallengesCount.value += count;
-    Logger.debug('Profile: Completed challenges badge incremented by $count, total: ${_completedChallengesCount.value}', 'Profile');
+    Logger.debug(
+        'Profile: Completed challenges badge incremented by $count, total: ${_completedChallengesCount.value}',
+        'Profile');
   }
 
   /// Reset completed challenges badge (called when user opens challenges page)
@@ -364,7 +378,7 @@ class ProfileController extends GetxController {
   Future<void> loadChallenges() async {
     final userId = _userData.value?.id;
     if (userId == null) return;
-    
+
     try {
       // Refresh user challenges data
       await achievementRepository.getChallenges(userId);
@@ -393,8 +407,35 @@ class ProfileController extends GetxController {
         ..totalReview = _userData.value!.totalReview
         ..totalAchievement = _userData.value!.totalAchievement
         ..totalChallenge = _userData.value!.totalChallenge;
-      
-      Logger.debug('Profile: Added $amount coins, new total: ${_userData.value!.totalCoin}', 'Profile');
+
+      Logger.debug(
+          'Profile: Added $amount coins, new total: ${_userData.value!.totalCoin}',
+          'Profile');
+    }
+  }
+
+  /// Update selected frame (saves to backend via API)
+  Future<void> updateSelectedFrame(String? frameUrl) async {
+    try {
+      // Update via API (userSettings.frameUrl)
+      await userRepository.updateUserProfile(
+        userSettings: {
+          'frame_url': frameUrl,
+        },
+      );
+
+      // Update local reactive state immediately
+      selectedFrameUrl.value = frameUrl;
+
+      // Also update the userData object
+      if (_userData.value != null) {
+        _userData.value!.userSettings?.frameUrl = frameUrl;
+      }
+
+      Logger.info('Frame updated via API: $frameUrl', 'Profile');
+    } catch (e) {
+      Logger.error('Error updating selected frame', e, null, 'Profile');
+      rethrow; // Let caller handle the error
     }
   }
 
@@ -417,8 +458,10 @@ class ProfileController extends GetxController {
         ..totalReview = _userData.value!.totalReview
         ..totalAchievement = _userData.value!.totalAchievement
         ..totalChallenge = _userData.value!.totalChallenge;
-      
-      Logger.debug('Profile: Added $amount XP, new total: ${_userData.value!.totalExp}', 'Profile');
+
+      Logger.debug(
+          'Profile: Added $amount XP, new total: ${_userData.value!.totalExp}',
+          'Profile');
     }
   }
 }

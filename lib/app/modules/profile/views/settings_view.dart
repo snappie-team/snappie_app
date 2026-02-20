@@ -129,27 +129,14 @@ class SettingsView extends StatelessWidget {
               ),
             ),
 
-            // Avatar with border and frame
-            FutureBuilder<String?>(
-              future: _getSelectedFrameUrl(),
-              builder: (context, snapshot) {
-                final frameUrl = snapshot.data;
-                return Container(
-                  padding: const EdgeInsets.all(4),
-                  // decoration: BoxDecoration(
-                  //   shape: BoxShape.circle,
-                  //   border: Border.all(
-                  //     color: Colors.white,
-                  //     width: 3,
-                  //   ),
-                  // ),
-                  child: Obx(() => AvatarWidget(
-                        imageUrl: controller.userAvatar,
-                        size: AvatarSize.extraLarge,
-                        frameUrl: frameUrl,
-                      )),
-                );
-              },
+            // Avatar with border and frame (reactive)
+            Container(
+              padding: const EdgeInsets.all(4),
+              child: Obx(() => AvatarWidget(
+                    imageUrl: controller.userAvatar,
+                    size: AvatarSize.extraLarge,
+                    frameUrl: controller.selectedFrameUrl.value,
+                  )),
             ),
 
             const SizedBox(height: 20),
@@ -182,11 +169,6 @@ class SettingsView extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<String?> _getSelectedFrameUrl() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('selected_frame_url');
   }
 
   Widget _buildHeaderButton({
@@ -225,7 +207,7 @@ class SettingsView extends StatelessWidget {
       (icon != null) || (iconAsset != null),
       'Either icon or iconAsset must be provided',
     );
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
@@ -460,19 +442,14 @@ class SettingsView extends StatelessWidget {
                   onTap: () async {
                     Get.back();
                     try {
-                      // Save frame selection to local storage
-                      if (frameId == 'none') {
-                        await prefs.remove('selected_frame');
-                        await prefs.remove('selected_frame_url');
-                      } else {
-                        await prefs.setString('selected_frame', frameId);
-                        await prefs.setString('selected_frame_url', frameAsset);
-                      }
-
-                      // Reload profile to show updated avatar
+                      // Get ProfileController
                       final ProfileController profileController =
                           Get.find<ProfileController>();
-                      profileController.loadUserProfile();
+
+                      // Update frame using controller method
+                      await profileController.updateSelectedFrame(
+                        frameId == 'none' ? null : frameAsset,
+                      );
 
                       Get.snackbar(
                         'Berhasil',

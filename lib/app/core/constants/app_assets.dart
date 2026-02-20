@@ -45,11 +45,15 @@ class _AppImages {
   String get onboarding2 => '$_basePath/onboarding/onboarding2.png';
   String get onboarding3 => '$_basePath/onboarding/onboarding3.png';
   String get onboarding4 => '$_basePath/background/onboarding4.webp';
-  
+
   // === Mascot ===
   String get mascot => '$_basePath/onboarding/onboarding4-add.png';
 
   // === Icons / Illustrations ===
+  String get camera => '$_basePath/generals/camera.png';
+  String get rating => '$_basePath/generals/rating.png';
+  String get photo => '$_basePath/generals/photo.png';
+  String get review => '$_basePath/generals/review.png';
   String get coin => '$_basePath/generals/coin.png';
   String get coins => '$_basePath/generals/coins.png';
   String get coupon => '$_basePath/generals/coupon.png';
@@ -62,6 +66,7 @@ class _AppImages {
   String get target => '$_basePath/generals/target.png';
   String get unlocked => '$_basePath/generals/unlocked.png';
   String get delete => '$_basePath/generals/delete.png';
+  String get chest => '$_basePath/generals/chest.png';
 
   // === Mission ===
   String get mission => '$_basePath/generals/mission.png';
@@ -133,6 +138,9 @@ class _AppFrames {
   String get creator => '$_basePath/creator.png';
   String get first => '$_basePath/first.png';
   String get mvp => '$_basePath/mvp.png';
+  String get crownGold => '$_basePath/crown_gold.png';
+  String get crownSilver => '$_basePath/crown_silver.png';
+  String get crownBronze => '$_basePath/crown_bronze.png';
 }
 
 /// Asset SVG icons di folder assets/icons/
@@ -166,7 +174,7 @@ class _AppIcons {
   String get download => '$_basePath/Download.svg';
   String get addFriend => '$_basePath/Tambah Teman.svg';
   String get create => '$_basePath/create.svg';
-  
+
   // === Content Icons ===
   String get capture => '$_basePath/Capture.svg';
   String get camera => '$_basePath/camera mini.svg';
@@ -191,7 +199,7 @@ class _AppIcons {
   String get language => '$_basePath/Ubah Bahasa.svg';
   String get changePassword => '$_basePath/Ubah Kata Sandi.svg';
   String get helpCenter => '$_basePath/Pusat Bantuan.svg';
-  
+
   // === Gamification Icons ===
   String get leaderboard => '$_basePath/Papan Peringkat Fix.svg';
   String get achievement => '$_basePath/Penghargaan Fix.svg';

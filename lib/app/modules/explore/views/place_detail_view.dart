@@ -139,7 +139,11 @@ class PlaceDetailView extends GetView<ExploreController> {
 
   Widget _buildImageSection(BuildContext context, PlaceModel? place) {
     double imageHeight = 300;
-    final imageUrls = place?.imageUrls ?? [];
+    final placeImages = place?.imageUrls ?? [];
+    final imageUrls = placeImages
+        .where((img) => img.url != null)
+        .map((img) => img.url!)
+        .toList();
     Logger.debug('imageUrls: $imageUrls', 'PlaceDetailView');
 
     // If no images, show placeholder
@@ -656,7 +660,10 @@ class PlaceDetailView extends GetView<ExploreController> {
   Widget _buildGallerySection(BuildContext context, PlaceModel place) {
     return Obx(() {
       final photos = <String>[];
-      if (place.imageUrls != null) photos.addAll(place.imageUrls!);
+      if (place.imageUrls != null)
+        photos.addAll(place.imageUrls!
+            .where((img) => img.url != null)
+            .map((img) => img.url!));
       for (final review in controller.reviews) {
         if (review.imageUrls != null) {
           photos.addAll(review.imageUrls!);
@@ -996,8 +1003,11 @@ class PlaceDetailView extends GetView<ExploreController> {
     final result = await MissionConfirmModal.show(place: place);
 
     if (result != null && result.confirmed) {
-      // Initialize mission controller and navigate
-      final missionController = Get.put(MissionController());
+      // Initialize mission controller (check if already registered)
+      if (!Get.isRegistered<MissionController>()) {
+        Get.put(MissionController());
+      }
+      final missionController = Get.find<MissionController>();
       missionController.initMission(place, hideUsername: result.hideUsername);
 
       Get.toNamed(AppPages.MISSION_PHOTO);
@@ -1110,7 +1120,7 @@ class PlaceDetailView extends GetView<ExploreController> {
                     borderRadius: BorderRadius.circular(12),
                     child: place.imageUrls?.isNotEmpty == true
                         ? NetworkImageWidget(
-                            imageUrl: place.imageUrls!.first,
+                            imageUrl: place.imageUrls!.first.url ?? '',
                             width: 70,
                             height: 70,
                             fit: BoxFit.cover,
@@ -1287,14 +1297,8 @@ class PlaceDetailView extends GetView<ExploreController> {
                   color: AppColors.textPrimary,
                 ),
               ),
-              if (content != null) ...[
-                const SizedBox(height: 4),
-                content
-              ],
-              if (trailing != null) ...[
-                const SizedBox(height: 4),
-                trailing
-              ],
+              if (content != null) ...[const SizedBox(height: 4), content],
+              if (trailing != null) ...[const SizedBox(height: 4), trailing],
             ],
           ),
         ),

@@ -55,7 +55,7 @@ class _FeedbackBaseLayout extends StatelessWidget {
       children: [
         // Header with close button and place info
         _buildHeader(),
-        
+
         // Content
         Expanded(child: child),
       ],
@@ -96,7 +96,7 @@ class _FeedbackBaseLayout extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Coin reward badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -121,9 +121,9 @@ class _FeedbackBaseLayout extends StatelessWidget {
               ],
             ),
           ),
-          
+
           const SizedBox(width: 12),
-          
+
           // Close button
           GestureDetector(
             onTap: () => _showExitConfirmation(),
@@ -160,7 +160,8 @@ class _FeedbackBaseLayout extends StatelessWidget {
             onPressed: () {
               Get.back();
               controller.resetMission();
-              Get.until((route) => route.settings.name == AppPages.PLACE_DETAIL);
+              Get.until(
+                  (route) => route.settings.name == AppPages.PLACE_DETAIL);
             },
             child: Text(
               'Keluar',
@@ -189,7 +190,7 @@ class _FeedbackStep1 extends StatelessWidget {
         child: Column(
           children: [
             const Spacer(),
-            
+
             // Question
             Text(
               'Apakah informasi yang disajikan sudah sesuai?',
@@ -200,9 +201,9 @@ class _FeedbackStep1 extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const Spacer(),
-            
+
             // Buttons
             SizedBox(
               width: double.infinity,
@@ -253,7 +254,7 @@ class _FeedbackStep1 extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 40),
           ],
         ),
@@ -279,17 +280,19 @@ class _FeedbackStep2State extends State<_FeedbackStep2> {
   List<String> get _images {
     final place = widget.controller.currentPlace;
     final images = <String>[];
-    
+
     // Add place images
     if (place?.imageUrls != null && place!.imageUrls!.isNotEmpty) {
-      images.addAll(place.imageUrls!);
+      images.addAll(place.imageUrls!
+          .where((img) => img.url != null)
+          .map((img) => img.url!));
     }
-    
+
     // Add uploaded checkin image if available
     if (widget.controller.uploadedImageUrl.value != null) {
       images.add(widget.controller.uploadedImageUrl.value!);
     }
-    
+
     return images;
   }
 
@@ -302,7 +305,7 @@ class _FeedbackStep2State extends State<_FeedbackStep2> {
   @override
   Widget build(BuildContext context) {
     final images = _images;
-    
+
     return _FeedbackBaseLayout(
       placeName: widget.controller.currentPlace?.name ?? 'Nama Tempat',
       coinReward: widget.controller.coinReward,
@@ -311,7 +314,7 @@ class _FeedbackStep2State extends State<_FeedbackStep2> {
         child: Column(
           children: [
             const SizedBox(height: 20),
-            
+
             // Question
             Text(
               'Foto manakah yang paling cocok menjadi gambar profil tempat ini?',
@@ -322,9 +325,9 @@ class _FeedbackStep2State extends State<_FeedbackStep2> {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Image carousel
             Expanded(
               child: images.isEmpty
@@ -364,9 +367,9 @@ class _FeedbackStep2State extends State<_FeedbackStep2> {
                       },
                     ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Page indicator dots
             if (images.isNotEmpty)
               Row(
@@ -386,17 +389,19 @@ class _FeedbackStep2State extends State<_FeedbackStep2> {
                   ),
                 ),
               ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Continue button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
                   if (images.isNotEmpty) {
-                    widget.controller.feedbackAnswers['best_photo_index'] = _currentIndex;
-                    widget.controller.feedbackAnswers['best_photo_url'] = images[_currentIndex];
+                    widget.controller.feedbackAnswers['best_photo_index'] =
+                        _currentIndex;
+                    widget.controller.feedbackAnswers['best_photo_url'] =
+                        images[_currentIndex];
                   }
                   widget.controller.feedbackStep.value = 2;
                 },
@@ -417,7 +422,7 @@ class _FeedbackStep2State extends State<_FeedbackStep2> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 20),
           ],
         ),
@@ -442,7 +447,7 @@ class _FeedbackStep3 extends StatelessWidget {
         child: Column(
           children: [
             const Spacer(),
-            
+
             // Question
             Text(
               'Apakah kamu setuju jika tempat ini disebut ',
@@ -472,9 +477,9 @@ class _FeedbackStep3 extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const Spacer(),
-            
+
             // Buttons
             SizedBox(
               width: double.infinity,
@@ -525,7 +530,7 @@ class _FeedbackStep3 extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 40),
           ],
         ),
@@ -585,7 +590,7 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            
+
             // Star rating
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -599,9 +604,7 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     child: Icon(
-                      index < _recommendRating
-                          ? Icons.star
-                          : Icons.star_border,
+                      index < _recommendRating ? Icons.star : Icons.star_border,
                       color: index < _recommendRating
                           ? AppColors.warning
                           : AppColors.textTertiary,
@@ -611,9 +614,9 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
                 );
               }),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Question 2: Tags
             Text(
               'Apa yang paling kamu sukai dari proses pencarian tempat di aplikasi Snappie?',
@@ -625,7 +628,7 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            
+
             // Tags wrap
             Wrap(
               spacing: 8,
@@ -654,9 +657,8 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
                           : AppColors.surface,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.border,
+                        color:
+                            isSelected ? AppColors.primary : AppColors.border,
                       ),
                     ),
                     child: Text(
@@ -674,9 +676,9 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
                 );
               }).toList(),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Question 3: Free text feedback
             Text(
               'Masukan',
@@ -687,7 +689,7 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
               ),
             ),
             const SizedBox(height: 12),
-            
+
             TextField(
               controller: _feedbackController,
               maxLines: 4,
@@ -713,9 +715,9 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Submit button
             SizedBox(
               width: double.infinity,
@@ -738,7 +740,7 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 20),
           ],
         ),
@@ -749,8 +751,10 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
   Future<void> _submitFeedback() async {
     // Save answers
     widget.controller.feedbackAnswers['recommend_rating'] = _recommendRating;
-    widget.controller.feedbackAnswers['liked_features'] = _selectedTags.toList();
-    widget.controller.feedbackAnswers['feedback_text'] = _feedbackController.text.trim();
+    widget.controller.feedbackAnswers['liked_features'] =
+        _selectedTags.toList();
+    widget.controller.feedbackAnswers['feedback_text'] =
+        _feedbackController.text.trim();
 
     // Show loading modal
     MissionLoadingModal.show(message: 'Mengirim feedback...');
@@ -764,14 +768,15 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
       // Show final success modal
       final claimResult = await MissionSuccessModal.show(
         title: 'Misi Berhasil!',
-        description: 'Selamat, Anda telah menyelesaikan semua misi.\nKlaim ${widget.controller.expReward} XP dan ${widget.controller.coinReward} Koin Kamu!',
+        description:
+            'Selamat, Anda telah menyelesaikan semua misi.\nKlaim ${widget.controller.expReward} XP dan ${widget.controller.coinReward} Koin Kamu!',
       );
-      
+
       if (claimResult == true) {
         // Reset mission and return to place detail
         widget.controller.resetMission();
         Get.until((route) => route.settings.name == AppPages.PLACE_DETAIL);
-        
+
         Get.snackbar(
           'Selamat!',
           'Kamu mendapatkan total ${widget.controller.expReward} XP',

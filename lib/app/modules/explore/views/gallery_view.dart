@@ -22,7 +22,7 @@ class _GalleryViewState extends State<GalleryView> {
   void initState() {
     super.initState();
     place = Get.arguments as PlaceModel?;
-    
+
     // Load gallery data when view initializes
     if (place?.id != null) {
       controller.loadGalleryCheckins(place!.id!);
@@ -78,7 +78,7 @@ class _GalleryViewState extends State<GalleryView> {
 
   Widget _buildTabBar() {
     final tabs = ['Galeri Kami', 'Galeri Misi', 'Postingan Terkait'];
-    
+
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       decoration: BoxDecoration(
@@ -87,7 +87,7 @@ class _GalleryViewState extends State<GalleryView> {
       child: Container(
         padding: const EdgeInsets.fromLTRB(4, 4, 4, 4),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(99),
+            borderRadius: BorderRadius.circular(99),
           color: AppColors.background
         ),
         child: Row(
@@ -124,8 +124,11 @@ class _GalleryViewState extends State<GalleryView> {
 
   /// Tab 1: Galeri Kami - from place.imageUrls
   Widget _buildGaleriKamiTab() {
-    final photos = place?.imageUrls ?? [];
-    
+    final photos = (place?.imageUrls ?? [])
+        .where((img) => img.url != null)
+        .map((img) => img.url!)
+        .toList();
+
     if (photos.isEmpty) {
       return _buildEmptyState('Belum ada foto dari tempat ini');
     }
@@ -144,7 +147,7 @@ class _GalleryViewState extends State<GalleryView> {
       }
 
       final photos = controller.galleryCheckinImages;
-      
+
       if (photos.isEmpty) {
         return _buildEmptyState('Belum ada foto misi dari pengunjung');
       }
@@ -161,7 +164,7 @@ class _GalleryViewState extends State<GalleryView> {
       }
 
       final posts = controller.galleryPosts;
-      
+
       if (posts.isEmpty) {
         return _buildEmptyState('Belum ada postingan terkait');
       }
@@ -233,9 +236,9 @@ class _GalleryViewState extends State<GalleryView> {
     return GestureDetector(
       onTap: () {
         FullscreenImageViewer.show(
-          context: context,
-          imageUrls: photos,
-          initialIndex: index,
+            context: context,
+            imageUrls: photos,
+            initialIndex: index,
           isCarousel: true
         );
       },
@@ -281,33 +284,22 @@ class _GalleryViewState extends State<GalleryView> {
     );
   }
 
-  // TODO: Add label for each images in database
+  // Labels come from PlaceImage.description in database
   String _getLabelForIndex(int index) {
-    // Generate label based on place info if available
-    final placeAttributes = place?.placeAttributes;
-    if (placeAttributes != null) {
-      // Try to get area names from place attributes
-      final capacityList = placeAttributes.capacity;
-      if (capacityList != null && index < capacityList.length) {
-        return capacityList[index].name ?? 'Area ${index + 1}';
-      }
+    // Use PlaceImage description from database
+    final placeImages = place?.imageUrls ?? [];
+    if (index < placeImages.length &&
+        placeImages[index].description != null &&
+        placeImages[index].description!.isNotEmpty) {
+      return placeImages[index].description!;
     }
-    
-    // Default labels based on common areas
-    final defaultLabels = [
-      'Area Indoor',
-      'Area Indoor',
-      'Area Outdoor 1',
-      'Area Outdoor 2',
-      'Area Outdoor 3',
-      'Mushola',
-      'Area Parkir',
-      'Toilet',
-    ];
-    
-    if (index < defaultLabels.length) {
-      return defaultLabels[index];
+
+    // Fallback: try capacity names from place attributes
+    final capacityList = place?.placeAttributes?.capacity;
+    if (capacityList != null && index < capacityList.length) {
+      return capacityList[index].name ?? 'Area ${index + 1}';
     }
+
     return 'Foto ${index + 1}';
   }
 }

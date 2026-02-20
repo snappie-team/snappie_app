@@ -144,7 +144,8 @@ class _ReviewsViewState extends State<ReviewsView> {
                       subtitle: 'Jadilah yang pertama menulis ulasan',
                     ),
                   )
-          else _buildReviewsList(),
+          else
+            _buildReviewsList(),
         ],
       ),
     );
@@ -212,7 +213,8 @@ class _ReviewsViewState extends State<ReviewsView> {
     required VoidCallback onTap,
   }) {
     final effectiveSubtitle = subtitle ?? (count != null ? '$count' : null);
-    final text = effectiveSubtitle != null ? '$label\n($effectiveSubtitle)' : label;
+    final text =
+        effectiveSubtitle != null ? '$label\n($effectiveSubtitle)' : label;
 
     return GestureDetector(
       onTap: onTap,
@@ -265,7 +267,8 @@ class _ReviewsViewState extends State<ReviewsView> {
   }
 
   void _showRatingBottomSheet() {
-    final maxCount = _ratingCounts.values.fold<int>(0, (prev, el) => el > prev ? el : prev);
+    final maxCount =
+        _ratingCounts.values.fold<int>(0, (prev, el) => el > prev ? el : prev);
     int? tempSelected = _selectedRating;
 
     showModalBottomSheet<void>(
@@ -322,8 +325,9 @@ class _ReviewsViewState extends State<ReviewsView> {
                             '$rating',
                             style: TextStyle(
                               fontSize: 14,
-                              fontWeight:
-                                  isSelected ? FontWeight.w600 : FontWeight.w500,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
                               color: AppColors.textPrimary,
                             ),
                           ),
@@ -492,7 +496,8 @@ class _ReviewsViewState extends State<ReviewsView> {
                 );
                 return;
               }
-              if (controller.hasCheckinThisMonth && !controller.hasReviewThisMonth) {
+              if (controller.hasCheckinThisMonth &&
+                  !controller.hasReviewThisMonth) {
                 Get.toNamed(AppPages.MISSION_REVIEW, arguments: place);
                 return;
               }
@@ -516,9 +521,7 @@ class _ReviewsViewState extends State<ReviewsView> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                
                 const SizedBox(width: 4),
-
                 AppIcon(AppAssets.icons.moreOption3, size: 20),
               ],
             ),
@@ -694,8 +697,7 @@ class _ReviewsViewState extends State<ReviewsView> {
   }
 
   Widget _buildReviewCard(ReviewModel review) {
-    final hideUsername =
-        review.additionalInfo?['hide_username'] == true;
+    final hideUsername = review.additionalInfo?['hide_username'] == true;
     final displayName =
         hideUsername ? 'Anonim' : (review.user?.name ?? 'Anonim');
     final displayImageUrl = hideUsername ? null : review.user?.imageUrl;
@@ -747,7 +749,7 @@ class _ReviewsViewState extends State<ReviewsView> {
             ),
           ],
         ),
-    
+
         // Review content
         if (review.content != null && review.content!.isNotEmpty) ...[
           const SizedBox(height: 4),
@@ -760,7 +762,7 @@ class _ReviewsViewState extends State<ReviewsView> {
             ),
           ),
         ],
-    
+
         // Review images
         if (review.imageUrls != null && review.imageUrls!.isNotEmpty) ...[
           const SizedBox(height: 8),
@@ -928,8 +930,11 @@ class _ReviewsViewState extends State<ReviewsView> {
     final result = await MissionConfirmModal.show(place: place);
 
     if (result != null && result.confirmed) {
-      // Initialize mission controller and navigate
-      final missionController = Get.put(MissionController());
+      // Initialize mission controller (check if already registered)
+      if (!Get.isRegistered<MissionController>()) {
+        Get.put(MissionController());
+      }
+      final missionController = Get.find<MissionController>();
       missionController.initMission(place, hideUsername: result.hideUsername);
 
       Get.toNamed(AppPages.MISSION_PHOTO);

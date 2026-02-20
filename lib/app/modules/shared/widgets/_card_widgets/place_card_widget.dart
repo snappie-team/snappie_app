@@ -64,7 +64,7 @@ class PlaceCardWidget extends StatelessWidget {
     this.padding,
   });
 
-   CardConfig _getCardConfig() {
+  CardConfig _getCardConfig() {
     switch (cardSize) {
       case CardSize.small:
         return CardConfig(
@@ -120,7 +120,7 @@ class PlaceCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cardConfig = _getCardConfig();
-    
+
     return Container(
       // decoration: BoxDecoration(
       //   border: Border.all(
@@ -132,6 +132,7 @@ class PlaceCardWidget extends StatelessWidget {
       height: cardConfig.height,
       margin: cardConfig.margin,
       child: GestureDetector(
+        key: Key('place_card_${place.id}'),
         onTap: () => Get.toNamed(AppPages.PLACE_DETAIL, arguments: place),
         child: Container(
           padding: padding ?? cardConfig.contentPadding,
@@ -152,7 +153,7 @@ class PlaceCardWidget extends StatelessWidget {
             children: [
               // Image with optional overlay icon
               _buildImageSection(cardConfig),
-              
+
               // Content
               _buildContentSection(cardConfig),
             ],
@@ -172,8 +173,10 @@ class PlaceCardWidget extends StatelessWidget {
             width: double.infinity,
             color: AppColors.background,
             child: Image.network(
-              (place.imageUrls != null && place.imageUrls!.isNotEmpty)
-                  ? place.imageUrls!.first
+              (place.imageUrls != null &&
+                      place.imageUrls!.isNotEmpty &&
+                      place.imageUrls!.first.url != null)
+                  ? place.imageUrls!.first.url!
                   : 'https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/146/2024/04/30/Sagarmatha-3522761961.jpeg',
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
@@ -255,14 +258,13 @@ class PlaceCardWidget extends StatelessWidget {
               ],
             ],
           ),
-          
+
           if (cardSize != CardSize.small) ...[
             const SizedBox(height: 6),
-            
+
             // Short Description
             Text(
-              place.placeDetail?.shortDescription ??
-              'Tempat makan yang nyaman',
+              place.placeDetail?.shortDescription ?? 'Tempat makan yang nyaman',
               style: TextStyle(
                 fontSize: config.descriptionFontSize,
                 fontWeight: FontWeight.normal,

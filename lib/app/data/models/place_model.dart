@@ -18,8 +18,11 @@ class PlaceModel {
   double? longitude;
   double? latitude;
 
-  @JsonKey(name: 'image_urls')
-  List<String>? imageUrls;
+  @JsonKey(
+      name: 'image_urls',
+      fromJson: _placeImagesFromJson,
+      toJson: _placeImagesToJson)
+  List<PlaceImage>? imageUrls;
 
   @JsonKey(name: 'coin_reward')       int? coinReward;
   @JsonKey(name: 'exp_reward')        int? expReward;
@@ -31,7 +34,7 @@ class PlaceModel {
 
   bool? status;
 
-  @JsonKey(name: 'partnership_status') 
+  @JsonKey(name: 'partnership_status')
   bool? partnershipStatus;
 
   @JsonKey(name: 'place_detail')
@@ -203,4 +206,39 @@ class Accessibility {
   factory Accessibility.fromJson(Map<String, dynamic> json) =>
       _$AccessibilityFromJson(json);
   Map<String, dynamic> toJson() => _$AccessibilityToJson(this);
+}
+
+@JsonSerializable()
+@embedded
+class PlaceImage {
+  String? url;
+  String? description;
+
+  PlaceImage();
+
+  factory PlaceImage.fromJson(Map<String, dynamic> json) =>
+      _$PlaceImageFromJson(json);
+  Map<String, dynamic> toJson() => _$PlaceImageToJson(this);
+}
+
+/// Custom converter for image_urls that handles both formats:
+/// - Legacy: ["url1", "url2"] (plain strings from current backend)
+/// - New: [{"url": "url1", "description": "desc1"}, ...] (objects)
+List<PlaceImage>? _placeImagesFromJson(dynamic json) {
+  if (json == null) return null;
+  if (json is! List) return null;
+  return json.map((item) {
+    if (item is String) {
+      // Legacy format: plain URL string
+      return PlaceImage()..url = item;
+    } else if (item is Map<String, dynamic>) {
+      // New format: {url, description} object
+      return PlaceImage.fromJson(item);
+    }
+    return PlaceImage();
+  }).toList();
+}
+
+List<Map<String, dynamic>>? _placeImagesToJson(List<PlaceImage>? images) {
+  return images?.map((e) => e.toJson()).toList();
 }

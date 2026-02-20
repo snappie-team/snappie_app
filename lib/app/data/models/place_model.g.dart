@@ -55,7 +55,8 @@ const PlaceModelSchema = CollectionSchema(
     r'imageUrls': PropertySchema(
       id: 7,
       name: r'imageUrls',
-      type: IsarType.stringList,
+      type: IsarType.objectList,
+      target: r'PlaceImage',
     ),
     r'latitude': PropertySchema(
       id: 8,
@@ -158,6 +159,7 @@ const PlaceModelSchema = CollectionSchema(
   },
   links: {},
   embeddedSchemas: {
+    r'PlaceImage': PlaceImageSchema,
     r'PlaceDetail': PlaceDetailSchema,
     r'MenuItem': MenuItemSchema,
     r'PlaceAttributes': PlaceAttributesSchema,
@@ -203,9 +205,11 @@ int _placeModelEstimateSize(
     if (list != null) {
       bytesCount += 3 + list.length * 3;
       {
+        final offsets = allOffsets[PlaceImage]!;
         for (var i = 0; i < list.length; i++) {
           final value = list[i];
-          bytesCount += value.length * 3;
+          bytesCount +=
+              PlaceImageSchema.estimateSize(value, offsets, allOffsets);
         }
       }
     }
@@ -279,7 +283,12 @@ void _placeModelSerialize(
   writer.writeLong(offsets[4], object.expReward);
   writer.writeStringList(offsets[5], object.foodType);
   writer.writeLong(offsets[6], object.id);
-  writer.writeStringList(offsets[7], object.imageUrls);
+  writer.writeObjectList<PlaceImage>(
+    offsets[7],
+    allOffsets,
+    PlaceImageSchema.serialize,
+    object.imageUrls,
+  );
   writer.writeDouble(offsets[8], object.latitude);
   writer.writeDouble(offsets[9], object.longitude);
   writer.writeDouble(offsets[10], object.maxPrice);
@@ -326,7 +335,12 @@ PlaceModel _placeModelDeserialize(
   object.expReward = reader.readLongOrNull(offsets[4]);
   object.foodType = reader.readStringList(offsets[5]);
   object.id = reader.readLongOrNull(offsets[6]);
-  object.imageUrls = reader.readStringList(offsets[7]);
+  object.imageUrls = reader.readObjectList<PlaceImage>(
+    offsets[7],
+    PlaceImageSchema.deserialize,
+    allOffsets,
+    PlaceImage(),
+  );
   object.isarId = id;
   object.latitude = reader.readDoubleOrNull(offsets[8]);
   object.longitude = reader.readDoubleOrNull(offsets[9]);
@@ -381,7 +395,12 @@ P _placeModelDeserializeProp<P>(
     case 6:
       return (reader.readLongOrNull(offset)) as P;
     case 7:
-      return (reader.readStringList(offset)) as P;
+      return (reader.readObjectList<PlaceImage>(
+        offset,
+        PlaceImageSchema.deserialize,
+        allOffsets,
+        PlaceImage(),
+      )) as P;
     case 8:
       return (reader.readDoubleOrNull(offset)) as P;
     case 9:
@@ -1473,142 +1492,6 @@ extension PlaceModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
         property: r'imageUrls',
-      ));
-    });
-  }
-
-  QueryBuilder<PlaceModel, PlaceModel, QAfterFilterCondition>
-      imageUrlsElementEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'imageUrls',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<PlaceModel, PlaceModel, QAfterFilterCondition>
-      imageUrlsElementGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'imageUrls',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<PlaceModel, PlaceModel, QAfterFilterCondition>
-      imageUrlsElementLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'imageUrls',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<PlaceModel, PlaceModel, QAfterFilterCondition>
-      imageUrlsElementBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'imageUrls',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<PlaceModel, PlaceModel, QAfterFilterCondition>
-      imageUrlsElementStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'imageUrls',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<PlaceModel, PlaceModel, QAfterFilterCondition>
-      imageUrlsElementEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'imageUrls',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<PlaceModel, PlaceModel, QAfterFilterCondition>
-      imageUrlsElementContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'imageUrls',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<PlaceModel, PlaceModel, QAfterFilterCondition>
-      imageUrlsElementMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'imageUrls',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<PlaceModel, PlaceModel, QAfterFilterCondition>
-      imageUrlsElementIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'imageUrls',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<PlaceModel, PlaceModel, QAfterFilterCondition>
-      imageUrlsElementIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'imageUrls',
-        value: '',
       ));
     });
   }
@@ -3035,6 +2918,13 @@ extension PlaceModelQueryFilter
 
 extension PlaceModelQueryObject
     on QueryBuilder<PlaceModel, PlaceModel, QFilterCondition> {
+  QueryBuilder<PlaceModel, PlaceModel, QAfterFilterCondition> imageUrlsElement(
+      FilterQuery<PlaceImage> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'imageUrls');
+    });
+  }
+
   QueryBuilder<PlaceModel, PlaceModel, QAfterFilterCondition> menuElement(
       FilterQuery<MenuItem> q) {
     return QueryBuilder.apply(this, (query) {
@@ -3533,12 +3423,6 @@ extension PlaceModelQueryWhereDistinct
     });
   }
 
-  QueryBuilder<PlaceModel, PlaceModel, QDistinct> distinctByImageUrls() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'imageUrls');
-    });
-  }
-
   QueryBuilder<PlaceModel, PlaceModel, QDistinct> distinctByLatitude() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'latitude');
@@ -3665,7 +3549,7 @@ extension PlaceModelQueryProperty
     });
   }
 
-  QueryBuilder<PlaceModel, List<String>?, QQueryOperations>
+  QueryBuilder<PlaceModel, List<PlaceImage>?, QQueryOperations>
       imageUrlsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'imageUrls');
@@ -9018,6 +8902,395 @@ extension AccessibilityQueryFilter
 extension AccessibilityQueryObject
     on QueryBuilder<Accessibility, Accessibility, QFilterCondition> {}
 
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+const PlaceImageSchema = Schema(
+  name: r'PlaceImage',
+  id: 2183401697030739776,
+  properties: {
+    r'description': PropertySchema(
+      id: 0,
+      name: r'description',
+      type: IsarType.string,
+    ),
+    r'url': PropertySchema(
+      id: 1,
+      name: r'url',
+      type: IsarType.string,
+    )
+  },
+  estimateSize: _placeImageEstimateSize,
+  serialize: _placeImageSerialize,
+  deserialize: _placeImageDeserialize,
+  deserializeProp: _placeImageDeserializeProp,
+);
+
+int _placeImageEstimateSize(
+  PlaceImage object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  {
+    final value = object.description;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.url;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  return bytesCount;
+}
+
+void _placeImageSerialize(
+  PlaceImage object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeString(offsets[0], object.description);
+  writer.writeString(offsets[1], object.url);
+}
+
+PlaceImage _placeImageDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = PlaceImage();
+  object.description = reader.readStringOrNull(offsets[0]);
+  object.url = reader.readStringOrNull(offsets[1]);
+  return object;
+}
+
+P _placeImageDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readStringOrNull(offset)) as P;
+    case 1:
+      return (reader.readStringOrNull(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+extension PlaceImageQueryFilter
+    on QueryBuilder<PlaceImage, PlaceImage, QFilterCondition> {
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition>
+      descriptionIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'description',
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition>
+      descriptionIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'description',
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition>
+      descriptionEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'description',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition>
+      descriptionGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'description',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition>
+      descriptionLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'description',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition>
+      descriptionBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'description',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition>
+      descriptionStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'description',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition>
+      descriptionEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'description',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition>
+      descriptionContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'description',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition>
+      descriptionMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'description',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition>
+      descriptionIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'description',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition>
+      descriptionIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'description',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition> urlIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'url',
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition> urlIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'url',
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition> urlEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'url',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition> urlGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'url',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition> urlLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'url',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition> urlBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'url',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition> urlStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'url',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition> urlEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'url',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition> urlContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'url',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition> urlMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'url',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition> urlIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'url',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<PlaceImage, PlaceImage, QAfterFilterCondition> urlIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'url',
+        value: '',
+      ));
+    });
+  }
+}
+
+extension PlaceImageQueryObject
+    on QueryBuilder<PlaceImage, PlaceImage, QFilterCondition> {}
+
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
@@ -9028,8 +9301,7 @@ PlaceModel _$PlaceModelFromJson(Map<String, dynamic> json) => PlaceModel()
   ..description = json['description'] as String?
   ..longitude = (json['longitude'] as num?)?.toDouble()
   ..latitude = (json['latitude'] as num?)?.toDouble()
-  ..imageUrls =
-      (json['image_urls'] as List<dynamic>?)?.map((e) => e as String).toList()
+  ..imageUrls = _placeImagesFromJson(json['image_urls'])
   ..coinReward = (json['coin_reward'] as num?)?.toInt()
   ..expReward = (json['exp_reward'] as num?)?.toInt()
   ..minPrice = (json['min_price'] as num?)?.toDouble()
@@ -9068,7 +9340,7 @@ Map<String, dynamic> _$PlaceModelToJson(PlaceModel instance) =>
       'description': instance.description,
       'longitude': instance.longitude,
       'latitude': instance.latitude,
-      'image_urls': instance.imageUrls,
+      'image_urls': _placeImagesToJson(instance.imageUrls),
       'coin_reward': instance.coinReward,
       'exp_reward': instance.expReward,
       'min_price': instance.minPrice,
@@ -9206,5 +9478,15 @@ Accessibility _$AccessibilityFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$AccessibilityToJson(Accessibility instance) =>
     <String, dynamic>{
       'name': instance.name,
+      'description': instance.description,
+    };
+
+PlaceImage _$PlaceImageFromJson(Map<String, dynamic> json) => PlaceImage()
+  ..url = json['url'] as String?
+  ..description = json['description'] as String?;
+
+Map<String, dynamic> _$PlaceImageToJson(PlaceImage instance) =>
+    <String, dynamic>{
+      'url': instance.url,
       'description': instance.description,
     };

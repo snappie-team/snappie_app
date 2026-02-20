@@ -89,9 +89,8 @@ class ExploreController extends GetxController {
   final _showBanner = true.obs;
   final _showMissionCta = true.obs;
 
-
   Timer? _searchDebounce;
-  
+
   // Search text controller
   final searchTextController = TextEditingController();
 
@@ -131,7 +130,7 @@ class ExploreController extends GetxController {
   List<String> get foodTypes => FoodTypeExtension.allLabels;
   List<String> get placeValues => PlaceValueExtension.allLabels;
 
-    final _selectedFoodTypes = <String>[].obs;
+  final _selectedFoodTypes = <String>[].obs;
   final _selectedPlaceValues = <String>[].obs;
   RxList<String> get selectedFoodTypes => _selectedFoodTypes;
   RxList<String> get selectedPlaceValues => _selectedPlaceValues;
@@ -154,13 +153,13 @@ class ExploreController extends GetxController {
   bool get showMissionCta => _showMissionCta.value;
   bool get hasCheckinThisMonth =>
       _placeStatus.value?.hasCheckinThisMonth ?? false;
-  bool get hasReviewThisMonth => _placeStatus.value?.hasReviewThisMonth ?? false;
+  bool get hasReviewThisMonth =>
+      _placeStatus.value?.hasReviewThisMonth ?? false;
   bool get appReviewSubmittedThisMonth =>
       _placeStatus.value?.appReviewSubmittedThisMonth ?? false;
   bool get canCheckin => _placeStatus.value?.canCheckin ?? true;
   bool get canReview => _placeStatus.value?.canReview ?? true;
-  bool get canSubmitAppReview =>
-      _placeStatus.value?.canSubmitAppReview ?? true;
+  bool get canSubmitAppReview => _placeStatus.value?.canSubmitAppReview ?? true;
 
   void hideBanner() => _showBanner.value = false;
   void hideMissionCta() => _showMissionCta.value = false;
@@ -171,7 +170,8 @@ class ExploreController extends GetxController {
     super.onInit();
     // Set default filter - use valid category from backend
     _selectedCategory.value = '';
-    Logger.debug('ExploreController created (not initialized yet)', 'ExploreController');
+    Logger.debug(
+        'ExploreController created (not initialized yet)', 'ExploreController');
   }
 
   @override
@@ -198,17 +198,20 @@ class ExploreController extends GetxController {
     Logger.debug('User Email: ${authService.userEmail}', 'ExploreController');
 
     if (authService.isLoggedIn) {
-      Logger.debug('User authenticated, loading explore data...', 'ExploreController');
+      Logger.debug(
+          'User authenticated, loading explore data...', 'ExploreController');
       await loadExploreData();
     } else {
-      Logger.debug('User not authenticated, skipping data load', 'ExploreController');
+      Logger.debug(
+          'User not authenticated, skipping data load', 'ExploreController');
     }
   }
 
   Future<void> loadExploreData() async {
     // Check if user is authenticated
     if (!authService.isLoggedIn) {
-      Logger.debug('User not authenticated, cannot load explore data', 'ExploreController');
+      Logger.debug('User not authenticated, cannot load explore data',
+          'ExploreController');
       _setError('Please login to view places and categories');
       return;
     }
@@ -241,41 +244,55 @@ class ExploreController extends GetxController {
     _clearError();
 
     try {
-      Logger.debug("Load Places with filters: "
-          "selectedCategory='${_selectedCategory.value}', "
-          "selectedRating=${_selectedRating.value}, "
-          "selectedPriceRange='${_selectedPriceRange.value}', "
-          "selectedFilter='${_selectedFilter.value}', "
-          "selectedLocation=${_selectedLocation.value}", 'ExploreController');
-      
+      Logger.debug(
+          "Load Places with filters: "
+              "selectedCategory='${_selectedCategory.value}', "
+              "selectedRating=${_selectedRating.value}, "
+              "selectedPriceRange='${_selectedPriceRange.value}', "
+              "selectedFilter='${_selectedFilter.value}', "
+              "selectedLocation=${_selectedLocation.value}",
+          'ExploreController');
+
       // Load places from repository - don't include search query (local search)
       final placesList = await placeRepository.getPlaces(
         perPage: 50, // Load more for local search
         minRating: _selectedRating.value?.toDouble(),
         partner: _selectedFilter.value == 'partner' ? true : null,
         popular: _selectedFilter.value == 'popular' ? true : null,
-        longitude: _selectedFilter.value == 'nearby' ? _selectedLocation.value![1] : null,
-        latitude: _selectedFilter.value == 'nearby' ? _selectedLocation.value![0] :  null,
-        placeValues: _selectedFilter.value == 'placeValues' ? _selectedPlaceValues.toList() : null,
-        foodTypes: _selectedFilter.value == 'foodTypes' ? _selectedFoodTypes.toList() : null,
+        longitude: _selectedFilter.value == 'nearby'
+            ? _selectedLocation.value![1]
+            : null,
+        latitude: _selectedFilter.value == 'nearby'
+            ? _selectedLocation.value![0]
+            : null,
+        placeValues: _selectedFilter.value == 'placeValues'
+            ? _selectedPlaceValues.toList()
+            : null,
+        foodTypes: _selectedFilter.value == 'foodTypes'
+            ? _selectedFoodTypes.toList()
+            : null,
       );
 
       Logger.debug('PLACES LOADED SUCCESSFULLY:', 'ExploreController');
       Logger.debug('Places Count: ${placesList.length}', 'ExploreController');
       Logger.debug(
-          'First Place: ${placesList.isNotEmpty ? placesList.first.name : "None"}', 'ExploreController');
+          'First Place: ${placesList.isNotEmpty ? placesList.first.name : "None"}',
+          'ExploreController');
       Logger.debug(
-          'First Place Additional Info: ${placesList.isNotEmpty ? placesList.first.placeAttributes : "None"}', 'ExploreController');
+          'First Place Additional Info: ${placesList.isNotEmpty ? placesList.first.placeAttributes : "None"}',
+          'ExploreController');
 
       if (refresh || _currentPage.value == 1) {
         Logger.debug('Assigning all places to _allPlaces', 'ExploreController');
         _allPlaces.assignAll(placesList);
       } else {
-        Logger.debug('Adding places to existing _allPlaces', 'ExploreController');
+        Logger.debug(
+            'Adding places to existing _allPlaces', 'ExploreController');
         _allPlaces.addAll(placesList);
       }
 
-      Logger.debug('_allPlaces length after update: ${_allPlaces.length}', 'ExploreController');
+      Logger.debug('_allPlaces length after update: ${_allPlaces.length}',
+          'ExploreController');
 
       if (placesList.isEmpty) {
         _hasMoreData.value = false;
@@ -295,7 +312,8 @@ class ExploreController extends GetxController {
   Future<void> loadCategories() async {
     // Check authentication before loading
     if (!authService.isLoggedIn) {
-      Logger.debug('User not authenticated, cannot load categories', 'ExploreController');
+      Logger.debug('User not authenticated, cannot load categories',
+          'ExploreController');
       return;
     }
 
@@ -327,28 +345,30 @@ class ExploreController extends GetxController {
         // final address = place.address?.toLowerCase() ?? '';
         // final description = place.description?.toLowerCase() ?? '';
         // final category = place.category?.toLowerCase() ?? '';
-        
+
         return name.contains(query);
-            // address.contains(query) ||
-            // description.contains(query) ||
-            // category.contains(query);
+        // address.contains(query) ||
+        // description.contains(query) ||
+        // category.contains(query);
       }).toList();
     }
 
     _filteredPlaces.value = result;
-    Logger.debug('Filtered places: ${result.length} of ${_allPlaces.length}', 'ExploreController');
+    Logger.debug('Filtered places: ${result.length} of ${_allPlaces.length}',
+        'ExploreController');
   }
 
   /// Handle search input with debounce (local search)
-  void handleSearchInput(String query, {Duration delay = const Duration(milliseconds: 300)}) {
+  void handleSearchInput(String query,
+      {Duration delay = const Duration(milliseconds: 300)}) {
     _searchQuery.value = query;
     _searchDebounce?.cancel();
-    
+
     // Show searching state immediately if query is not empty
     if (query.isNotEmpty) {
       _isSearching.value = true;
     }
-    
+
     // Debounce the actual filter
     _searchDebounce = Timer(delay, () {
       _applyLocalSearch();
@@ -375,10 +395,12 @@ class ExploreController extends GetxController {
       _selectedPlaceValues.add(placeValue);
       Logger.debug('Place value selected: $placeValue', 'ExploreController');
     }
-    Logger.debug('Total selected: ${_selectedPlaceValues.length} - ${_selectedPlaceValues.join(", ")}', 'ExploreController');
+    Logger.debug(
+        'Total selected: ${_selectedPlaceValues.length} - ${_selectedPlaceValues.join(", ")}',
+        'ExploreController');
   }
 
-    void toggleFoodTypeSelection(String foodType) {
+  void toggleFoodTypeSelection(String foodType) {
     if (_selectedFoodTypes.contains(foodType)) {
       _selectedFoodTypes.remove(foodType);
       Logger.debug('Food type removed: $foodType', 'ExploreController');
@@ -387,7 +409,8 @@ class ExploreController extends GetxController {
       Logger.debug('Food type selected: $foodType', 'ExploreController');
     }
     Logger.debug(
-        'Total selected: ${_selectedFoodTypes.length} - ${_selectedFoodTypes.join(", ")}', 'ExploreController');
+        'Total selected: ${_selectedFoodTypes.length} - ${_selectedFoodTypes.join(", ")}',
+        'ExploreController');
   }
 
   void filterByCategory(String category) {
@@ -428,7 +451,9 @@ class ExploreController extends GetxController {
     final position = await locationService.getCurrentPosition();
     if (position == null) return;
 
-    Logger.debug('Current Position: Lat ${position.latitude}, Lon ${position.longitude}', 'ExploreController');
+    Logger.debug(
+        'Current Position: Lat ${position.latitude}, Lon ${position.longitude}',
+        'ExploreController');
     _selectedFilter.value = 'nearby';
     _selectedLocation.value = [position.latitude, position.longitude];
     await loadPlaces(refresh: true);
@@ -448,7 +473,7 @@ class ExploreController extends GetxController {
     searchTextController.clear(); // Clear the search text field
     loadPlaces(refresh: true);
   }
-  
+
   /// Clear only search query (for search bar X button)
   void clearSearch() {
     _searchDebounce?.cancel();
@@ -466,7 +491,10 @@ class ExploreController extends GetxController {
 
   void selectPlace(PlaceModel? place) {
     _selectedPlace.value = place;
-    _selectedImageUrls.value = place?.imageUrls;
+    _selectedImageUrls.value = place?.imageUrls
+        ?.where((img) => img.url != null)
+        .map((img) => img.url!)
+        .toList();
   }
 
   Future<void> loadPlaceGamificationStatus(int placeId) async {
@@ -519,7 +547,8 @@ class ExploreController extends GetxController {
       // Load reviews from repository
       final reviewsList = await reviewRepository.getPlaceReviews(placeId);
       _reviews.assignAll(reviewsList);
-      Logger.debug('Reviews loaded: ${reviewsList.length}', 'ExploreController');
+      Logger.debug(
+          'Reviews loaded: ${reviewsList.length}', 'ExploreController');
     } catch (e) {
       _setError(ErrorHandler.getReadableMessage(e, tag: 'ExploreController'));
     }
@@ -655,9 +684,11 @@ class ExploreController extends GetxController {
     try {
       final checkins = await checkinRepository.getCheckinsByPlaceId(placeId);
       _galleryCheckins.assignAll(checkins);
-      Logger.debug('Gallery checkins loaded: ${checkins.length}', 'ExploreController');
+      Logger.debug(
+          'Gallery checkins loaded: ${checkins.length}', 'ExploreController');
     } catch (e) {
-      Logger.error('Error loading gallery checkins', e, null, 'ExploreController');
+      Logger.error(
+          'Error loading gallery checkins', e, null, 'ExploreController');
       // Silent fail - gallery will show empty state
     }
 
@@ -672,7 +703,8 @@ class ExploreController extends GetxController {
     try {
       final posts = await postRepository.getPostsByPlaceId(placeId);
       _galleryPosts.assignAll(posts);
-      Logger.debug('Gallery posts loaded: ${posts.length}', 'ExploreController');
+      Logger.debug(
+          'Gallery posts loaded: ${posts.length}', 'ExploreController');
     } catch (e) {
       Logger.error('Error loading gallery posts', e, null, 'ExploreController');
       // Silent fail - gallery will show empty state
@@ -705,18 +737,21 @@ class ExploreController extends GetxController {
   /// Load user's saved places from API
   Future<void> loadSavedPlaces() async {
     if (_isLoadingSavedPlaces.value) return;
-    
+
     _isLoadingSavedPlaces.value = true;
     try {
       final userSaved = await userRepository.getUserSaved();
       // Extract IDs from SavedPlacePreview objects
       final placeIds = userSaved.savedPlaces
-          ?.where((p) => p.id != null)
-          .map((p) => p.id!)
-          .toList() ?? [];
+              ?.where((p) => p.id != null)
+              .map((p) => p.id!)
+              .toList() ??
+          [];
       _savedPlaces.assignAll(placeIds);
-      Logger.debug('Loaded saved places: ${_savedPlaces.length}', 'ExploreController');
-      Logger.debug('Saved place IDs: ${_savedPlaces.join(", ")}', 'ExploreController');
+      Logger.debug(
+          'Loaded saved places: ${_savedPlaces.length}', 'ExploreController');
+      Logger.debug(
+          'Saved place IDs: ${_savedPlaces.join(", ")}', 'ExploreController');
     } catch (e) {
       Logger.error('Error loading saved places', e, null, 'ExploreController');
       // Silent fail - will show as not saved
@@ -733,14 +768,16 @@ class ExploreController extends GetxController {
   /// Toggle save/unsave a place from favorites
   Future<bool> toggleSavedPlace(int placeId) async {
     if (_isTogglingFavorite.value) return false;
-    
+
     _isTogglingFavorite.value = true;
 
     try {
       // Check if already saved locally
       final isCurrentlySaved = _savedPlaces.contains(placeId);
-      Logger.debug('Toggling saved place: $placeId (currently saved: $isCurrentlySaved)', 'ExploreController');
-      
+      Logger.debug(
+          'Toggling saved place: $placeId (currently saved: $isCurrentlySaved)',
+          'ExploreController');
+
       if (isCurrentlySaved) {
         // Remove from local state first (optimistic)
         _savedPlaces.remove(placeId);
@@ -748,16 +785,19 @@ class ExploreController extends GetxController {
         // Add to local state first (optimistic)
         _savedPlaces.add(placeId);
       }
-      
+
       // Call toggle API - returns list of IDs directly
-      final updatedPlaceIds = await userRepository.toggleSavedPlace(_savedPlaces);
-      Logger.debug('Toggled saved place on server $updatedPlaceIds', 'ExploreController');
-      
+      final updatedPlaceIds =
+          await userRepository.toggleSavedPlace(_savedPlaces);
+      Logger.debug('Toggled saved place on server $updatedPlaceIds',
+          'ExploreController');
+
       // Sync with server response
       _savedPlaces.assignAll(updatedPlaceIds);
-      
+
       final isNowSaved = _savedPlaces.contains(placeId);
-      Logger.debug('Place ${isNowSaved ? "saved" : "unsaved"}: $placeId', 'ExploreController');
+      Logger.debug('Place ${isNowSaved ? "saved" : "unsaved"}: $placeId',
+          'ExploreController');
       return isNowSaved;
     } catch (e) {
       // Revert optimistic update on error - reload from server

@@ -16,7 +16,7 @@ class PlaceView extends GetView<ExploreController> {
     // Get place from arguments - can be either PlaceModel or int (ID)
     PlaceModel? place;
     final arguments = Get.arguments;
-    
+
     if (arguments is PlaceModel) {
       // Direct PlaceModel passed
       place = arguments;
@@ -25,7 +25,7 @@ class PlaceView extends GetView<ExploreController> {
       // For now, we'll handle this in the controller
       place = null;
     }
-    
+
     controller.selectPlace(place);
 
     // Load place when page loads
@@ -44,63 +44,63 @@ class PlaceView extends GetView<ExploreController> {
     return Obx(() {
       // Get the current selected place from controller
       final currentPlace = controller.selectedPlace ?? place;
-      
+
       return DetailLayout(
-        title: currentPlace?.name ?? '',
-        actions: [
-          ButtonWidget(
-            icon: AppIcon(AppAssets.icons.saveInactive, size: 24),
-            backgroundColor: AppColors.background,
-            onPressed: () => {},
-          ),
-          const SizedBox(width: 8),
-          ButtonWidget(
-            icon: AppIcon(AppAssets.icons.share, size: 24),
-            backgroundColor: AppColors.background,
-            onPressed: () => {},
-          ),
-          const SizedBox(width: 8),
-        ],
-        body: controller.isLoading 
-          ? const Center(child: CircularProgressIndicator())
-          : controller.errorMessage.isNotEmpty
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Error: ${controller.errorMessage}',
-                      style: const TextStyle(color: Colors.red),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (arguments is int) {
-                          controller.loadPlaceById(arguments);
-                        }
-                      },
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              )
-            : SingleChildScrollView(
-                child: Column(
-                  children: [
-                    _buildImageSection(context, currentPlace),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          title: currentPlace?.name ?? '',
+          actions: [
+            ButtonWidget(
+              icon: AppIcon(AppAssets.icons.saveInactive, size: 24),
+              backgroundColor: AppColors.background,
+              onPressed: () => {},
+            ),
+            const SizedBox(width: 8),
+            ButtonWidget(
+              icon: AppIcon(AppAssets.icons.share, size: 24),
+              backgroundColor: AppColors.background,
+              onPressed: () => {},
+            ),
+            const SizedBox(width: 8),
+          ],
+          body: controller.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : controller.errorMessage.isNotEmpty
+                  ? Center(
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _buildPlaceInfo(currentPlace),
+                          Text(
+                            'Error: ${controller.errorMessage}',
+                            style: const TextStyle(color: Colors.red),
+                            textAlign: TextAlign.center,
+                          ),
                           const SizedBox(height: 16),
-                          _buildPlaceReviews(currentPlace),
+                          ElevatedButton(
+                            onPressed: () {
+                              if (arguments is int) {
+                                controller.loadPlaceById(arguments);
+                              }
+                            },
+                            child: const Text('Retry'),
+                          ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
+                    )
+                  : SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          _buildImageSection(context, currentPlace),
+                          Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            child: Column(
+                              children: [
+                                _buildPlaceInfo(currentPlace),
+                                const SizedBox(height: 16),
+                                _buildPlaceReviews(currentPlace),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
               )
       );
     });
@@ -198,19 +198,19 @@ class PlaceView extends GetView<ExploreController> {
                   subtitleColor: Colors.orange,
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Jam Buka
                 _buildDetailRow(
                   icon: Icons.access_time,
                   title: 'Jam Buka:',
                   content: _getOperatingStatus(place),
                   subtitle: _getOperatingHours(place),
-                  subtitleColor: _getOperatingStatus(place) == 'Buka Sekarang' 
-                      ? Colors.green 
+                  subtitleColor: _getOperatingStatus(place) == 'Buka Sekarang'
+                      ? Colors.green
                       : Colors.red,
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Reservasi
                 _buildDetailRow(
                   icon: Icons.phone,
@@ -367,35 +367,39 @@ class PlaceView extends GetView<ExploreController> {
             ),
           ),
         ),
-         const SizedBox(height: 16),
-         // Tempat Serupa Lainnya Card
-         Card(
-           elevation: 2,
-           child: Padding(
-             padding: const EdgeInsets.all(16),
-             child: Column(
-               crossAxisAlignment: CrossAxisAlignment.start,
-               children: [
-                 Text(
-                   'Tempat Serupa Lainnya',
+        const SizedBox(height: 16),
+        // Tempat Serupa Lainnya Card
+        Card(
+          elevation: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Tempat Serupa Lainnya',
                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                 ),
-                 const SizedBox(height: 16),
-                 _buildRecommendationsList(),
-               ],
-             ),
-           ),
-         ),
-       ],
-     );
-   }
+                ),
+                const SizedBox(height: 16),
+                _buildRecommendationsList(),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget _buildImageSection(BuildContext context, PlaceModel? place) {
     double imageHeight = 300;
     // final imageUrls = ['https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/146/2024/04/30/Sagarmatha-3522761961.jpeg', 'https://sitimustiani.com/wp-content/uploads/2023/10/Kedai-Kopi-Lao-Kopitiam-Pontianak-1170x878.jpg',];
-    final imageUrls = place?.imageUrls ?? [];
+    final placeImages = place?.imageUrls ?? [];
+    final imageUrls = placeImages
+        .where((img) => img.url != null)
+        .map((img) => img.url!)
+        .toList();
     Logger.debug('imageUrls: $imageUrls', 'PlaceView');
-    
+
     // If no images, show placeholder
     if (imageUrls.isEmpty) {
       return Container(
@@ -441,7 +445,7 @@ class PlaceView extends GetView<ExploreController> {
     // Multiple images - show carousel
     final PageController pageController = PageController();
     final RxInt currentImageIndex = 0.obs;
-    
+
     return Container(
       height: imageHeight,
       child: PageView.builder(
@@ -451,12 +455,12 @@ class PlaceView extends GetView<ExploreController> {
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () {
-               FullscreenImageViewer.show(
-                 context: context,
-                 imageUrls: imageUrls,
-                 initialIndex: index,
-               );
-             },
+              FullscreenImageViewer.show(
+                context: context,
+                imageUrls: imageUrls,
+                initialIndex: index,
+              );
+            },
             child: Container(
               width: double.infinity,
               child: Stack(
@@ -504,10 +508,10 @@ class PlaceView extends GetView<ExploreController> {
                 ],
               ),
             ),
-            );
-          },
-        ),
-      );
+          );
+        },
+      ),
+    );
     //     ),
     //   ),
     // );
@@ -531,7 +535,7 @@ class PlaceView extends GetView<ExploreController> {
 
     // Siapkan item berdasarkan data yang ada
     List<Widget> gridItems = [];
-    
+
     for (int i = 0; i < items.length; i++) {
       if (isPlaceValue) {
         gridItems.add(_buildPlaceValueChip(items[i], i));

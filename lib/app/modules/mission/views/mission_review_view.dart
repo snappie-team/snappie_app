@@ -30,7 +30,7 @@ class MissionReviewView extends StatefulWidget {
 class _MissionReviewViewState extends State<MissionReviewView> {
   final MissionController controller = Get.find<MissionController>();
   final TextEditingController _reviewController = TextEditingController();
-  
+
   // Local state
   int _rating = 0;
   final List<FoodType> _selectedFoodTypes = [];
@@ -39,9 +39,10 @@ class _MissionReviewViewState extends State<MissionReviewView> {
   final List<File> _selectedImages = [];
   final ImagePicker _imagePicker = ImagePicker();
   static const int _maxImages = 5;
-  
+
   // Use place from controller (set during mission flow) or from arguments (standalone)
-  PlaceModel? get place => controller.currentPlace ?? (Get.arguments as PlaceModel?);
+  PlaceModel? get place =>
+      controller.currentPlace ?? (Get.arguments as PlaceModel?);
 
   @override
   void initState() {
@@ -97,22 +98,22 @@ class _MissionReviewViewState extends State<MissionReviewView> {
             child: Column(
               children: [
                 _buildPlaceInfoCard(),
-                          
+
                 // Rating section
                 _buildRatingSection(),
-                          
+
                 // Photo/Video section
                 _buildPhotoVideoSection(),
-                          
+
                 // Food catalog section
                 _buildFoodCatalogSection(),
-                          
+
                 // Place value section
                 _buildPlaceValueSection(),
-                          
+
                 // Review text section
                 _buildReviewTextSection(),
-                          
+
                 // Hide username checkbox
                 _buildHideUsernameSection(),
               ],
@@ -155,7 +156,9 @@ class _MissionReviewViewState extends State<MissionReviewView> {
                 color: AppColors.accent,
               ),
             ),
-            const TextSpan(text: '! Dapatkan hadiah lebih banyak dengan menambahkan foto dan video'),
+            const TextSpan(
+                text:
+                    '! Dapatkan hadiah lebih banyak dengan menambahkan foto dan video'),
           ],
         ),
       ),
@@ -170,9 +173,11 @@ class _MissionReviewViewState extends State<MissionReviewView> {
           // Place image
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: place?.imageUrls != null && place!.imageUrls!.isNotEmpty
+            child: place?.imageUrls != null &&
+                    place!.imageUrls!.isNotEmpty &&
+                    place!.imageUrls!.first.url != null
                 ? Image.network(
-                    place!.imageUrls!.first,
+                    place!.imageUrls!.first.url!,
                     width: 70,
                     height: 70,
                     fit: BoxFit.cover,
@@ -318,14 +323,15 @@ class _MissionReviewViewState extends State<MissionReviewView> {
             ],
           ),
           const SizedBox(height: 12),
-          
+
           // Selected images preview
           if (_selectedImages.isNotEmpty) ...[
             SizedBox(
               height: 100,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: _selectedImages.length + (_selectedImages.length < _maxImages ? 1 : 0),
+                itemCount: _selectedImages.length +
+                    (_selectedImages.length < _maxImages ? 1 : 0),
                 itemBuilder: (context, index) {
                   if (index == _selectedImages.length) {
                     // Add more button
@@ -610,11 +616,15 @@ class _MissionReviewViewState extends State<MissionReviewView> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : AppColors.surface,
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.1)
+              : AppColors.surface,
           borderRadius: BorderRadius.circular(4),
-          border: isSelected ? Border.all(
-            color: AppColors.primary,
-          ) : null,
+          border: isSelected
+              ? Border.all(
+                  color: AppColors.primary,
+                )
+              : null,
         ),
         child: Center(
           child: Text(
@@ -653,7 +663,8 @@ class _MissionReviewViewState extends State<MissionReviewView> {
             maxLines: 4,
             style: TextStyle(color: AppColors.textPrimary),
             decoration: InputDecoration(
-              hintText: 'Bagikan pengalamanmu untuk membantu pengguna lain membuat pilihan sesuai preferensi mereka',
+              hintText:
+                  'Bagikan pengalamanmu untuk membantu pengguna lain membuat pilihan sesuai preferensi mereka',
               hintStyle: TextStyle(
                 color: AppColors.textTertiary,
                 fontSize: 14,
@@ -740,33 +751,36 @@ class _MissionReviewViewState extends State<MissionReviewView> {
         child: SizedBox(
           width: double.infinity,
           child: Obx(() => ElevatedButton(
-            onPressed: controller.isSubmitting.value ? null : () => _submitReview(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.accent,
-              foregroundColor: AppColors.textOnPrimary,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              disabledBackgroundColor: AppColors.accent.withValues(alpha: 0.6),
-            ),
-            child: controller.isSubmitting.value
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Text(
-                    'Kirim Ulasan',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                onPressed: controller.isSubmitting.value
+                    ? null
+                    : () => _submitReview(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accent,
+                  foregroundColor: AppColors.textOnPrimary,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-          )),
+                  disabledBackgroundColor:
+                      AppColors.accent.withValues(alpha: 0.6),
+                ),
+                child: controller.isSubmitting.value
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        'Kirim Ulasan',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+              )),
         ),
       ),
     );
@@ -919,7 +933,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
   Future<void> _pickImageFromGallery() async {
     try {
       final int remaining = _maxImages - _selectedImages.length;
-      
+
       if (remaining <= 0) {
         Get.snackbar(
           'Info',
@@ -938,9 +952,10 @@ class _MissionReviewViewState extends State<MissionReviewView> {
       if (images.isNotEmpty) {
         setState(() {
           // Only add up to remaining slots
-          final imagesToAdd = images.take(remaining).map((x) => File(x.path)).toList();
+          final imagesToAdd =
+              images.take(remaining).map((x) => File(x.path)).toList();
           _selectedImages.addAll(imagesToAdd);
-          
+
           if (images.length > remaining) {
             Get.snackbar(
               'Info',
@@ -1003,23 +1018,28 @@ class _MissionReviewViewState extends State<MissionReviewView> {
     if (_selectedImages.isNotEmpty) {
       try {
         final cloudinaryService = Get.find<CloudinaryService>();
-        
+
         for (int i = 0; i < _selectedImages.length; i++) {
           final file = _selectedImages[i];
-          Logger.debug('Uploading image ${i + 1}/${_selectedImages.length}...', 'MissionReviewView');
-          
+          Logger.debug('Uploading image ${i + 1}/${_selectedImages.length}...',
+              'MissionReviewView');
+
           final result = await cloudinaryService.uploadReviewImage(file);
-          
+
           if (result.success && result.secureUrl != null) {
             imageUrls.add(result.secureUrl!);
             controller.addReviewMedia(result.secureUrl!);
-            Logger.debug('Image ${i + 1} uploaded: ${result.secureUrl}', 'MissionReviewView');
+            Logger.debug('Image ${i + 1} uploaded: ${result.secureUrl}',
+                'MissionReviewView');
           } else {
-            Logger.warning('Failed to upload image ${i + 1}: ${result.error}', 'MissionReviewView');
+            Logger.warning('Failed to upload image ${i + 1}: ${result.error}',
+                'MissionReviewView');
           }
         }
-        
-        Logger.debug('Successfully uploaded ${imageUrls.length}/${_selectedImages.length} images', 'MissionReviewView');
+
+        Logger.debug(
+            'Successfully uploaded ${imageUrls.length}/${_selectedImages.length} images',
+            'MissionReviewView');
       } catch (e) {
         MissionLoadingModal.hide();
         Get.snackbar(
@@ -1045,14 +1065,15 @@ class _MissionReviewViewState extends State<MissionReviewView> {
     // Set controller values for submission
     controller.rating.value = _rating;
     final trimmedReview = _reviewController.text.trim();
-    controller.reviewController.text = trimmedReview.isEmpty ? 'oi' : trimmedReview;
+    controller.reviewController.text =
+        trimmedReview.isEmpty ? 'oi' : trimmedReview;
     controller.hideUsername.value = _hideUsername;
-    
+
     // Set selected food types
     controller.selectedFoodTypes.clear();
     controller.selectedFoodTypes.addAll(_selectedFoodTypes);
-    
-    // Set selected place values  
+
+    // Set selected place values
     controller.selectedPlaceValues.clear();
     controller.selectedPlaceValues.addAll(_selectedPlaceValues);
 
@@ -1083,7 +1104,10 @@ class _MissionReviewViewState extends State<MissionReviewView> {
           final feedbackResult = await MissionFeedbackModal.show(
             placeName: controller.currentPlace?.name ?? 'Tempat',
             coinReward: controller.coinReward,
-            placeImages: controller.currentPlace?.imageUrls ?? [],
+            placeImages: (controller.currentPlace?.imageUrls ?? [])
+                .where((img) => img.url != null)
+                .map((img) => img.url!)
+                .toList(),
             checkinImageUrl: controller.uploadedImageUrl.value,
           );
 

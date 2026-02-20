@@ -14,6 +14,8 @@ import '../../../../data/repositories/achievement_repository_impl.dart';
 import '../../../../data/repositories/social_repository_impl.dart';
 import '../../../../data/repositories/gamification_repository_impl.dart';
 
+import '../../../../data/repositories/articles_repository_impl.dart';
+
 /// Binding untuk MainLayout
 /// Inject semua controllers yang dibutuhkan oleh tabs di MainLayout
 ///
@@ -30,7 +32,8 @@ class MainBinding extends Bindings {
       permanent: true,
     );
 
-    // Tab controllers - lazyPut (created when first accessed)
+    // Tab controllers - lazyPut with fenix for auto-recreation
+    // fenix: true ensures controller is auto-recreated if disposed
     // Di-combine dengan LazyIndexedChild untuk lazy initialization
 
     // Home tab
@@ -40,7 +43,9 @@ class MainBinding extends Bindings {
         postRepository: Get.find<PostRepository>(),
         socialRepository: Get.find<SocialRepository>(),
         userRepository: Get.find<UserRepository>(),
+        articlesRepository: Get.find<ArticlesRepository>(),
       ),
+      fenix: true,
     );
 
     // Explore tab
@@ -54,11 +59,13 @@ class MainBinding extends Bindings {
         authService: Get.find<AuthService>(),
         gamificationRepository: Get.find<GamificationRepository>(),
       ),
+      fenix: true,
     );
 
     // Articles tab
     Get.lazyPut<ArticlesController>(
       () => ArticlesController(),
+      fenix: true,
     );
 
     // Profile tab
@@ -70,6 +77,7 @@ class MainBinding extends Bindings {
         placeRepository: Get.find<PlaceRepository>(),
         achievementRepository: Get.find<AchievementRepository>(),
       ),
+      fenix: true,
     );
   }
 }

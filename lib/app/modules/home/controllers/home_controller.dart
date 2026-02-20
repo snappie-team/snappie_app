@@ -5,9 +5,11 @@ import '../../../data/models/user_model.dart';
 import '../../../data/repositories/post_repository_impl.dart';
 import '../../../data/repositories/social_repository_impl.dart';
 import '../../../data/repositories/user_repository_impl.dart';
+import '../../../data/repositories/articles_repository_impl.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/helpers/error_handler.dart';
+import '../../../data/models/articles_model.dart';
 
 enum PostFollowState {
   friend,
@@ -21,12 +23,14 @@ class HomeController extends GetxController {
   final PostRepository postRepository;
   final SocialRepository socialRepository;
   final UserRepository userRepository;
+  final ArticlesRepository? articlesRepository;
 
   HomeController({
     required this.authService,
     required this.postRepository,
     required this.socialRepository,
     required this.userRepository,
+    this.articlesRepository,
   });
 
   final _posts = <PostModel>[].obs;
@@ -36,7 +40,8 @@ class HomeController extends GetxController {
   final _isLoading = false.obs;
   final _errorMessage = ''.obs;
   final _isInitialized = false.obs;
-  final _showBanner = true.obs; // State untuk banner visibility
+  final _showBanner = true.obs;
+  final _articles = <ArticlesModel>[].obs;
 
   final _followerIds = <int>[].obs;
   final _followingIds = <int>[].obs;
@@ -55,6 +60,7 @@ class HomeController extends GetxController {
   bool get isLoading => _isLoading.value;
   String get errorMessage => _errorMessage.value;
   bool get showBanner => _showBanner.value;
+  List<ArticlesModel> get articles => _articles;
 
   void hideBanner() => _showBanner.value = false;
 
@@ -161,6 +167,9 @@ class HomeController extends GetxController {
       }
 
       Logger.info('Home: Loaded ${loadedPosts.length} posts', 'Home');
+
+      // Load articles for carousel (non-blocking)
+      _loadArticles();
     } catch (e) {
       _errorMessage.value =
           ErrorHandler.getReadableMessage(e, tag: 'HomeController');
@@ -185,6 +194,18 @@ class HomeController extends GetxController {
     _followerIds.assignAll(followers);
     _followingIds.assignAll(following);
     _followingOverrides.clear();
+  }
+
+  Future<void> _loadArticles() async {
+    if (articlesRepository == null) return;
+    try {
+      final loaded = await articlesRepository!.getArticles();
+      _articles.assignAll(loaded);
+      Logger.debug(
+          'Home: Loaded ${loaded.length} articles for carousel', 'Home');
+    } catch (e) {
+      Logger.warning('Home: Failed to load articles: $e', 'Home');
+    }
   }
 
   Future<void> refreshData() async {

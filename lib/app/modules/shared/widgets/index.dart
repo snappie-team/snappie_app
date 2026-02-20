@@ -17,6 +17,8 @@ export '_dialog_widgets/mission_next_modal.dart';
 export '_dialog_widgets/mission_success_modal.dart';
 export '_dialog_widgets/mission_survey_modal.dart';
 export '_dialog_widgets/share_profile_modal.dart';
+export '_dialog_widgets/treasure_chest_modal.dart';
+export '_dialog_widgets/processing_modal.dart';
 
 // Display Widgets
 export '_display_widgets/app_icon.dart';
@@ -33,6 +35,7 @@ export '_layout_widgets/search_bar_widget.dart';
 // Card Widgets
 export '_card_widgets/promotional_banner.dart';
 export '_card_widgets/article_card_widget.dart';
+export '_card_widgets/article_carousel_widget.dart';
 export '_card_widgets/place_card_widget.dart';
 export '_card_widgets/post_card.dart';
 

@@ -100,6 +100,8 @@ class UserPost {
   String? username;
   @JsonKey(name: 'image_url')
   String? imageUrl;
+  @JsonKey(name: 'frame_url')
+  String? frameUrl;
 
   UserPost();
 
@@ -113,7 +115,7 @@ class UserPost {
 class PlacePost {
   int? id;
   String? name;
-  @JsonKey(name: 'image_urls')
+  @JsonKey(name: 'image_urls', fromJson: _placePostImagesFromJson)
   List<String>? imageUrls;
 
   PlacePost();
@@ -121,4 +123,17 @@ class PlacePost {
   factory PlacePost.fromJson(Map<String, dynamic> json) =>
       _$PlacePostFromJson(json);
   Map<String, dynamic> toJson() => _$PlacePostToJson(this);
+}
+
+/// Handles both formats for place image_urls inside posts:
+/// - Legacy: ["url1", "url2"] (plain strings)
+/// - New: [{"url": "url1", "description": "desc"}, ...] (objects)
+List<String>? _placePostImagesFromJson(dynamic json) {
+  if (json == null) return null;
+  if (json is! List) return null;
+  return json.map<String>((item) {
+    if (item is String) return item;
+    if (item is Map<String, dynamic>) return (item['url'] as String?) ?? '';
+    return '';
+  }).toList();
 }

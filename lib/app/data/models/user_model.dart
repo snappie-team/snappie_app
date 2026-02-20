@@ -19,24 +19,36 @@ class UserModel {
   @JsonKey(name: 'image_url')
   String? imageUrl;
 
-  @JsonKey(name: 'total_coin')        int? totalCoin;
-  @JsonKey(name: 'total_exp')         int? totalExp;
-  @JsonKey(name: 'total_following')   int? totalFollowing;
-  @JsonKey(name: 'total_follower')    int? totalFollower;
-  @JsonKey(name: 'total_checkin')     int? totalCheckin;
-  @JsonKey(name: 'total_post')        int? totalPost;
-  @JsonKey(name: 'total_article')     int? totalArticle;
-  @JsonKey(name: 'total_review')      int? totalReview;
-  @JsonKey(name: 'total_achievement') int? totalAchievement;
-  @JsonKey(name: 'total_challenge')   int? totalChallenge;
+  @JsonKey(name: 'total_coin')
+  int? totalCoin;
+  @JsonKey(name: 'total_exp')
+  int? totalExp;
+  @JsonKey(name: 'total_following')
+  int? totalFollowing;
+  @JsonKey(name: 'total_follower')
+  int? totalFollower;
+  @JsonKey(name: 'total_checkin')
+  int? totalCheckin;
+  @JsonKey(name: 'total_post')
+  int? totalPost;
+  @JsonKey(name: 'total_article')
+  int? totalArticle;
+  @JsonKey(name: 'total_review')
+  int? totalReview;
+  @JsonKey(name: 'total_achievement')
+  int? totalAchievement;
+  @JsonKey(name: 'total_challenge')
+  int? totalChallenge;
 
   bool? status;
 
   @JsonKey(name: 'last_login_at')
   DateTime? lastLoginAt;
 
-  @JsonKey(name: 'created_at') DateTime? createdAt;
-  @JsonKey(name: 'updated_at') DateTime? updatedAt;
+  @JsonKey(name: 'created_at')
+  DateTime? createdAt;
+  @JsonKey(name: 'updated_at')
+  DateTime? updatedAt;
 
   @JsonKey(name: 'user_detail')
   UserDetail? userDetail;
@@ -67,48 +79,50 @@ class UserModel {
 class UserDetail {
   String? bio;
   String? gender;
-  @JsonKey(name: 'date_of_birth') String? dateOfBirth;
+  @JsonKey(name: 'date_of_birth')
+  String? dateOfBirth;
   String? phone;
 
   UserDetail();
-  factory UserDetail.fromJson(Map<String, dynamic> json) => _$UserDetailFromJson(json);
+  factory UserDetail.fromJson(Map<String, dynamic> json) =>
+      _$UserDetailFromJson(json);
   Map<String, dynamic> toJson() => _$UserDetailToJson(this);
 }
 
 @JsonSerializable()
 @embedded
 class UserPreferences {
-  @JsonKey(name: 'food_type')  
+  @JsonKey(name: 'food_type')
   List<String>? foodType;
-  
-  @JsonKey(name: 'place_value') 
+
+  @JsonKey(name: 'place_value')
   List<String>? placeValue;
 
   UserPreferences();
-  
-  factory UserPreferences.fromJson(Map<String, dynamic> json) => 
+
+  factory UserPreferences.fromJson(Map<String, dynamic> json) =>
       _$UserPreferencesFromJson(json);
-  
+
   Map<String, dynamic> toJson() => _$UserPreferencesToJson(this);
 }
 
 @JsonSerializable()
 @embedded
 class UserSaved {
-  @JsonKey(name: 'saved_places')   
+  @JsonKey(name: 'saved_places')
   List<SavedPlacePreview>? savedPlaces;
-  
-  @JsonKey(name: 'saved_posts')    
+
+  @JsonKey(name: 'saved_posts')
   List<SavedPostPreview>? savedPosts;
-  
-  @JsonKey(name: 'saved_articles') 
+
+  @JsonKey(name: 'saved_articles')
   List<int>? savedArticles;
 
   UserSaved();
-  
-  factory UserSaved.fromJson(Map<String, dynamic> json) => 
+
+  factory UserSaved.fromJson(Map<String, dynamic> json) =>
       _$UserSavedFromJson(json);
-  
+
   Map<String, dynamic> toJson() => _$UserSavedToJson(this);
 }
 
@@ -125,8 +139,8 @@ class SavedPlacePreview {
   double? rating;
 
   SavedPlacePreview();
-  
-  factory SavedPlacePreview.fromJson(Map<String, dynamic> json) => 
+
+  factory SavedPlacePreview.fromJson(Map<String, dynamic> json) =>
       _$SavedPlacePreviewFromJson(json);
   Map<String, dynamic> toJson() => _$SavedPlacePreviewToJson(this);
 }
@@ -146,8 +160,8 @@ class SavedPostPreview {
   int? likeCount;
 
   SavedPostPreview();
-  
-  factory SavedPostPreview.fromJson(Map<String, dynamic> json) => 
+
+  factory SavedPostPreview.fromJson(Map<String, dynamic> json) =>
       _$SavedPostPreviewFromJson(json);
   Map<String, dynamic> toJson() => _$SavedPostPreviewToJson(this);
 }
@@ -158,18 +172,24 @@ class UserSettings {
   String? language;
   String? theme;
 
+  @JsonKey(name: 'frame_url')
+  String? frameUrl;
+
   UserSettings();
-  factory UserSettings.fromJson(Map<String, dynamic> json) => _$UserSettingsFromJson(json);
+  factory UserSettings.fromJson(Map<String, dynamic> json) =>
+      _$UserSettingsFromJson(json);
   Map<String, dynamic> toJson() => _$UserSettingsToJson(this);
 }
 
 @JsonSerializable()
 @embedded
 class UserNotification {
-  @JsonKey(name: 'push_notification') bool? pushNotification;
+  @JsonKey(name: 'push_notification')
+  bool? pushNotification;
 
   UserNotification();
-  factory UserNotification.fromJson(Map<String, dynamic> json) => _$UserNotificationFromJson(json);
+  factory UserNotification.fromJson(Map<String, dynamic> json) =>
+      _$UserNotificationFromJson(json);
   Map<String, dynamic> toJson() => _$UserNotificationToJson(this);
 }
 
@@ -189,7 +209,8 @@ class UserSearchItem {
   bool? isFollowed;
 
   UserSearchItem();
-  factory UserSearchItem.fromJson(Map<String, dynamic> json) => _$UserSearchItemFromJson(json);
+  factory UserSearchItem.fromJson(Map<String, dynamic> json) =>
+      _$UserSearchItemFromJson(json);
   Map<String, dynamic> toJson() => _$UserSearchItemToJson(this);
 }
 
@@ -200,7 +221,8 @@ class UserSearchResult {
   SearchPagination? pagination;
 
   UserSearchResult();
-  factory UserSearchResult.fromJson(Map<String, dynamic> json) => _$UserSearchResultFromJson(json);
+  factory UserSearchResult.fromJson(Map<String, dynamic> json) =>
+      _$UserSearchResultFromJson(json);
   Map<String, dynamic> toJson() => _$UserSearchResultToJson(this);
 }
 
@@ -214,6 +236,7 @@ class SearchPagination {
   bool? hasMore;
 
   SearchPagination();
-  factory SearchPagination.fromJson(Map<String, dynamic> json) => _$SearchPaginationFromJson(json);
+  factory SearchPagination.fromJson(Map<String, dynamic> json) =>
+      _$SearchPaginationFromJson(json);
   Map<String, dynamic> toJson() => _$SearchPaginationToJson(this);
 }

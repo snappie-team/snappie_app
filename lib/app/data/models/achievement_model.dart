@@ -35,6 +35,7 @@ class UserAchievement {
   int? id;
   String? code;
   String? name;
+  String? subtitle;
   String? description;
   @JsonKey(name: 'icon_url')
   String? iconUrl;
@@ -52,6 +53,10 @@ class UserAchievement {
   bool? isCompleted;
   @JsonKey(name: 'completed_at')
   String? completedAt;
+  @JsonKey(name: 'criteria_action')
+  String? criteriaAction;
+  @JsonKey(name: 'criteria_target')
+  int? criteriaTarget;
 
   UserAchievement();
 

@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'reward_model.g.dart';
 
-/// User reward model
+/// User reward model (also used for available rewards)
 @JsonSerializable()
 class UserReward {
   int? id;
@@ -10,6 +10,15 @@ class UserReward {
   int? userId;
   @JsonKey(name: 'reward_id')
   int? rewardId;
+  String? name;
+  String? description;
+  @JsonKey(name: 'image_url')
+  String? imageUrl;
+  @JsonKey(name: 'coin_requirement')
+  int? coinRequirement;
+  int? stock;
+  @JsonKey(name: 'can_redeem')
+  bool? canRedeem;
   bool? status;
   @JsonKey(name: 'additional_info')
   RewardAdditionalInfo? additionalInfo;

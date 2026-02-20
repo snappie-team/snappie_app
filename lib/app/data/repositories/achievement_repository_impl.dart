@@ -10,9 +10,13 @@ abstract class AchievementRepository {
   Future<List<LeaderboardEntry>> getMonthlyLeaderboard();
   Future<List<UserAchievement>> getUserAchievements();
   Future<List<UserAchievement>> getUserChallenges();
-  Future<PaginatedUserRewards> getUserRewards(int userId, {int page, int perPage});
-  Future<PaginatedAchievements> getAchievements(int userId, {int page, int perPage});
-  Future<PaginatedChallenges> getChallenges(int userId, {int page, int perPage});
+  Future<PaginatedUserRewards> getUserRewards(int userId,
+      {int page, int perPage});
+  Future<PaginatedAchievements> getAchievements(int userId,
+      {int page, int perPage});
+  Future<PaginatedChallenges> getChallenges(int userId,
+      {int page, int perPage});
+  Future<List<UserReward>> getAvailableRewards();
 }
 
 class AchievementRepositoryImpl implements AchievementRepository {
@@ -57,26 +61,40 @@ class AchievementRepositoryImpl implements AchievementRepository {
   }
 
   @override
-  Future<PaginatedUserRewards> getUserRewards(int userId, {int page = 1, int perPage = 10}) async {
+  Future<PaginatedUserRewards> getUserRewards(int userId,
+      {int page = 1, int perPage = 10}) async {
     if (!await networkInfo.isConnected) {
       throw NetworkException('No internet connection');
     }
-    return await remoteDataSource.getUserRewards(userId, page: page, perPage: perPage);
+    return await remoteDataSource.getUserRewards(userId,
+        page: page, perPage: perPage);
   }
 
   @override
-  Future<PaginatedAchievements> getAchievements(int userId, {int page = 1, int perPage = 10}) async {
+  Future<PaginatedAchievements> getAchievements(int userId,
+      {int page = 1, int perPage = 10}) async {
     if (!await networkInfo.isConnected) {
       throw NetworkException('No internet connection');
     }
-    return await remoteDataSource.getAchievements(userId, page: page, perPage: perPage);
+    return await remoteDataSource.getAchievements(userId,
+        page: page, perPage: perPage);
   }
 
   @override
-  Future<PaginatedChallenges> getChallenges(int userId, {int page = 1, int perPage = 10}) async {
+  Future<PaginatedChallenges> getChallenges(int userId,
+      {int page = 1, int perPage = 10}) async {
     if (!await networkInfo.isConnected) {
       throw NetworkException('No internet connection');
     }
-    return await remoteDataSource.getChallenges(userId, page: page, perPage: perPage);
+    return await remoteDataSource.getChallenges(userId,
+        page: page, perPage: perPage);
+  }
+
+  @override
+  Future<List<UserReward>> getAvailableRewards() async {
+    if (!await networkInfo.isConnected) {
+      throw NetworkException('No internet connection');
+    }
+    return await remoteDataSource.getAvailableRewards();
   }
 }

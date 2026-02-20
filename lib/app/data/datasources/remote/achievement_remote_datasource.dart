@@ -14,9 +14,13 @@ abstract class AchievementRemoteDataSource {
   Future<List<LeaderboardEntry>> getMonthlyLeaderboard();
   Future<List<UserAchievement>> getUserAchievements();
   Future<List<UserAchievement>> getUserChallenges();
-  Future<PaginatedUserRewards> getUserRewards(int userId, {int page = 1, int perPage = 10});
-  Future<PaginatedAchievements> getAchievements(int userId, {int page = 1, int perPage = 10});
-  Future<PaginatedChallenges> getChallenges(int userId, {int page = 1, int perPage = 10});
+  Future<PaginatedUserRewards> getUserRewards(int userId,
+      {int page = 1, int perPage = 10});
+  Future<PaginatedAchievements> getAchievements(int userId,
+      {int page = 1, int perPage = 10});
+  Future<PaginatedChallenges> getChallenges(int userId,
+      {int page = 1, int perPage = 10});
+  Future<List<UserReward>> getAvailableRewards();
 }
 
 class AchievementRemoteDataSourceImpl implements AchievementRemoteDataSource {
@@ -62,11 +66,20 @@ class AchievementRemoteDataSourceImpl implements AchievementRemoteDataSource {
   @override
   Future<List<UserAchievement>> getUserAchievements() async {
     try {
-      final resp = await dioClient.dio.get(ApiEndpoints.userAchievementsProgress);
-      Logger.debug('Response data: ${resp.data}', 'AchievementRemoteDataSource');
+      final resp =
+          await dioClient.dio.get(ApiEndpoints.userAchievementsProgress);
+      Logger.debug(
+          'Response data: ${resp.data}', 'AchievementRemoteDataSource');
       final rawList = extractApiResponseListData<UserAchievement>(
         resp,
-        (json) => UserAchievement.fromJson(json),
+        (json) {
+          // Ensure icon_url is set (backend may use image_url field name)
+          final mapped = <String, dynamic>{
+            ...json,
+            'icon_url': json['icon_url'] ?? json['image_url'],
+          };
+          return UserAchievement.fromJson(mapped);
+        },
       );
       return rawList;
     } on ApiResponseException catch (e) {
@@ -97,9 +110,11 @@ class AchievementRemoteDataSourceImpl implements AchievementRemoteDataSource {
   }
 
   @override
-  Future<PaginatedUserRewards> getUserRewards(int userId, {int page = 1, int perPage = 10}) async {
+  Future<PaginatedUserRewards> getUserRewards(int userId,
+      {int page = 1, int perPage = 10}) async {
     try {
-      final endpoint = ApiEndpoints.userRewards.replaceAll('{id}', userId.toString());
+      final endpoint =
+          ApiEndpoints.userRewards.replaceAll('{id}', userId.toString());
       final resp = await dioClient.dio.get(
         endpoint,
         queryParameters: {'page': page, 'per_page': perPage},
@@ -119,9 +134,11 @@ class AchievementRemoteDataSourceImpl implements AchievementRemoteDataSource {
   }
 
   @override
-  Future<PaginatedAchievements> getAchievements(int userId, {int page = 1, int perPage = 10}) async {
+  Future<PaginatedAchievements> getAchievements(int userId,
+      {int page = 1, int perPage = 10}) async {
     try {
-      final endpoint = ApiEndpoints.userAchievements.replaceAll('{id}', userId.toString());
+      final endpoint =
+          ApiEndpoints.userAchievements.replaceAll('{id}', userId.toString());
       final resp = await dioClient.dio.get(
         endpoint,
         queryParameters: {'page': page, 'per_page': perPage},
@@ -141,9 +158,11 @@ class AchievementRemoteDataSourceImpl implements AchievementRemoteDataSource {
   }
 
   @override
-  Future<PaginatedChallenges> getChallenges(int userId, {int page = 1, int perPage = 10}) async {
+  Future<PaginatedChallenges> getChallenges(int userId,
+      {int page = 1, int perPage = 10}) async {
     try {
-      final endpoint = ApiEndpoints.userChallenges.replaceAll('{id}', userId.toString());
+      final endpoint =
+          ApiEndpoints.userChallenges.replaceAll('{id}', userId.toString());
       final resp = await dioClient.dio.get(
         endpoint,
         queryParameters: {'page': page, 'per_page': perPage},
@@ -159,6 +178,24 @@ class AchievementRemoteDataSourceImpl implements AchievementRemoteDataSource {
       throw _handleDioException(e);
     } catch (e) {
       throw ServerException('Failed to get user challenges: $e', 500);
+    }
+  }
+
+  @override
+  Future<List<UserReward>> getAvailableRewards() async {
+    try {
+      final resp = await dioClient.dio.get(ApiEndpoints.gamificationRewards);
+      final rawList = extractApiResponseListData<UserReward>(
+        resp,
+        (json) => UserReward.fromJson(json),
+      );
+      return rawList;
+    } on ApiResponseException catch (e) {
+      throw ServerException(e.message, e.statusCode ?? 500);
+    } on DioException catch (e) {
+      throw _handleDioException(e);
+    } catch (e) {
+      throw ServerException('Failed to get available rewards: $e', 500);
     }
   }
 

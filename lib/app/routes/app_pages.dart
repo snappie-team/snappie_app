@@ -16,7 +16,7 @@ import 'package:snappie_app/app/modules/profile/views/language_view.dart';
 import 'package:snappie_app/app/modules/profile/views/help_center_view.dart';
 import 'package:snappie_app/app/modules/profile/views/faq_view.dart';
 import 'package:snappie_app/app/modules/home/views/notifications_view.dart';
-import 'package:snappie_app/app/modules/shared/components/tnc_view.dart';
+import 'package:snappie_app/app/modules/auth/views/tnc_view.dart';
 import 'package:snappie_app/app/modules/home/views/post_detail_view.dart';
 import '../modules/auth/views/login_view.dart';
 import '../modules/auth/views/register_view.dart';
@@ -29,7 +29,7 @@ import '../modules/explore/views/place_detail_view.dart';
 import '../modules/explore/views/reviews_view.dart';
 import '../modules/explore/views/facilities_view.dart';
 import '../modules/explore/views/gallery_view.dart';
-import '../modules/explore/bindings/explore_binding.dart';
+// ExploreBinding no longer needed in routes - ExploreController registered by MainBinding
 import '../modules/shared/components/splash_view.dart';
 import '../modules/mission/views/mission_photo_view.dart';
 import '../modules/mission/views/mission_photo_preview_view.dart';
@@ -152,12 +152,12 @@ class AppPages {
     GetPage(
       name: PLACE_DETAIL,
       page: () => const PlaceDetailView(),
-      binding: ExploreBinding(),
+      // ExploreController already registered by MainBinding - don't re-bind
     ),
     GetPage(
       name: REVIEWS,
       page: () => const ReviewsView(),
-      binding: ExploreBinding(),
+      // ExploreController already registered by MainBinding - don't re-bind
     ),
     GetPage(
       name: FACILITIES,
@@ -166,7 +166,7 @@ class AppPages {
     GetPage(
       name: GALLERY,
       page: () => const GalleryView(),
-      binding: ExploreBinding(),
+      // ExploreController already registered by MainBinding - don't re-bind
     ),
 
     // Profile pages - full screen navigation dari tab profile

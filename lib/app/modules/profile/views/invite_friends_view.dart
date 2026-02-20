@@ -143,7 +143,7 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
   String _searchQuery = '';
   bool _isSearching = false;
   List<UserSearchItem> _searchResults = [];
-  
+
   // Local state to track follow status changes (userId -> isFollowed)
   final Map<int, bool> _followStatusOverrides = {};
 
@@ -177,7 +177,8 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
     try {
       final result = await _userRepository.searchUsers(query);
       setState(() => _searchResults = result.users ?? []);
-      Logger.debug('Found ${_searchResults.length} users for query: $query', 'Search');
+      Logger.debug(
+          'Found ${_searchResults.length} users for query: $query', 'Search');
     } catch (e) {
       Logger.error('Error searching users', e, null, 'Search');
       setState(() => _searchResults = []);
@@ -188,23 +189,24 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
 
   Future<void> _toggleFollow(UserSearchItem user) async {
     if (user.id == null) return;
-    
+
     // Get current follow status
-    final currentStatus = _followStatusOverrides[user.id!] ?? user.isFollowed ?? false;
-    
+    final currentStatus =
+        _followStatusOverrides[user.id!] ?? user.isFollowed ?? false;
+
     try {
       // Call toggle API
       await _socialRepository.followUser(user.id!);
-      
+
       // Toggle local state
       setState(() {
         _followStatusOverrides[user.id!] = !currentStatus;
       });
-      
+
       final message = !currentStatus
           ? 'Anda sekarang mengikuti ${user.name ?? user.username}'
           : 'Anda berhenti mengikuti ${user.name ?? user.username}';
-      
+
       Get.snackbar(
         'Berhasil',
         message,
@@ -225,7 +227,7 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
 
   void _navigateToUserProfile(UserSearchItem user) {
     if (user.id == null) return;
-    
+
     Get.toNamed(
       AppPages.USER_PROFILE,
       arguments: {'userId': user.id},
@@ -240,7 +242,8 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
         backgroundColor: AppColors.backgroundContainer,
         elevation: 0,
         leading: IconButton(
-          icon: AppIcon(AppAssets.icons.back, color: AppColors.primary, size: 24),
+          icon:
+              AppIcon(AppAssets.icons.back, color: AppColors.primary, size: 24),
           onPressed: () => Get.back(),
         ),
         title: Text(
@@ -259,7 +262,10 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
 
           // Results
           Expanded(
-            child: _buildContent(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: _buildContent(),
+            ),
           ),
         ],
       ),
@@ -311,7 +317,8 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
             borderRadius: BorderRadius.circular(24),
             borderSide: BorderSide(color: AppColors.primary, width: 1),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
       ),
     );
@@ -324,22 +331,18 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
 
     if (_searchQuery.isEmpty) {
       return _buildEmptyState(
-        icon: Icons.search,
-        title: 'Cari Teman',
         subtitle: 'Masukkan nama atau username untuk mencari teman',
       );
     }
 
     if (_searchResults.isEmpty) {
       return _buildEmptyState(
-        icon: Icons.person_search,
-        title: 'Tidak ditemukan',
         subtitle: 'Tidak ada pengguna dengan nama "$_searchQuery"',
       );
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.zero,
       itemCount: _searchResults.length,
       separatorBuilder: (context, index) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
@@ -392,10 +395,11 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
 
   Widget _buildFollowButton(UserSearchItem user) {
     if (user.id == null) return const SizedBox.shrink();
-    
+
     // Check local override first, then fall back to API value
-    final isFollowed = _followStatusOverrides[user.id!] ?? user.isFollowed ?? false;
-    
+    final isFollowed =
+        _followStatusOverrides[user.id!] ?? user.isFollowed ?? false;
+
     if (isFollowed) {
       // Already following → "Mengikuti" button (outlined)
       return OutlinedButton(
@@ -411,7 +415,7 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
         child: const Text('Mengikuti'),
       );
     }
-    
+
     // Not following → "Ikuti" button (filled)
     return ElevatedButton(
       onPressed: () => _toggleFollow(user),
@@ -428,40 +432,15 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
   }
 
   Widget _buildEmptyState({
-    required IconData icon,
-    required String title,
     required String subtitle,
   }) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 64,
-              color: AppColors.textSecondary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
+      child: Text(
+        subtitle,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 14,
+          color: AppColors.textSecondary,
         ),
       ),
     );

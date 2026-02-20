@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
-import '../constants/app_colors.dart';
+import '../helpers/app_snackbar.dart';
 
 /// Service for handling location-related functionality
-/// 
+///
 /// Usage:
 /// ```dart
 /// final locationService = Get.find<LocationService>();
@@ -15,11 +14,11 @@ import '../constants/app_colors.dart';
 /// ```
 class LocationService extends GetxService {
   /// Get current position with permission handling
-  /// 
+  ///
   /// [showSnackbars] - Whether to show snackbars for errors/status (default: true)
   /// [accuracy] - Location accuracy level (default: LocationAccuracy.medium)
   /// [timeLimit] - Timeout for getting position (default: 10 seconds)
-  /// 
+  ///
   /// Returns [Position] if successful, null if failed or permission denied
   Future<Position?> getCurrentPosition({
     bool showSnackbars = true,
@@ -30,12 +29,9 @@ class LocationService extends GetxService {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (showSnackbars) {
-        Get.snackbar(
-          'Lokasi Tidak Aktif',
+        AppSnackbar.warning(
           'Aktifkan layanan lokasi untuk menggunakan fitur ini',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.warning,
-          colorText: AppColors.textOnPrimary,
+          title: 'Lokasi Tidak Aktif',
         );
       }
       // return null;
@@ -47,12 +43,9 @@ class LocationService extends GetxService {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         if (showSnackbars) {
-          Get.snackbar(
-            'Izin Ditolak',
+          AppSnackbar.error(
             'Izin lokasi diperlukan untuk menggunakan fitur ini',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: AppColors.error,
-            colorText: AppColors.textOnPrimary,
+            title: 'Izin Ditolak',
           );
         }
         return null;
@@ -61,16 +54,9 @@ class LocationService extends GetxService {
 
     if (permission == LocationPermission.deniedForever) {
       if (showSnackbars) {
-        Get.snackbar(
-          'Izin Lokasi Diblokir',
+        AppSnackbar.error(
           'Buka pengaturan untuk mengizinkan akses lokasi',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.error,
-          colorText: AppColors.textOnPrimary,
-          mainButton: TextButton(
-            onPressed: () => Geolocator.openAppSettings(),
-            child: const Text('Buka Pengaturan', style: TextStyle(color: Colors.white)),
-          ),
+          title: 'Izin Lokasi Diblokir',
         );
       }
       return null;
@@ -79,12 +65,11 @@ class LocationService extends GetxService {
     // Permission granted, get current position
     try {
       if (showSnackbars) {
-        Get.snackbar(
-          'Mencari Lokasi',
+        AppSnackbar.info(
           'Mendapatkan posisi Anda...',
-          snackPosition: SnackPosition.BOTTOM,
-          showProgressIndicator: true,
+          title: 'Mencari Lokasi',
           duration: const Duration(seconds: 2),
+          showProgressIndicator: true,
         );
       }
 
@@ -98,12 +83,9 @@ class LocationService extends GetxService {
       return position;
     } catch (e) {
       if (showSnackbars) {
-        Get.snackbar(
-          'Gagal Mendapatkan Lokasi',
+        AppSnackbar.error(
           'Coba lagi dalam beberapa saat',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.error,
-          colorText: AppColors.textOnPrimary,
+          title: 'Gagal Mendapatkan Lokasi',
         );
       }
       return null;

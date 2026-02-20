@@ -5,6 +5,7 @@ import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
 import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:snappie_app/app/core/services/logger_service.dart';
+import 'package:snappie_app/app/core/helpers/app_snackbar.dart';
 import 'package:snappie_app/app/data/repositories/place_repository_impl.dart';
 import 'package:snappie_app/app/data/repositories/post_repository_impl.dart';
 import 'package:snappie_app/app/modules/home/controllers/home_controller.dart';
@@ -105,6 +106,7 @@ class _PostCardState extends State<PostCard> {
           AvatarWidget(
             imageUrl: avatarUrl,
             size: AvatarSize.medium,
+            frameUrl: post.user?.frameUrl,
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -213,14 +215,10 @@ class _PostCardState extends State<PostCard> {
           menuItem(value: 'profile', text: 'Lihat Profil'),
           if (isOwner) ...[
             const PopupMenuDivider(height: 8),
-            menuItem(value: 'delete', text: 'Hapus Post'),
-          ] else ...[
+            menuItem(value: 'delete', text: 'Hapus'),
+          ] else if (canShowUnfollow) ...[
             const PopupMenuDivider(height: 8),
-            if (canShowUnfollow) ...[
-              menuItem(value: 'follow', text: 'Berhenti mengikuti'),
-              const PopupMenuDivider(height: 8),
-            ],
-            menuItem(value: 'report', text: 'Laporkan'),
+            menuItem(value: 'follow', text: 'Berhenti mengikuti'),
           ],
         ],
       );
@@ -397,22 +395,10 @@ class _PostCardState extends State<PostCard> {
         Logger.warning('HomeController not found, skipping sync', 'PostCard');
       }
 
-      Get.snackbar(
-        'Berhasil',
-        'Post berhasil dihapus',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.success,
-        colorText: AppColors.textPrimary,
-      );
+      AppSnackbar.success('Post berhasil dihapus');
     } catch (e) {
       Logger.error('Failed to delete post', e, null, 'PostCard');
-      Get.snackbar(
-        'Gagal',
-        'Tidak dapat menghapus post, silakan coba lagi',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.textPrimary,
-      );
+      AppSnackbar.error('Tidak dapat menghapus post, silakan coba lagi');
     }
   }
 
@@ -838,13 +824,7 @@ class _PostCardState extends State<PostCard> {
       _likesCount.value = originalCount;
 
       Logger.error('Failed to toggle like', e, null, 'PostCard');
-      Get.snackbar(
-        'Gagal',
-        'Tidak dapat menyukai post, silakan coba lagi',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.textPrimary,
-      );
+      AppSnackbar.error('Tidak dapat menyukai post, silakan coba lagi');
     } finally {
       _isTogglingLike.value = false;
     }
@@ -1078,21 +1058,9 @@ class _PostCardState extends State<PostCard> {
     try {
       final controller = Get.find<HomeController>();
       await controller.toggleFollowUser(userId);
-      Get.snackbar(
-        'Berhasil',
-        'Status mengikuti diperbarui',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.success,
-        colorText: AppColors.textPrimary,
-      );
+      AppSnackbar.success('Status mengikuti diperbarui');
     } catch (e) {
-      Get.snackbar(
-        'Gagal',
-        'Tidak dapat mengikuti: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.textPrimary,
-      );
+      AppSnackbar.error('Tidak dapat mengikuti: $e');
     }
   }
 
@@ -1103,32 +1071,16 @@ class _PostCardState extends State<PostCard> {
     try {
       final controller = Get.find<HomeController>();
       controller.toggleSavePost(postId).then((_) {
-        Get.snackbar(
-          'Berhasil',
+        AppSnackbar.success(
           controller.isPostSaved(postId)
               ? 'Postingan disimpan'
               : 'Postingan dihapus dari tersimpan',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.success,
-          colorText: AppColors.textPrimary,
         );
       }).catchError((e) {
-        Get.snackbar(
-          'Gagal',
-          'Tidak dapat menyimpan: $e',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.error,
-          colorText: AppColors.textPrimary,
-        );
+        AppSnackbar.error('Tidak dapat menyimpan: $e');
       });
     } catch (e) {
-      Get.snackbar(
-        'Gagal',
-        'Fitur simpan tidak tersedia',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.textPrimary,
-      );
+      AppSnackbar.error('Fitur simpan tidak tersedia');
     }
   }
 
@@ -1148,6 +1100,11 @@ class _PostCardState extends State<PostCard> {
       // Update local reactive state - this will update UI immediately
       _commentsCount.value = updatedPost.commentsCount ?? 0;
 
+      // Update comments list so new comment appears instantly in bottom sheet
+      if (updatedPost.comments != null) {
+        _comments.assignAll(updatedPost.comments!);
+      }
+
       // Also sync with HomeController if available
       try {
         final homeController = Get.find<HomeController>();
@@ -1156,22 +1113,10 @@ class _PostCardState extends State<PostCard> {
         Logger.warning('HomeController not found, skipping sync', 'PostCard');
       }
 
-      Get.snackbar(
-        'Berhasil',
-        'Komentar berhasil ditambahkan',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.success,
-        colorText: AppColors.textPrimary,
-      );
+      AppSnackbar.success('Komentar berhasil ditambahkan');
     } catch (e) {
       Logger.error('Failed to add comment', e, null, 'PostCard');
-      Get.snackbar(
-        'Gagal',
-        'Tidak dapat menambahkan komentar, silakan coba lagi',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.textPrimary,
-      );
+      AppSnackbar.error('Tidak dapat menambahkan komentar, silakan coba lagi');
     }
   }
 
@@ -1200,11 +1145,7 @@ class _PostCardState extends State<PostCard> {
       // Close loading if open
       if (Get.isDialogOpen == true) Get.back();
 
-      Get.snackbar(
-        'Error',
-        'Gagal memuat detail tempat',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppSnackbar.error('Gagal memuat detail tempat');
     }
   }
 }

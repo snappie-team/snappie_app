@@ -14,6 +14,7 @@ class SavedPostsView extends GetView<ProfileController> {
   Widget build(BuildContext context) {
     return ScaffoldFrame.detail(
       title: 'Postingan Tersimpan',
+      onRefresh: () => controller.loadSavedItems(),
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.all(16),
@@ -27,23 +28,12 @@ class SavedPostsView extends GetView<ProfileController> {
             if (controller.savedPosts.isEmpty) {
               return SliverFillRemaining(
                 child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.bookmark_border,
-                        size: 64,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Belum ada postingan tersimpan',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    'Belum ada postingan tersimpan', // TODO: use local keys
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               );
@@ -98,7 +88,7 @@ class SavedPostsView extends GetView<ProfileController> {
                 imageUrl: post.imageUrl ?? '',
                 fit: BoxFit.cover,
               ),
-              
+
               // Gradient Overlay
               Container(
                 decoration: BoxDecoration(
@@ -113,7 +103,7 @@ class SavedPostsView extends GetView<ProfileController> {
                   ),
                 ),
               ),
-              
+
               // Content at bottom
               Positioned(
                 left: 12,
@@ -155,11 +145,12 @@ class SavedPostsView extends GetView<ProfileController> {
                         ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 4),
-                    
+
                     // Content preview
-                    if (post.contentPreview != null && post.contentPreview!.isNotEmpty)
+                    if (post.contentPreview != null &&
+                        post.contentPreview!.isNotEmpty)
                       Text(
                         post.contentPreview!,
                         style: TextStyle(

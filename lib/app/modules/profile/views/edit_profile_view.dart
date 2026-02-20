@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/core/helpers/app_snackbar.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/helpers/error_handler.dart';
@@ -322,12 +323,11 @@ class _EditProfileViewState extends State<EditProfileView> {
         username: username.isNotEmpty ? username : null,
       );
       await _profileController.loadUserProfile();
-      Get.snackbar('Berhasil', 'Profil diperbarui',
-          snackPosition: SnackPosition.BOTTOM);
+      AppSnackbar.success('Profil diperbarui');
       Get.back();
     } catch (e) {
-      Get.snackbar('Gagal', ErrorHandler.getReadableMessage(e, tag: 'EditProfileView'),
-          snackPosition: SnackPosition.BOTTOM);
+      AppSnackbar.error(
+          ErrorHandler.getReadableMessage(e, tag: 'EditProfileView'));
     } finally {
       if (mounted) setState(() => _saving = false);
     }

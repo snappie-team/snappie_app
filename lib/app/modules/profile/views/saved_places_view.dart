@@ -15,6 +15,7 @@ class SavedPlacesView extends GetView<ProfileController> {
   Widget build(BuildContext context) {
     return ScaffoldFrame.detail(
       title: 'Tempat Tersimpan',
+      onRefresh: () => controller.loadSavedItems(),
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.all(16),
@@ -28,23 +29,12 @@ class SavedPlacesView extends GetView<ProfileController> {
             if (controller.savedPlaces.isEmpty) {
               return SliverFillRemaining(
                 child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.bookmark_border,
-                        size: 64,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Belum ada tempat tersimpan',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    'Belum ada tempat tersimpan', // TODO: use local keys
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               );
@@ -95,7 +85,7 @@ class SavedPlacesView extends GetView<ProfileController> {
                 imageUrl: place.imageUrl ?? '',
                 fit: BoxFit.cover,
               ),
-              
+
               // Gradient Overlay
               Container(
                 decoration: BoxDecoration(
@@ -110,7 +100,7 @@ class SavedPlacesView extends GetView<ProfileController> {
                   ),
                 ),
               ),
-              
+
               // Content at bottom
               Positioned(
                 left: 12,
@@ -152,11 +142,12 @@ class SavedPlacesView extends GetView<ProfileController> {
                         ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 4),
-                    
+
                     // Short description
-                    if (place.shortDescription != null && place.shortDescription!.isNotEmpty)
+                    if (place.shortDescription != null &&
+                        place.shortDescription!.isNotEmpty)
                       Text(
                         place.shortDescription!,
                         style: TextStyle(
@@ -178,27 +169,27 @@ class SavedPlacesView extends GetView<ProfileController> {
 
   Future<void> _navigateToPlaceDetail(int? placeId) async {
     if (placeId == null) return;
-    
+
     try {
       // Show loading
       Get.dialog(
         const Center(child: CircularProgressIndicator()),
         barrierDismissible: false,
       );
-      
+
       // Fetch full place data
       final placeRepository = Get.find<PlaceRepository>();
       final place = await placeRepository.getPlaceById(placeId);
-      
+
       // Close loading
       Get.back();
-      
+
       // Navigate to place detail
       Get.toNamed(AppPages.PLACE_DETAIL, arguments: place);
     } catch (e) {
       // Close loading if open
       if (Get.isDialogOpen == true) Get.back();
-      
+
       Get.snackbar(
         'Error',
         'Gagal memuat detail tempat',

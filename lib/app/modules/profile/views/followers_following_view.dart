@@ -28,31 +28,34 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
   String _searchQuery = '';
   List<FollowEntry> _followers = [];
   List<FollowEntry> _following = [];
-  
+
   // Local state to track follow status changes (userId -> isFollowed)
   final Map<int, bool> _followStatusOverrides = {};
 
   // Get view type from arguments (0 = followers, 1 = following)
   FollowViewType get _viewType {
     final initialTab = Get.arguments?['initialTab'] ?? 0;
-    return initialTab == 0 ? FollowViewType.followers : FollowViewType.following;
+    return initialTab == 0
+        ? FollowViewType.followers
+        : FollowViewType.following;
   }
 
   // Get title based on view type
-  String get _title => _viewType == FollowViewType.followers ? 'Pengikut' : 'Mengikuti';
+  String get _title =>
+      _viewType == FollowViewType.followers ? 'Pengikut' : 'Mengikuti';
 
   // Get list based on view type
-  List<FollowEntry> get _currentList => 
+  List<FollowEntry> get _currentList =>
       _viewType == FollowViewType.followers ? _followers : _following;
 
   // Get filtered list based on search query
   List<FollowEntry> get _filteredList {
     if (_searchQuery.isEmpty) return _currentList;
-    
+
     final query = _searchQuery.toLowerCase();
     return _currentList.where((entry) {
-      final user = _viewType == FollowViewType.followers 
-          ? entry.follower 
+      final user = _viewType == FollowViewType.followers
+          ? entry.follower
           : entry.following;
       final name = user?.name?.toLowerCase() ?? '';
       final username = user?.username?.toLowerCase() ?? '';
@@ -77,11 +80,13 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
 
     try {
       final followData = await _socialRepository.getFollowData();
-      
+
       _followers = followData.followers ?? [];
       _following = followData.following ?? [];
 
-      Logger.debug('Loaded ${_followers.length} followers and ${_following.length} following', 'Social');
+      Logger.debug(
+          'Loaded ${_followers.length} followers and ${_following.length} following',
+          'Social');
     } catch (e) {
       Logger.error('Error loading follow data', e, null, 'Social');
     }
@@ -93,6 +98,7 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
   Widget build(BuildContext context) {
     return ScaffoldFrame.detail(
       title: _title,
+      onRefresh: _loadFollowData,
       slivers: [
         SliverToBoxAdapter(
           child: _buildSearchBar(),
@@ -139,7 +145,8 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
             borderRadius: BorderRadius.circular(24),
             borderSide: BorderSide(color: AppColors.border),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
       ),
     );
@@ -164,8 +171,8 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
         (context, index) {
           final entry = _filteredList[index];
           // Use appropriate nested data based on view type
-          final user = _viewType == FollowViewType.followers 
-              ? entry.follower 
+          final user = _viewType == FollowViewType.followers
+              ? entry.follower
               : entry.following;
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
@@ -221,77 +228,123 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
 
   Widget _buildFollowButton(FollowUser? user) {
     if (user?.id == null) return const SizedBox.shrink();
-    
+
     // Check local override first, then fall back to API value
-    final isFollowed = _followStatusOverrides[user!.id!] ?? user.isFollowed ?? false;
-    
-    if (isFollowed) {
-      // isFollowed = true means mutual follow → "Teman"
-      return OutlinedButton(
-        onPressed: () => _toggleFollow(user),
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(color: AppColors.accent),
-          foregroundColor: AppColors.accent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        ),
-        child: const Text('Teman'),
-      );
-    }
-    
-    // isFollowed = false
+    // isFollowed dari backend:
+    // - Di Followers view: true = kita juga follow mereka (mutual)
+    // - Di Following view: true = mereka juga follow kita (mutual)
+    final isFollowedFromApi = user!.isFollowed ?? false;
+
+    // Untuk Following page, kita perlu track apakah masih follow atau sudah unfollow
+    // Default: di Following page kita PASTI follow mereka (true), di Followers tergantung API
+    final currentlyFollowing = _followStatusOverrides[user.id!] ??
+        (_viewType == FollowViewType.following ? true : isFollowedFromApi);
+
     if (_viewType == FollowViewType.followers) {
-      // Di halaman Followers: mereka follow kita, tapi kita belum follow mereka → "Ikuti"
-      return ElevatedButton(
-        onPressed: () => _toggleFollow(user),
-        style: ElevatedButton.styleFrom(
-          foregroundColor: AppColors.textOnPrimary,
-          backgroundColor: AppColors.accent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+      // HALAMAN FOLLOWERS: Orang-orang yang follow kita
+      if (currentlyFollowing) {
+        // Kita sudah follow mereka → Mutual/Teman → Klik untuk UNFOLLOW
+        return OutlinedButton(
+          onPressed: () => _toggleFollow(user),
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(color: AppColors.accent),
+            foregroundColor: AppColors.accent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        ),
-        child: const Text('Ikuti'),
-      );
+          child: const Text('Teman'),
+        );
+      } else {
+        // Kita belum follow mereka → Tombol "Ikuti" → Klik untuk FOLLOW
+        return ElevatedButton(
+          onPressed: () => _toggleFollow(user),
+          style: ElevatedButton.styleFrom(
+            foregroundColor: AppColors.textOnPrimary,
+            backgroundColor: AppColors.accent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          ),
+          child: const Text('Ikuti'),
+        );
+      }
     } else {
-      // Di halaman Following: kita follow mereka, tapi mereka belum follow kita → "Mengikuti"
-      return OutlinedButton(
-        onPressed: () => _toggleFollow(user),
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(color: AppColors.accent),
-          foregroundColor: AppColors.accent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+      // HALAMAN FOLLOWING: Orang-orang yang kita follow
+      // Di halaman ini, kita PASTI sudah follow mereka (kecuali sudah di-unfollow via override)
+
+      if (!currentlyFollowing) {
+        // Sudah di-unfollow → Tombol "Ikuti" atau "Ikuti Balik"
+        final buttonText = isFollowedFromApi ? 'Ikuti Balik' : 'Ikuti';
+        return ElevatedButton(
+          onPressed: () => _toggleFollow(user),
+          style: ElevatedButton.styleFrom(
+            foregroundColor: AppColors.textOnPrimary,
+            backgroundColor: AppColors.accent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        ),
-        child: const Text('Mengikuti'),
-      );
+          child: Text(buttonText),
+        );
+      } else if (isFollowedFromApi) {
+        // Masih follow & mereka juga follow kita → Mutual/Teman → Klik untuk UNFOLLOW
+        return OutlinedButton(
+          onPressed: () => _toggleFollow(user),
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(color: AppColors.accent),
+            foregroundColor: AppColors.accent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          ),
+          child: const Text('Teman'),
+        );
+      } else {
+        // Masih follow tapi mereka belum follow kita → "Mengikuti" → Klik untuk UNFOLLOW
+        return OutlinedButton(
+          onPressed: () => _toggleFollow(user),
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(color: AppColors.accent),
+            foregroundColor: AppColors.accent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          ),
+          child: const Text('Mengikuti'),
+        );
+      }
     }
   }
 
   Future<void> _toggleFollow(FollowUser user) async {
     if (user.id == null) return;
-    
-    // Get current follow status
-    final currentStatus = _followStatusOverrides[user.id!] ?? user.isFollowed ?? false;
-    
+
+    // Tentukan status saat ini berdasarkan halaman
+    final isFollowedFromApi = user.isFollowed ?? false;
+    final currentlyFollowing = _followStatusOverrides[user.id!] ??
+        (_viewType == FollowViewType.following ? true : isFollowedFromApi);
+
     try {
       // Call toggle API
       await _socialRepository.followUser(user.id!);
-      
+
       // Toggle local state
       setState(() {
-        _followStatusOverrides[user.id!] = !currentStatus;
+        _followStatusOverrides[user.id!] = !currentlyFollowing;
       });
-      
-      final message = !currentStatus
-          ? 'Anda sekarang berteman dengan ${user.name ?? user.username}'
+
+      // Pesan setelah toggle
+      final newStatus = !currentlyFollowing;
+      final message = newStatus
+          ? 'Anda sekarang mengikuti ${user.name ?? user.username}'
           : 'Anda berhenti mengikuti ${user.name ?? user.username}';
-      
+
       Get.snackbar(
         'Berhasil',
         message,
@@ -311,46 +364,19 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
   }
 
   Widget _buildEmptyState() {
-    final icon = _viewType == FollowViewType.followers 
-        ? Icons.people_outline 
-        : Icons.person_add_outlined;
-    final title = _viewType == FollowViewType.followers 
-        ? 'Belum ada pengikut' 
+    final title = _viewType == FollowViewType.followers
+        ? 'Belum ada pengikut'
         : 'Belum mengikuti siapapun';
-    final subtitle = _viewType == FollowViewType.followers 
-        ? 'Bagikan profil Anda untuk mendapatkan pengikut' 
-        : 'Temukan dan ikuti pengguna lain';
 
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 64,
-              color: AppColors.textSecondary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
+        child: Text(
+          title,
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 16,
+          ),
         ),
       ),
     );
@@ -360,33 +386,13 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: AppColors.textSecondary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Tidak ditemukan',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tidak ada hasil untuk "$_searchQuery"',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
+        child: Text(
+          'Tidak ada hasil untuk "$_searchQuery"',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 16,
+          ),
         ),
       ),
     );
@@ -394,7 +400,7 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
 
   void _navigateToUserProfile(FollowUser? user) {
     if (user?.id == null) return;
-    
+
     Get.toNamed(
       AppPages.USER_PROFILE,
       arguments: {'userId': user!.id},

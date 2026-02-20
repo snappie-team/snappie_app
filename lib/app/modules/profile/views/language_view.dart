@@ -26,76 +26,76 @@ class _LanguageViewState extends State<LanguageView> {
 
   @override
   Widget build(BuildContext context) {
-    return ScaffoldFrame.detail(
-      title: tr(LocaleKeys.language_title),
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.all(16),
-          sliver: SliverToBoxAdapter(
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-              _buildOption(
-                value: 'id',
-                label: tr(LocaleKeys.language_indonesian),
-              ),
-              const SizedBox(height: 12),
-              _buildOption(
-                value: 'en',
-                label: tr(LocaleKeys.language_english),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _saving ? null : _onSave,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    disabledBackgroundColor: Colors.grey.shade300,
-                  ),
-                  child: _saving
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : Text(
-                          tr(LocaleKeys.language_save),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+    return ScaffoldFrame.detail(title: tr(LocaleKeys.language_title), slivers: [
+      SliverPadding(
+        padding: const EdgeInsets.all(16),
+        sliver: SliverToBoxAdapter(
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
                 ),
-              ),
-            ],
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildOption(
+                  value: 'id',
+                  label: tr(LocaleKeys.language_indonesian),
+                ),
+                const SizedBox(height: 12),
+                _buildOption(
+                  value: 'en',
+                  label: tr(LocaleKeys.language_english),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _saving ? null : _onSave,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      disabledBackgroundColor: Colors.grey.shade300,
+                    ),
+                    child: _saving
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : Text(
+                            tr(LocaleKeys.language_save),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    )]);
+      )
+    ]);
   }
 
   Widget _buildOption({required String value, required String label}) {
@@ -124,32 +124,41 @@ class _LanguageViewState extends State<LanguageView> {
 
   Future<void> _onSave() async {
     setState(() => _saving = true);
-    
-    final newLocale = Locale(_selected);
-    
-    // Switch locale in EasyLocalization
-    await context.setLocale(newLocale);
-    
-    // Sync with GetX locale system
-    Get.updateLocale(newLocale);
-    
-    await Future<void>.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
-    
-    setState(() => _saving = false);
-    
+
     Get.snackbar(
-      tr(LocaleKeys.language_success_title),
-      tr(LocaleKeys.language_success_message),
+      'Segera Hadir',
+      'Fitur ini akan segera hadir',
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppColors.primary.withOpacity(0.9),
-      colorText: Colors.white,
+      backgroundColor: Colors.amber,
+      colorText: Colors.black,
       duration: const Duration(seconds: 2),
     );
-    
-    // Optional: Navigate back after short delay
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) Get.back();
-    });
+
+    // final newLocale = Locale(_selected);
+
+    // Switch locale in EasyLocalization
+    // await context.setLocale(newLocale);
+
+    // Sync with GetX locale system
+    // Get.updateLocale(newLocale);
+
+    // await Future<void>.delayed(const Duration(milliseconds: 400));
+    // if (!mounted) return;
+
+    setState(() => _saving = false);
+
+    // Get.snackbar(
+    //   tr(LocaleKeys.language_success_title),
+    //   tr(LocaleKeys.language_success_message),
+    //   snackPosition: SnackPosition.BOTTOM,
+    //   backgroundColor: AppColors.primary.withOpacity(0.9),
+    //   colorText: Colors.white,
+    //   duration: const Duration(seconds: 2),
+    // );
+
+    // // Optional: Navigate back after short delay
+    // Future.delayed(const Duration(milliseconds: 500), () {
+    //   if (mounted) Get.back();
+    // });
   }
 }

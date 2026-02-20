@@ -1,4 +1,5 @@
 // json_mapping_helpers.dart
+import 'dart:convert';
 import '../services/logger_service.dart';
 
 typedef Json = Map<String, dynamic>;
@@ -40,7 +41,7 @@ const Map<String, List<String>> _liftKeysRegistry = {
     'userDetail',
     'user_preferences',
     'userPreferences',
-    // 'user_saved', 
+    // 'user_saved',
     // 'userSaved',
     'user_settings',
     'userSettings',
@@ -120,7 +121,51 @@ Json _fixDuplicateFieldsAndTypeMismatches(Json data) {
   // Fix type mismatches in numeric fields
   _fixNumericFieldTypes(result);
 
+  // Fix stringified JSON values and ensure list fields are arrays
+  _ensureListFields(result);
+
   return result;
+}
+
+/// Fields that are expected to be List in models but may come as plain strings
+/// or JSON-encoded strings from the backend.
+const _knownListFields = <String>{
+  'food_type',
+  'place_value',
+  'foodType',
+  'placeValue',
+};
+
+/// Recursively fix values that should be Lists but come as strings.
+/// Handles two cases:
+/// 1. Plain string: "Buah-buahan" → ["Buah-buahan"]
+/// 2. JSON-encoded array: "[\"a\",\"b\"]" → ["a","b"]
+/// Also handles JSON-encoded objects in string form.
+void _ensureListFields(Json data) {
+  for (final key in data.keys.toList()) {
+    final value = data[key];
+    if (value is String && value.isNotEmpty) {
+      final trimmed = value.trim();
+      // Try JSON decode for values that look like arrays or objects
+      if ((trimmed.startsWith('[') && trimmed.endsWith(']')) ||
+          (trimmed.startsWith('{') && trimmed.endsWith('}'))) {
+        try {
+          data[key] = jsonDecode(trimmed);
+        } catch (_) {
+          // Not valid JSON — if this is a known list field, wrap it
+          if (_knownListFields.contains(key)) {
+            data[key] = [value];
+          }
+        }
+      } else if (_knownListFields.contains(key)) {
+        // Plain string in a known list field → wrap in array
+        data[key] = [value];
+      }
+    } else if (value is Map<String, dynamic>) {
+      // Recurse into nested maps (e.g., user_preferences)
+      _ensureListFields(value);
+    }
+  }
 }
 
 /// Fix type mismatches for numeric fields that might come as strings
@@ -149,7 +194,8 @@ void _fixNumericFieldTypes(Json data) {
         }
       } catch (e) {
         // Keep original value if parsing fails
-        Logger.warning('Failed to parse numeric field $field: ${data[field]}', 'JsonMappingHelper');
+        Logger.warning('Failed to parse numeric field $field: ${data[field]}',
+            'JsonMappingHelper');
       }
     }
   }

@@ -55,6 +55,7 @@ class _LoginViewState extends State<LoginView> {
                       children: [
                         // Mascot Image
                         Image.asset(
+                          key: const Key('login_mascot_image'),
                           AppAssets.images.mascot,
                           width: 200,
                           height: 200,
@@ -62,6 +63,7 @@ class _LoginViewState extends State<LoginView> {
                         Transform.translate(
                           offset: const Offset(0, -20),
                           child: Container(
+                            key: const Key('login_content_container'),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(24),
@@ -72,128 +74,135 @@ class _LoginViewState extends State<LoginView> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                        // Masuk dengan Google Button
-                        Obx(() => ElevatedButton(
-                              onPressed: controller.isLoading
-                                  ? null
-                                  : controller.loginWithGoogle,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.accent,
-                                foregroundColor: Colors.white,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                              ),
-                              child: controller.isLoading
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                Colors.white),
+                                // Masuk dengan Google Button
+                                Obx(() => ElevatedButton(
+                                      key: Key('login_google_button'),
+                                      onPressed: controller.isLoginLoading
+                                          ? null
+                                          : controller.loginWithGoogle,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.accent,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(50),
+                                        ),
                                       ),
-                                    )
-                                  : Text(
-                                      tr(LocaleKeys.login_sign_in_google),
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
+                                      child: controller.isLoginLoading
+                                          ? const SizedBox(
+                                              height: 20,
+                                              width: 20,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(Colors.white),
+                                              ),
+                                            )
+                                          : Text(
+                                              tr(LocaleKeys
+                                                  .login_sign_in_google),
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                    )),
+
+                                const SizedBox(height: 12),
+
+                                // Daftar dengan Google Button
+                                Obx(() => OutlinedButton(
+                                      key: Key('register_google_button'),
+                                      onPressed: controller.isRegisterLoading
+                                          ? null
+                                          : controller.signUpWithGoogle,
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: AppColors.accent,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
+                                        side: const BorderSide(
+                                          color: Color(0xFFFFA500),
+                                          width: 2,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(50),
+                                        ),
+                                        disabledForegroundColor:
+                                            Colors.grey.shade400,
                                       ),
+                                      child: controller.isRegisterLoading
+                                          ? const SizedBox(
+                                              height: 20,
+                                              width: 20,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(Colors.grey),
+                                              ),
+                                            )
+                                          : Text(
+                                              tr(LocaleKeys
+                                                  .login_sign_up_google),
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                    )),
+
+                                const SizedBox(height: 24),
+
+                                // Terms and Conditions Text
+                                RichText(
+                                  textAlign: TextAlign.justify,
+                                  text: TextSpan(
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black,
                                     ),
-                            )),
-
-                            const SizedBox(height: 12),
-
-                            // Daftar dengan Google Button
-                            Obx(() => OutlinedButton(
-                              onPressed: controller.isLoading
-                                  ? null
-                                  : controller.signUpWithGoogle,
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.accent,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
-                                side: const BorderSide(
-                                  color: Color(0xFFFFA500),
-                                  width: 2,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                                disabledForegroundColor: Colors.grey.shade400,
-                              ),
-                              child: controller.isLoading
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                Colors.grey),
+                                    children: [
+                                      TextSpan(
+                                        text: tr(LocaleKeys.login_terms_prefix),
                                       ),
-                                    )
-                                  : Text(
-                                      tr(LocaleKeys.login_sign_up_google),
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
+                                      TextSpan(
+                                        text: tr(LocaleKeys.login_terms_link),
+                                        style: TextStyle(
+                                          color: AppColors.primary,
+                                          fontWeight: FontWeight.w600,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            Get.toNamed(AppPages.TNC);
+                                          },
                                       ),
-                                    ),
-                            )),
-
-                            const SizedBox(height: 24),
-
-                            // Terms and Conditions Text
-                            RichText(
-                          textAlign: TextAlign.justify,
-                          text: TextSpan(
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black,
+                                      TextSpan(
+                                        text: tr(LocaleKeys.login_terms_middle),
+                                      ),
+                                      TextSpan(
+                                        text: tr(LocaleKeys.login_privacy_link),
+                                        style: TextStyle(
+                                          color: AppColors.primary,
+                                          fontWeight: FontWeight.w600,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            Get.toNamed(AppPages.TNC);
+                                          },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                            children: [
-                              TextSpan(
-                                text: tr(LocaleKeys.login_terms_prefix),
-                              ),
-                              TextSpan(
-                                text: tr(LocaleKeys.login_terms_link),
-                                style: TextStyle(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
-                                  decoration: TextDecoration.underline,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    Get.toNamed(AppPages.TNC);
-                                  },
-                              ),
-                              TextSpan(
-                                text: tr(LocaleKeys.login_terms_middle),
-                              ),
-                              TextSpan(
-                                text: tr(LocaleKeys.login_privacy_link),
-                                style: TextStyle(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
-                                  decoration: TextDecoration.underline,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    Get.toNamed(AppPages.TNC);
-                                  },
-                              ),
-                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
                       ],
                     ),
                   ),

@@ -9,6 +9,9 @@ import '../../../core/services/auth_service.dart';
 import '../../../core/constants/remote_assets.dart';
 import '../../../core/errors/auth_result.dart';
 import '../../../core/services/app_update_service.dart';
+import '../../../core/services/onboarding_service.dart';
+import '../../shared/layout/controllers/main_controller.dart';
+import '../../shared/widgets/index.dart';
 
 enum Gender { male, female, others }
 
@@ -27,6 +30,8 @@ class AuthController extends GetxController {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController registerEmailController = TextEditingController();
 
+  final _isLoginLoading = false.obs;
+  final _isRegisterLoading = false.obs;
   final _isLoading = false.obs;
   final _selectedPageIndex = 0.obs;
   final _isLoggedIn = false.obs;
@@ -47,6 +52,8 @@ class AuthController extends GetxController {
   List<String> get foodTypes => FoodTypeExtension.allLabels;
   List<String> get placeValues => PlaceValueExtension.allLabels;
 
+  bool get isLoginLoading => _isLoginLoading.value;
+  bool get isRegisterLoading => _isRegisterLoading.value;
   bool get isLoading => _isLoading.value;
   bool get isLoggedIn => _isLoggedIn.value;
   String get googleUserName => _googleUserName.value;
@@ -95,9 +102,7 @@ class AuthController extends GetxController {
 
     usernameController.addListener(() {
       final username = usernameController.text.trim();
-      _isUsernameValid.value = RegExp(
-        r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*._-])[A-Za-z\d!@#$%^&*._-]{8,}$',
-      ).hasMatch(username);
+      _isUsernameValid.value = username.length >= 8;
     });
   }
 
@@ -176,7 +181,7 @@ class AuthController extends GetxController {
   }
 
   Future<void> loginWithGoogle() async {
-    _setLoading(true);
+    _isLoginLoading.value = true;
 
     try {
       final result = await authService.login();
@@ -193,7 +198,7 @@ class AuthController extends GetxController {
         // Navigate to main app
         Get.offAllNamed(AppPages.MAIN);
 
-        _setLoading(false);
+        _isLoginLoading.value = false;
         return;
       }
 
@@ -234,11 +239,11 @@ class AuthController extends GetxController {
       );
     }
 
-    _setLoading(false);
+    _isLoginLoading.value = false;
   }
 
   Future<void> signUpWithGoogle() async {
-    _setLoading(true);
+    _isRegisterLoading.value = true;
 
     try {
       final result = await authService.login();
@@ -255,7 +260,7 @@ class AuthController extends GetxController {
         // Navigate to main app
         Get.offAllNamed(AppPages.MAIN);
 
-        _setLoading(false);
+        _isRegisterLoading.value = false;
         return;
       }
 
@@ -289,7 +294,7 @@ class AuthController extends GetxController {
       );
     }
 
-    _setLoading(false);
+    _isRegisterLoading.value = false;
   }
 
   // ========== REGISTRATION METHODS ==========
@@ -299,14 +304,12 @@ class AuthController extends GetxController {
       return;
     }
 
-    _setLoading(true);
+    _isRegisterLoading.value = true;
 
-    // Show info snackbar
-    _showSnackbar(
-      'Processing',
-      'Mendaftarkan akun Anda, mohon tunggu...',
-      Colors.blue,
-    );
+    // Show processing modal
+    ProcessingModal.show(message: 'Mendaftarkan akun Anda...');
+
+    final startTime = DateTime.now();
 
     try {
       final success = await authService.registerUser(
@@ -320,18 +323,32 @@ class AuthController extends GetxController {
         placeValues: _selectedPlaceValues.toList(),
       );
 
+      // Ensure at least 1 second has passed
+      final elapsed = DateTime.now().difference(startTime);
+      if (elapsed < const Duration(seconds: 1)) {
+        await Future.delayed(const Duration(seconds: 1) - elapsed);
+      }
+
+      // Close modal before proceeding
+      ProcessingModal.hide();
+
       if (success) {
         // Set loading false before navigation
-        _setLoading(false);
-
-        _showSnackbar(
-          'Berhasil',
-          'Registrasi berhasil! Selamat datang di Snappie',
-          Colors.green,
-        );
+        _isRegisterLoading.value = false;
 
         // Small delay before navigation to ensure everything is ready
         await Future.delayed(const Duration(milliseconds: 500));
+
+        // Mark as new registration so the tab tour shows
+        try {
+          await Get.find<OnboardingService>().markAsNewRegistration();
+
+          // Pro-actively trigger onboarding if MainController is already alive
+          // (Since MainController is permanent, onReady might not fire again)
+          if (Get.isRegistered<MainController>()) {
+            Get.find<MainController>().checkAndStartOnboardingFlow();
+          }
+        } catch (_) {}
 
         // Navigate to home (main app layout)
         Get.offAllNamed(AppPages.MAIN);
@@ -345,6 +362,13 @@ class AuthController extends GetxController {
         );
       }
     } catch (e, stackTrace) {
+      // Ensure at least 1 second has passed even on error
+      final elapsed = DateTime.now().difference(startTime);
+      if (elapsed < const Duration(seconds: 1)) {
+        await Future.delayed(const Duration(seconds: 1) - elapsed);
+      }
+
+      ProcessingModal.hide();
       Logger.error('Registration error', e, stackTrace, 'AuthController');
       _showSnackbar(
         'Error',
@@ -353,7 +377,7 @@ class AuthController extends GetxController {
       );
     }
 
-    _setLoading(false);
+    _isRegisterLoading.value = false;
   }
 
   bool _validateForm() {
@@ -391,18 +415,6 @@ class AuthController extends GetxController {
       _showSnackbar(
         'Error',
         'Username must be at least 8 characters long',
-        Colors.red,
-      );
-      return false;
-    }
-
-    final usernamePattern = RegExp(
-      r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*._-])[A-Za-z\d!@#$%^&*._-]{8,}$',
-    );
-    if (!usernamePattern.hasMatch(username)) {
-      _showSnackbar(
-        'Error',
-        'Username must contain letters, numbers, and special characters',
         Colors.red,
       );
       return false;
@@ -491,10 +503,6 @@ class AuthController extends GetxController {
 
     // Navigate back to login
     Get.toNamed(AppPages.LOGIN);
-  }
-
-  void _setLoading(bool loading) {
-    _isLoading.value = loading;
   }
 
   void setGender(Gender gender) {

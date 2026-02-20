@@ -20,31 +20,35 @@ class OnboardingView extends GetView<OnboardingController> {
               children: [
                 Expanded(
                   child: PageView(
-                controller: controller.pageController,
-                onPageChanged: controller.onPageChanged,
-                children: [
-                  _buildOnboardingPage(
-                    imagePath: AppAssets.images.onboarding1,
-                    height: 300,
-                    title: tr(LocaleKeys.onboarding_page1_title),
-                    description: tr(LocaleKeys.onboarding_page1_description),
+                    key: Key('onboarding_page_view'),
+                    controller: controller.pageController,
+                    onPageChanged: controller.onPageChanged,
+                    children: [
+                      _buildOnboardingPage(
+                        imagePath: AppAssets.images.onboarding1,
+                        height: 300,
+                        title: tr(LocaleKeys.onboarding_page1_title),
+                        description:
+                            tr(LocaleKeys.onboarding_page1_description),
+                      ),
+                      _buildOnboardingPage(
+                        imagePath: AppAssets.images.onboarding2,
+                        height: 200,
+                        title: tr(LocaleKeys.onboarding_page2_title),
+                        description:
+                            tr(LocaleKeys.onboarding_page2_description),
+                      ),
+                      _buildOnboardingPage(
+                        imagePath: AppAssets.images.onboarding3,
+                        height: 300,
+                        title: tr(LocaleKeys.onboarding_page3_title),
+                        description:
+                            tr(LocaleKeys.onboarding_page3_description),
+                      ),
+                    ],
                   ),
-                  _buildOnboardingPage(
-                    imagePath: AppAssets.images.onboarding2,
-                    height: 200,
-                    title: tr(LocaleKeys.onboarding_page2_title),
-                    description: tr(LocaleKeys.onboarding_page2_description),
-                  ),
-                  _buildOnboardingPage(
-                    imagePath: AppAssets.images.onboarding3,
-                    height: 300,
-                    title: tr(LocaleKeys.onboarding_page3_title),
-                    description: tr(LocaleKeys.onboarding_page3_description),
-                  ),
-                ],
-              ),
-            ),
-            _buildBottomSection(),
+                ),
+                _buildBottomSection(),
               ],
             ),
           ],
@@ -116,22 +120,21 @@ class OnboardingView extends GetView<OnboardingController> {
           // Buttons
           Obx(() {
             final isFirstPage = controller.currentPage.value == 0;
-            final isLastPage = controller.currentPage.value == controller.totalPages - 1;
+            final isLastPage =
+                controller.currentPage.value == controller.totalPages - 1;
 
             return Row(
               children: [
                 // Back button (hide on first page)
                 if (!isFirstPage)
                   Expanded(
-                    child: OutlinedButton(
+                    child: ElevatedButton(
+                      key: Key('onboarding_back_button'),
                       onPressed: controller.previousPage,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.accent,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accent,
+                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(
-                          color: AppColors.accent,
-                          width: 2,
-                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(50),
                         ),
@@ -149,6 +152,9 @@ class OnboardingView extends GetView<OnboardingController> {
                 // Next/Finish button
                 Expanded(
                   child: ElevatedButton(
+                    key: Key(isLastPage
+                        ? 'onboarding_start_button'
+                        : 'onboarding_next_button'),
                     onPressed: controller.nextPage,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.accent,

@@ -62,6 +62,7 @@ class RegisterView extends GetView<AuthController> {
                           if (controller.selectedPageIndex > 0)
                             Expanded(
                               child: ElevatedButton(
+                                key: Key('register_back_button'),
                                 onPressed: controller.previousPage,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.accent,
@@ -117,6 +118,9 @@ class RegisterView extends GetView<AuthController> {
                               }
 
                               return ElevatedButton(
+                                key: Key(controller.selectedPageIndex < 2
+                                    ? 'register_next_button'
+                                    : 'register_submit_button'),
                                 onPressed: canProceed
                                     ? () {
                                         if (controller.selectedPageIndex < 2) {
@@ -284,6 +288,7 @@ class RegisterView extends GetView<AuthController> {
           children: [
             Expanded(
               child: TextField(
+                key: Key('register_firstname_field'),
                 controller: controller.firstnameController,
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z]')),
@@ -311,6 +316,7 @@ class RegisterView extends GetView<AuthController> {
             const SizedBox(width: 12),
             Expanded(
               child: TextField(
+                key: Key('register_lastname_field'),
                 controller: controller.lastnameController,
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z]')),
@@ -358,6 +364,7 @@ class RegisterView extends GetView<AuthController> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 GestureDetector(
+                  key: Key('register_gender_male'),
                   onTap: () => controller.setGender(Gender.male),
                   child: Row(
                     children: [
@@ -370,6 +377,7 @@ class RegisterView extends GetView<AuthController> {
                 ),
                 const SizedBox(width: 24),
                 GestureDetector(
+                  key: Key('register_gender_female'),
                   onTap: () => controller.setGender(Gender.female),
                   child: Row(
                     children: [
@@ -431,6 +439,7 @@ class RegisterView extends GetView<AuthController> {
                                           controller.getAvatarOptions(controller
                                               .selectedGender.value)[index];
                                       return GestureDetector(
+                                        key: Key('avatar_option_$index'),
                                         onTap: () {
                                           controller.setAvatar(avatar['path']);
                                         },
@@ -485,8 +494,8 @@ class RegisterView extends GetView<AuthController> {
                                                     errorBuilder: (context,
                                                         error, stackTrace) {
                                                       return AppIcon(
-                                                          AppAssets.icons
-                                                              .profile,
+                                                          AppAssets
+                                                              .icons.profile,
                                                           size: 40);
                                                     },
                                                   );
@@ -528,6 +537,7 @@ class RegisterView extends GetView<AuthController> {
         ),
         const SizedBox(height: 8),
         TextField(
+          key: Key('register_username_field'),
           controller: controller.usernameController,
           inputFormatters: [
             FilteringTextInputFormatter.deny(RegExp(r'\s')),
@@ -592,6 +602,7 @@ class RegisterView extends GetView<AuthController> {
                     controller.selectedFoodTypes.contains(foodType);
 
                 return GestureDetector(
+                  key: Key('food_type_$index'),
                   onTap: () {
                     controller.toggleFoodTypeSelection(foodType);
                   },
@@ -620,9 +631,8 @@ class RegisterView extends GetView<AuthController> {
                           foodType,
                           style: TextStyle(
                             fontSize: 14,
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.w500,
+                            fontWeight:
+                                isSelected ? FontWeight.w600 : FontWeight.w500,
                             color:
                                 isSelected ? AppColors.primary : Colors.black87,
                           ),
@@ -680,6 +690,7 @@ class RegisterView extends GetView<AuthController> {
                     controller.selectedPlaceValues.contains(placeValue);
 
                 return GestureDetector(
+                  key: Key('place_value_$index'),
                   onTap: () {
                     controller.togglePlaceValueSelection(placeValue);
                   },

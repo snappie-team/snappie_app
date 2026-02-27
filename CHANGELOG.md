@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.4] - 2026-02-28
+### Added
+- Deep link system: dukungan buka konten langsung via link (snappie:// dan https://snappie-team.github.io)
+- Optimistic UI komentar: komentar langsung muncul saat dikirim tanpa menunggu server, rollback otomatis jika gagal
+- Tombol "Nanti Saja" pada modal misi gagal
+
+### Changed
+- Popup achievement didesain ulang menjadi modal full-screen dengan background putih, ikon besar, gradient pink, dan badge tanggal oranye
+- Deskripsi achievement kini menggunakan template bahasa Indonesia dengan highlight emas pada nama dan warna primer pada target
+- Popup achievement dari aktivitas otomatis tertutup setelah 1.5 detik
+- Achievement yang sudah didapatkan bisa dibuka dari halaman profil
+- Model AchievementSummary ditambah field: iconUrl, description, subtitle, criteriaAction, criteriaTarget
+- Semua Get.snackbar dimigrasikan ke AppSnackbar dengan tipe (success, error, warning, info)
+- URL share postingan dan tempat kini menggunakan deep link
+
 ## [1.2.3] - 2026-02-21
 ### Added
 - Notifikasi real dari server: sistem notifikasi kini terhubung ke API dengan dukungan tandai semua sudah dibaca

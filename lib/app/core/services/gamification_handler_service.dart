@@ -52,10 +52,14 @@ class GamificationHandlerService {
       Logger.debug(
           'Showing achievement: ${achievement.name}', 'GamificationHandler');
 
-      // Show popup
+      // Show popup as full-screen modal with auto-close
       await Get.dialog(
-        AchievementPopupWidget(achievement: achievement),
+        AchievementPopupWidget(
+          achievement: achievement,
+          autoCloseDuration: const Duration(milliseconds: 1500),
+        ),
         barrierDismissible: true,
+        useSafeArea: false,
       );
 
       // Delay between popups (except after last one)

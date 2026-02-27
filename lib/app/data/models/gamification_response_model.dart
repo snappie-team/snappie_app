@@ -25,8 +25,19 @@ class AchievementSummary {
   final int? id;
   final String? code;
   final String? name;
+  final String? subtitle;
+  final String? description;
   final String? type; // "achievement" or "challenge"
   final int? level; // For leveled achievements
+
+  @JsonKey(name: 'icon_url')
+  final String? iconUrl;
+
+  @JsonKey(name: 'criteria_action')
+  final String? criteriaAction;
+
+  @JsonKey(name: 'criteria_target')
+  final int? criteriaTarget;
 
   @JsonKey(name: 'reward_coins')
   final int? rewardCoins;
@@ -41,8 +52,13 @@ class AchievementSummary {
     this.id,
     this.code,
     this.name,
+    this.subtitle,
+    this.description,
     this.type,
     this.level,
+    this.iconUrl,
+    this.criteriaAction,
+    this.criteriaTarget,
     this.rewardCoins,
     this.rewardXp,
     this.completedAt,

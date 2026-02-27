@@ -6,6 +6,7 @@ import '../../../core/constants/app_assets.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/achievement_model.dart';
+import '../../../data/models/gamification_response_model.dart';
 import '../../../data/repositories/achievement_repository_impl.dart';
 import '../controllers/profile_controller.dart';
 
@@ -135,35 +136,61 @@ class _UserAchievementViewState extends State<UserAchievementView> {
             width: 75,
           );
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Achievement icon with locked/unlocked visual state
-          imageWidget,
+    return GestureDetector(
+      onTap: isUnlocked ? () => _showAchievementDetail(userAchievement) : null,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // Achievement icon with locked/unlocked visual state
+            imageWidget,
 
-          // Name
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              '${userAchievement.name}',
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color:
-                    isUnlocked ? AppColors.textPrimary : AppColors.textTertiary,
+            // Name
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                '${userAchievement.name}',
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color:
+                      isUnlocked ? AppColors.textPrimary : AppColors.textTertiary,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  void _showAchievementDetail(UserAchievement userAchievement) {
+    final summary = AchievementSummary(
+      id: userAchievement.id,
+      code: userAchievement.code,
+      name: userAchievement.name,
+      subtitle: userAchievement.subtitle,
+      description: userAchievement.description,
+      type: userAchievement.type,
+      iconUrl: userAchievement.iconUrl,
+      criteriaAction: userAchievement.criteriaAction,
+      criteriaTarget: userAchievement.criteriaTarget,
+      rewardCoins: userAchievement.rewardCoins,
+      rewardXp: userAchievement.rewardXp,
+      completedAt: userAchievement.completedAt,
+    );
+
+    Get.dialog(
+      AchievementPopupWidget(achievement: summary),
+      barrierDismissible: true,
+      useSafeArea: false,
     );
   }
 }

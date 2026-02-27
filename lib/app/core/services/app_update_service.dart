@@ -9,6 +9,7 @@ import '../../routes/api_endpoints.dart';
 import 'package:dio/dio.dart' as dio_lib;
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import '../helpers/app_snackbar.dart';
 
 class AppUpdateInfo {
   final String versionName;
@@ -218,11 +219,9 @@ class AppUpdateService extends GetxService {
                   // await AppUpdateService.platform.invokeMethod('installApk', {'filePath': filePath});
                   await OpenFile.open(filePath);
                 } on PlatformException catch (e) {
-                  Get.snackbar(
-                    'Gagal Menginstal',
+                  AppSnackbar.error(
                     '${e.message}',
-                    backgroundColor: Colors.red,
-                    colorText: Colors.white,
+                    title: 'Gagal Menginstal',
                     duration: const Duration(seconds: 5),
                   );
                 }
@@ -235,11 +234,9 @@ class AppUpdateService extends GetxService {
       );
     } catch (e) {
       if (Get.isDialogOpen == true) Get.back();
-      Get.snackbar(
-        'Gagal Mengunduh',
+      AppSnackbar.error(
         e.toString(),
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        title: 'Gagal Mengunduh',
       );
     }
   }

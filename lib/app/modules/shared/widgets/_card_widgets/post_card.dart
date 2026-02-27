@@ -5,6 +5,7 @@ import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
 import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:snappie_app/app/core/services/logger_service.dart';
+import 'package:snappie_app/app/core/services/deep_link_service.dart';
 import 'package:snappie_app/app/core/helpers/app_snackbar.dart';
 import 'package:snappie_app/app/data/repositories/place_repository_impl.dart';
 import 'package:snappie_app/app/data/repositories/post_repository_impl.dart';
@@ -37,6 +38,7 @@ class _PostCardState extends State<PostCard> {
   late RxBool _isLiked;
   late RxBool _isTogglingLike;
   late RxList<CommentModel> _comments;
+  final RxSet<int> _pendingCommentIds = <int>{}.obs;
 
   PostModel get post => widget.post;
 
@@ -890,7 +892,11 @@ class _PostCardState extends State<PostCard> {
                             itemCount: _comments.length,
                             itemBuilder: (context, index) {
                               final comment = _comments[index];
-                              return Padding(
+                              final isPending = comment.id != null &&
+                                  _pendingCommentIds.contains(comment.id);
+                              return Opacity(
+                                opacity: isPending ? 0.5 : 1.0,
+                                child: Padding(
                                 padding: const EdgeInsets.only(bottom: 16),
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -945,6 +951,7 @@ class _PostCardState extends State<PostCard> {
                                     ),
                                   ],
                                 ),
+                              ),
                               );
                             },
                           ),
@@ -1039,7 +1046,7 @@ class _PostCardState extends State<PostCard> {
       shareText += '\n📍 Lokasi: $placeName';
     }
     if (postId != null) {
-      shareText += '\n\nLihat selengkapnya:\nhttps://snappie.app/post/$postId';
+      shareText += '\n\nLihat selengkapnya:\n${DeepLinkService.postUrl(postId)}';
     }
     shareText += '\n\nTemukan di Snappie App! 📱';
 
@@ -1088,19 +1095,38 @@ class _PostCardState extends State<PostCard> {
     final postId = post.id;
     if (postId == null || comment.trim().isEmpty) return;
 
+    // Create optimistic comment with temporary negative ID
+    final authService = Get.find<AuthService>();
+    final tempId = -DateTime.now().millisecondsSinceEpoch;
+    final optimisticComment = CommentModel()
+      ..id = tempId
+      ..userId = authService.userData?.id
+      ..comment = comment.trim()
+      ..createdAt = DateTime.now()
+      ..user = (UserComment()
+        ..id = authService.userData?.id
+        ..name = authService.userData?.name ?? 'Anda'
+        ..username = authService.userData?.username
+        ..imageUrl = authService.userData?.imageUrl);
+
+    // Optimistic update - show comment immediately with pending state
+    _comments.add(optimisticComment);
+    _commentsCount.value += 1;
+    _pendingCommentIds.add(tempId);
+
     try {
       final postRepository = Get.find<PostRepository>();
 
-      // Create comment
+      // Create comment on server
       await postRepository.createComment(postId, comment);
 
       // Fetch updated post data to get latest comments and count
       final updatedPost = await postRepository.getPostById(postId);
 
-      // Update local reactive state - this will update UI immediately
+      // Remove pending state and replace with real data
+      _pendingCommentIds.remove(tempId);
       _commentsCount.value = updatedPost.commentsCount ?? 0;
 
-      // Update comments list so new comment appears instantly in bottom sheet
       if (updatedPost.comments != null) {
         _comments.assignAll(updatedPost.comments!);
       }
@@ -1112,9 +1138,12 @@ class _PostCardState extends State<PostCard> {
       } catch (e) {
         Logger.warning('HomeController not found, skipping sync', 'PostCard');
       }
-
-      AppSnackbar.success('Komentar berhasil ditambahkan');
     } catch (e) {
+      // Rollback optimistic update
+      _pendingCommentIds.remove(tempId);
+      _comments.removeWhere((c) => c.id == tempId);
+      _commentsCount.value = (_commentsCount.value - 1).clamp(0, 999999);
+
       Logger.error('Failed to add comment', e, null, 'PostCard');
       AppSnackbar.error('Tidak dapat menambahkan komentar, silakan coba lagi');
     }

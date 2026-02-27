@@ -34,7 +34,6 @@ class LocationService extends GetxService {
           title: 'Lokasi Tidak Aktif',
         );
       }
-      // return null;
     }
 
     // Check and request location permission

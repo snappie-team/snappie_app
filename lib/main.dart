@@ -11,6 +11,7 @@ import 'firebase_options.dart';
 import 'app/routes/app_pages.dart';
 import 'app/core/services/auth_service.dart';
 import 'app/core/constants/app_theme.dart';
+import 'app/core/services/deep_link_service.dart';
 
 Future<String> initAuthService() async {
   try {
@@ -57,6 +58,9 @@ void main() async {
       child: MainApp(route: await initAuthService()),
     ),
   );
+
+  // Initialize deep link handling after app is running
+  DeepLinkService.init();
 }
 
 class MainApp extends StatelessWidget {
@@ -79,6 +83,10 @@ class MainApp extends StatelessWidget {
           title: "Snappie App",
           initialRoute: route,
           getPages: AppPages.routes,
+          unknownRoute: GetPage(
+            name: '/not-found',
+            page: () => const SizedBox.shrink(),
+          ),
           debugShowCheckedModeBanner: false,
           
           // Apply custom theme with Material Design color system

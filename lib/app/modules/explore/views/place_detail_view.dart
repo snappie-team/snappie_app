@@ -8,12 +8,14 @@ import 'package:snappie_app/app/core/constants/place_value.dart';
 import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../core/services/deep_link_service.dart';
 import '../../../core/helpers/error_handler.dart';
 import '../controllers/explore_controller.dart';
 import '../../shared/widgets/index.dart';
 import '../../../data/models/place_model.dart';
 import '../../../data/models/review_model.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/helpers/app_snackbar.dart';
 import '../../mission/controllers/mission_controller.dart';
 
 class PlaceDetailView extends GetView<ExploreController> {
@@ -892,13 +894,7 @@ class PlaceDetailView extends GetView<ExploreController> {
     final lng = place.longitude;
 
     if (lat == null || lng == null) {
-      Get.snackbar(
-        'Petunjuk Arah',
-        'Koordinat lokasi tidak tersedia',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.warning,
-        colorText: AppColors.textOnPrimary,
-      );
+      AppSnackbar.warning('Koordinat lokasi tidak tersedia', title: 'Petunjuk Arah');
       return;
     }
 
@@ -914,34 +910,16 @@ class PlaceDetailView extends GetView<ExploreController> {
       );
 
       if (!launched) {
-        Get.snackbar(
-          'Error',
-          'Tidak dapat membuka aplikasi peta',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.error,
-          colorText: AppColors.textOnPrimary,
-        );
+        AppSnackbar.error('Tidak dapat membuka aplikasi peta');
       }
     } catch (e) {
-      Get.snackbar(
-        'Gagal',
-        ErrorHandler.getReadableMessage(e, tag: 'PlaceDetailView'),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.textOnPrimary,
-      );
+      AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'PlaceDetailView'));
     }
   }
 
   void _openReservation(String? contactNumber) async {
     if (contactNumber == null || contactNumber.isEmpty) {
-      Get.snackbar(
-        'Reservasi',
-        'Kontak reservasi belum tersedia',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.warning,
-        colorText: AppColors.textOnPrimary,
-      );
+      AppSnackbar.warning('Kontak reservasi belum tersedia', title: 'Reservasi');
       return;
     }
 
@@ -968,35 +946,18 @@ class PlaceDetailView extends GetView<ExploreController> {
       );
 
       if (!launched) {
-        Get.snackbar(
-          'Error',
-          'Tidak dapat membuka WhatsApp',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.error,
-          colorText: AppColors.textOnPrimary,
-        );
+        AppSnackbar.error('Tidak dapat membuka WhatsApp');
       }
     } catch (e) {
-      Get.snackbar(
-        'Gagal',
-        ErrorHandler.getReadableMessage(e, tag: 'PlaceDetailView'),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.textOnPrimary,
-      );
+      AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'PlaceDetailView'));
     }
   }
 
   void _startMission(PlaceModel place) async {
+    // Re-check status terbaru sebelum mulai misi
     await controller.loadPlaceGamificationStatus(place.id!);
     if (!controller.canCheckin || !controller.canReview) {
-      Get.snackbar(
-        'Misi sudah selesai',
-        'Kamu sudah menyelesaikan misi atau ulasan untuk tempat ini bulan ini.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.warning,
-        colorText: AppColors.textOnPrimary,
-      );
+      // Status berubah setelah refresh — button akan otomatis disable via Obx
       return;
     }
 
@@ -1253,21 +1214,37 @@ class PlaceDetailView extends GetView<ExploreController> {
               ],
             ),
             const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _startMission(place),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  foregroundColor: AppColors.textOnPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+            Obx(() {
+              final missionCompleted =
+                  !controller.canCheckin || !controller.canReview;
+              return SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: missionCompleted
+                      ? null
+                      : () => _startMission(place),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: missionCompleted
+                        ? AppColors.border
+                        : AppColors.accent,
+                    foregroundColor: missionCompleted
+                        ? AppColors.textSecondary
+                        : AppColors.textOnPrimary,
+                    disabledBackgroundColor: AppColors.border,
+                    disabledForegroundColor: AppColors.textSecondary,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Text(
+                    missionCompleted
+                        ? 'Anda sudah memainkan misi ini'
+                        : 'Mulai Misi',
                   ),
                 ),
-                child: const Text('Mulai Misi'),
-              ),
-            ),
+              );
+            }),
           ],
         ),
       ),
@@ -1347,6 +1324,9 @@ class PlaceDetailView extends GetView<ExploreController> {
       shareText +=
           '\n📍 Lihat di Google Maps:\nhttps://www.google.com/maps/search/?api=1&query=$lat,$lng';
     }
+    if (place.id != null) {
+      shareText += '\n\n🔗 Buka di Snappie:\n${DeepLinkService.placeUrl(place.id!)}';
+    }
     shareText += '\n\nTemukan di Snappie App! 📱';
 
     await SharePlus.instance.share(
@@ -1359,36 +1339,20 @@ class PlaceDetailView extends GetView<ExploreController> {
 
   void _toggleFavorite(PlaceModel place) async {
     if (place.id == null) {
-      Get.snackbar(
-        'Error',
-        'Tidak dapat menyimpan tempat ini',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.textOnPrimary,
-      );
+      AppSnackbar.error('Tidak dapat menyimpan tempat ini');
       return;
     }
 
     try {
       final isNowSaved = await controller.toggleSavedPlace(place.id!);
 
-      Get.snackbar(
-        isNowSaved ? 'Disimpan' : 'Dihapus',
-        isNowSaved
-            ? '${place.name} ditambahkan ke favorit'
-            : '${place.name} dihapus dari favorit',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: isNowSaved ? AppColors.success : AppColors.primary,
-        colorText: AppColors.textOnPrimary,
-      );
+      if (isNowSaved) {
+        AppSnackbar.success('${place.name} ditambahkan ke favorit', title: 'Disimpan');
+      } else {
+        AppSnackbar.info('${place.name} dihapus dari favorit', title: 'Dihapus');
+      }
     } catch (e) {
-      Get.snackbar(
-        'Gagal',
-        ErrorHandler.getReadableMessage(e, tag: 'PlaceDetailView'),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.textOnPrimary,
-      );
+      AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'PlaceDetailView'));
     }
   }
 

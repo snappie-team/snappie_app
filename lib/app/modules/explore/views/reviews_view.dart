@@ -4,6 +4,7 @@ import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:snappie_app/app/modules/mission/controllers/mission_controller.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/helpers/app_snackbar.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../data/models/place_model.dart';
 import '../../../data/models/review_model.dart';
@@ -487,12 +488,9 @@ class _ReviewsViewState extends State<ReviewsView> {
           ElevatedButton(
             onPressed: () {
               if (!controller.canReview) {
-                Get.snackbar(
-                  'Ulasan sudah selesai',
+                AppSnackbar.warning(
                   'Kamu sudah mengulas tempat ini bulan ini.',
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: AppColors.warning,
-                  colorText: AppColors.textOnPrimary,
+                  title: 'Ulasan sudah selesai',
                 );
                 return;
               }
@@ -917,12 +915,9 @@ class _ReviewsViewState extends State<ReviewsView> {
   void _startMission(PlaceModel place) async {
     await controller.loadPlaceGamificationStatus(place.id!);
     if (!controller.canCheckin || !controller.canReview) {
-      Get.snackbar(
-        'Misi sudah selesai',
+      AppSnackbar.warning(
         'Kamu sudah menyelesaikan misi atau ulasan untuk tempat ini bulan ini.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.warning,
-        colorText: AppColors.textOnPrimary,
+        title: 'Misi sudah selesai',
       );
       return;
     }

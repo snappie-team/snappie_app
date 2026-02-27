@@ -8,6 +8,7 @@ import '../../../data/repositories/user_repository_impl.dart';
 import '../../../data/repositories/articles_repository_impl.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../core/helpers/app_snackbar.dart';
 import '../../../core/helpers/error_handler.dart';
 import '../../../data/models/articles_model.dart';
 
@@ -266,11 +267,7 @@ class HomeController extends GetxController {
 
   void commentPost(int postId) {
     // TODO: Implement comment functionality
-    Get.snackbar(
-      'Comment',
-      'Comment feature coming soon!',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    AppSnackbar.info('Comment feature coming soon!', title: 'Comment');
   }
 
   /// Update a specific post in the list
@@ -284,11 +281,7 @@ class HomeController extends GetxController {
 
   void sharePost(int postId) {
     // TODO: Implement share functionality
-    Get.snackbar(
-      'Shared',
-      'Post shared successfully!',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    AppSnackbar.info('Post shared successfully!', title: 'Shared');
   }
 
   Future<void> toggleFollowUser(int userId) async {

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/helpers/app_snackbar.dart';
 import '../../../../core/constants/app_assets.dart';
 import '../_display_widgets/avatar_widget.dart';
 import '../_display_widgets/app_icon.dart';
@@ -177,11 +178,7 @@ class ShareProfileModal extends StatelessWidget {
                 onTap: onSave ??
                     () {
                       Get.back();
-                      Get.snackbar(
-                        'Segera',
-                        'Fitur simpan QR akan segera hadir',
-                        snackPosition: SnackPosition.BOTTOM,
-                      );
+                      AppSnackbar.info('Fitur simpan QR akan segera hadir', title: 'Segera');
                     },
               ),
               const SizedBox(width: 24),

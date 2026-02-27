@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/core/constants/app_constants.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/helpers/app_snackbar.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/helpers/error_handler.dart';
@@ -326,21 +327,9 @@ class SettingsView extends StatelessWidget {
                             'https://res.cloudinary.com/deqnkuhbv/image/upload/v1761044273/snappie/assets/avatar/$avatar',
                       );
                       await controller.loadUserProfile();
-                      Get.snackbar(
-                        'Berhasil',
-                        'Avatar berhasil diubah',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.green,
-                        colorText: Colors.white,
-                      );
+                      AppSnackbar.success('Avatar berhasil diubah');
                     } catch (e) {
-                      Get.snackbar(
-                        'Gagal',
-                        ErrorHandler.getReadableMessage(e, tag: 'SettingsView'),
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.red,
-                        colorText: Colors.white,
-                      );
+                      AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'SettingsView'));
                     }
                   },
                   child: Container(
@@ -451,21 +440,9 @@ class SettingsView extends StatelessWidget {
                         frameId == 'none' ? null : frameAsset,
                       );
 
-                      Get.snackbar(
-                        'Berhasil',
-                        'Bingkai berhasil diubah',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.green,
-                        colorText: Colors.white,
-                      );
+                      AppSnackbar.success('Bingkai berhasil diubah');
                     } catch (e) {
-                      Get.snackbar(
-                        'Gagal',
-                        'Tidak dapat mengubah bingkai',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.red,
-                        colorText: Colors.white,
-                      );
+                      AppSnackbar.error('Tidak dapat mengubah bingkai');
                     }
                   },
                   child: Container(

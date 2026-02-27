@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:snappie_app/app/modules/mission/controllers/mission_controller.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/helpers/app_snackbar.dart';
 import '../../../core/constants/food_type.dart';
 import '../../../core/constants/place_value.dart';
 import '../../../core/services/cloudinary_service.dart';
@@ -797,11 +798,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
 
   void _showImagePickerOptions() {
     if (_selectedImages.length >= _maxImages) {
-      Get.snackbar(
-        'Info',
-        'Maksimal $_maxImages foto',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppSnackbar.info('Maksimal $_maxImages foto');
       return;
     }
 
@@ -920,13 +917,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
         });
       }
     } catch (e) {
-      Get.snackbar(
-        'Gagal',
-        ErrorHandler.getReadableMessage(e, tag: 'MissionReviewView'),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'MissionReviewView'));
     }
   }
 
@@ -935,11 +926,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
       final int remaining = _maxImages - _selectedImages.length;
 
       if (remaining <= 0) {
-        Get.snackbar(
-          'Info',
-          'Maksimal $_maxImages foto',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        AppSnackbar.info('Maksimal $_maxImages foto');
         return;
       }
 
@@ -957,56 +944,28 @@ class _MissionReviewViewState extends State<MissionReviewView> {
           _selectedImages.addAll(imagesToAdd);
 
           if (images.length > remaining) {
-            Get.snackbar(
-              'Info',
-              'Hanya ${imagesToAdd.length} foto yang ditambahkan (maksimal $_maxImages)',
-              snackPosition: SnackPosition.BOTTOM,
-            );
+            AppSnackbar.info('Hanya ${imagesToAdd.length} foto yang ditambahkan (maksimal $_maxImages)');
           }
         });
       }
     } catch (e) {
-      Get.snackbar(
-        'Gagal',
-        ErrorHandler.getReadableMessage(e, tag: 'MissionReviewView'),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'MissionReviewView'));
     }
   }
 
   Future<void> _submitReview() async {
     if (_rating == 0) {
-      Get.snackbar(
-        'Error',
-        'Silakan berikan penilaian terlebih dahulu',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.warning,
-        colorText: AppColors.textOnPrimary,
-      );
+      AppSnackbar.warning('Silakan berikan penilaian terlebih dahulu');
       return;
     }
 
     if (_selectedPlaceValues.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Silakan pilih kesesuaian tempat terlebih dahulu',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.warning,
-        colorText: AppColors.textOnPrimary,
-      );
+      AppSnackbar.warning('Silakan pilih kesesuaian tempat terlebih dahulu');
       return;
     }
 
     if (_selectedFoodTypes.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Silakan pilih tipe makanan terlebih dahulu',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.warning,
-        colorText: AppColors.textOnPrimary,
-      );
+      AppSnackbar.warning('Silakan pilih tipe makanan terlebih dahulu');
       return;
     }
 
@@ -1042,13 +1001,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
             'MissionReviewView');
       } catch (e) {
         MissionLoadingModal.hide();
-        Get.snackbar(
-          'Gagal',
-          ErrorHandler.getReadableMessage(e, tag: 'MissionReviewView'),
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.error,
-          colorText: AppColors.textOnPrimary,
-        );
+        AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'MissionReviewView'));
         return;
       }
     }

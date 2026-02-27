@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:snappie_app/app/core/constants/app_colors.dart';
 import 'package:snappie_app/app/core/constants/food_type.dart';
 import 'package:snappie_app/app/core/constants/place_value.dart';
 import '../../../core/services/logger_service.dart';
@@ -19,6 +18,7 @@ import '../../../data/repositories/user_repository_impl.dart';
 import '../../../data/repositories/gamification_repository_impl.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/location_service.dart';
+import '../../../core/helpers/app_snackbar.dart';
 import '../../../core/helpers/error_handler.dart';
 
 class ExploreController extends GetxController {
@@ -447,6 +447,14 @@ class ExploreController extends GetxController {
   }
 
   Future<void> filterByNearby() async {
+    // Toggle off jika sudah aktif
+    if (_selectedFilter.value == 'nearby') {
+      _selectedFilter.value = '';
+      _selectedLocation.value = null;
+      await loadPlaces(refresh: true);
+      return;
+    }
+
     final locationService = Get.find<LocationService>();
     final position = await locationService.getCurrentPosition();
     if (position == null) return;
@@ -610,12 +618,8 @@ class ExploreController extends GetxController {
       );
 
       // Show success and go back to place reviews list
-      Get.snackbar(
-        'Berhasil',
+      AppSnackbar.success(
         'Ulasan berhasil dikirim! Kamu mendapatkan ${place.expReward ?? 50} XP dan ${place.coinReward ?? 25} Koin',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.success,
-        colorText: AppColors.textOnPrimary,
         duration: const Duration(seconds: 3),
       );
 
@@ -626,11 +630,7 @@ class ExploreController extends GetxController {
     } catch (e) {
       final msg = ErrorHandler.getReadableMessage(e, tag: 'ExploreController');
       _setError(msg);
-      Get.snackbar(
-        'Gagal',
-        msg,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppSnackbar.error(msg);
     }
 
     _isCreatingReview.value = false;
@@ -656,19 +656,11 @@ class ExploreController extends GetxController {
         additionalInfo: additionalInfo,
       );
 
-      Get.snackbar(
-        'Success',
-        'Check-in created successfully! (API Mode)',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppSnackbar.success('Check-in created successfully! (API Mode)');
     } catch (e) {
       final msg = ErrorHandler.getReadableMessage(e, tag: 'ExploreController');
       _setError(msg);
-      Get.snackbar(
-        'Gagal',
-        msg,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppSnackbar.error(msg);
     }
 
     _isCreatingCheckin.value = false;

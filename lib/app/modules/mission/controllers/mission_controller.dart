@@ -3,12 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:snappie_app/app/core/constants/app_colors.dart';
 import 'package:snappie_app/app/core/services/cloudinary_service.dart';
 import 'package:snappie_app/app/core/services/gamification_handler_service.dart';
 import 'package:snappie_app/app/core/services/location_service.dart';
 import 'package:snappie_app/app/core/services/logger_service.dart';
 import '../../../core/helpers/error_handler.dart';
+import '../../../core/helpers/app_snackbar.dart';
 import '../../../data/models/place_model.dart';
 import '../../../data/models/checkin_model.dart';
 import '../../../data/models/review_model.dart';
@@ -286,12 +286,8 @@ class MissionController extends GetxController {
       }
 
       // Show success and go back
-      Get.snackbar(
-        'Berhasil',
+      AppSnackbar.success(
         'Ulasan berhasil dikirim! Kamu mendapatkan ${place.expReward ?? 50} XP dan ${place.coinReward ?? 25} Koin',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.success,
-        colorText: AppColors.textOnPrimary,
         duration: const Duration(seconds: 3),
       );
 
@@ -300,23 +296,11 @@ class MissionController extends GetxController {
     } on ServerException catch (e) {
       final msg = ErrorHandler.getReadableMessage(e, tag: 'MissionController');
       errorMessage.value = msg;
-      Get.snackbar(
-        'Gagal',
-        msg,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.textOnPrimary,
-      );
+      AppSnackbar.error(msg);
     } catch (e) {
       final msg = ErrorHandler.getReadableMessage(e, tag: 'MissionController');
       errorMessage.value = msg;
-      Get.snackbar(
-        'Gagal',
-        msg,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.textOnPrimary,
-      );
+      AppSnackbar.error(msg);
     } finally {
       isSubmitting.value = false;
     }

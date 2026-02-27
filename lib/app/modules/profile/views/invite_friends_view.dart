@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/helpers/app_snackbar.dart';
+import '../../../core/services/deep_link_service.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/helpers/error_handler.dart';
 import '../../../data/models/user_model.dart';
@@ -109,8 +111,8 @@ class InviteFriendsView extends StatelessWidget {
     final username = user?.username ?? '';
     final displayName = user?.name ?? 'User';
     final profileLink = username.isNotEmpty
-        ? 'https://snappie.app/u/$username'
-        : 'https://snappie.app/profile';
+        ? DeepLinkService.profileUrl(username)
+        : 'https://snappie-team.github.io';
 
     Get.bottomSheet(
       ShareProfileModal(
@@ -207,21 +209,9 @@ class _AddFriendsSearchViewState extends State<_AddFriendsSearchView> {
           ? 'Anda sekarang mengikuti ${user.name ?? user.username}'
           : 'Anda berhenti mengikuti ${user.name ?? user.username}';
 
-      Get.snackbar(
-        'Berhasil',
-        message,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      AppSnackbar.success(message);
     } catch (e) {
-      Get.snackbar(
-        'Gagal',
-        ErrorHandler.getReadableMessage(e, tag: 'InviteFriendsView'),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'InviteFriendsView'));
     }
   }
 

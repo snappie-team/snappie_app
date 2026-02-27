@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/helpers/app_snackbar.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../data/models/post_model.dart';
 import '../../../data/repositories/achievement_repository_impl.dart';
@@ -348,21 +349,9 @@ class _UserProfileViewState extends State<UserProfileView> {
     try {
       final controller = Get.find<HomeController>();
       await controller.toggleFollowUser(_userId);
-      Get.snackbar(
-        'Berhasil',
-        'Status mengikuti diperbarui',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.success,
-        colorText: AppColors.textPrimary,
-      );
+      AppSnackbar.success('Status mengikuti diperbarui');
     } catch (e) {
-      Get.snackbar(
-        'Gagal',
-        'Tidak dapat mengikuti: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.textPrimary,
-      );
+      AppSnackbar.error('Tidak dapat mengikuti: $e');
     }
   }
 

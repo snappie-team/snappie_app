@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
+import 'package:snappie_app/app/core/helpers/app_snackbar.dart';
 import 'package:snappie_app/app/core/services/cloudinary_service.dart';
 import 'package:snappie_app/app/core/services/logger_service.dart';
 import 'package:snappie_app/app/core/helpers/error_handler.dart';
@@ -61,13 +62,7 @@ class _CreatePostViewState extends State<CreatePostView> {
       Logger.error('CloudinaryService not found', e, null, 'CreatePostView');
       // Show error to user
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.snackbar(
-          'Error',
-          'CloudinaryService tidak tersedia. Restart aplikasi.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.error,
-          colorText: AppColors.textOnPrimary,
-        );
+        AppSnackbar.error('CloudinaryService tidak tersedia. Restart aplikasi.');
       });
     }
 
@@ -107,13 +102,7 @@ class _CreatePostViewState extends State<CreatePostView> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted || _selectedPlace != null) return;
           if (_places.isEmpty) {
-            Get.snackbar(
-              'Error',
-              'Tidak ada tempat tersedia',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: AppColors.error,
-              colorText: AppColors.textOnPrimary,
-            );
+            AppSnackbar.error('Tidak ada tempat tersedia');
             return;
           }
           _showPlaceSelection(force: true);
@@ -592,13 +581,7 @@ class _CreatePostViewState extends State<CreatePostView> {
     try {
       // Check if already at max limit
       if (_imageFiles.length >= _maxImages) {
-        Get.snackbar(
-          'Batas Maksimal',
-          'Maksimal $_maxImages gambar',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.warning,
-          colorText: AppColors.textOnPrimary,
-        );
+        AppSnackbar.warning('Maksimal $_maxImages gambar', title: 'Batas Maksimal');
         return;
       }
 
@@ -620,48 +603,24 @@ class _CreatePostViewState extends State<CreatePostView> {
 
           // Show warning if some images were not added
           if (pickedFiles.length > remainingSlots) {
-            Get.snackbar(
-              'Info',
-              'Hanya $remainingSlots gambar yang ditambahkan (maksimal $_maxImages)',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: AppColors.primary,
-              colorText: AppColors.textOnPrimary,
-            );
+            AppSnackbar.info('Hanya $remainingSlots gambar yang ditambahkan (maksimal $_maxImages)');
           }
         });
       }
     } catch (e) {
-      Get.snackbar(
-        'Gagal',
-        ErrorHandler.getReadableMessage(e, tag: 'CreatePostView'),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.textOnPrimary,
-      );
+      AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'CreatePostView'));
     }
   }
 
   Future<void> _submitPost() async {
     // Validation
     if (_selectedPlace == null) {
-      Get.snackbar(
-        'Error',
-        'Pilih tempat terlebih dahulu',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.textOnPrimary,
-      );
+      AppSnackbar.error('Pilih tempat terlebih dahulu');
       return;
     }
 
     if (_contentController.text.trim().isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Konten tidak boleh kosong',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.textOnPrimary,
-      );
+      AppSnackbar.error('Konten tidak boleh kosong');
       return;
     }
 
@@ -696,24 +655,16 @@ class _CreatePostViewState extends State<CreatePostView> {
                   'Upload failed for image ${i + 1}: ${result.error}',
                   'CreatePostView');
               // Show error to user
-              Get.snackbar(
-                'Warning',
+              AppSnackbar.warning(
                 'Gagal upload gambar ${i + 1}: ${result.error}',
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: AppColors.warning,
-                colorText: AppColors.textOnPrimary,
                 duration: const Duration(seconds: 2),
               );
             }
           } catch (uploadError) {
             Logger.error('Exception uploading image ${i + 1}', uploadError,
                 null, 'CreatePostView');
-            Get.snackbar(
-              'Warning',
+            AppSnackbar.warning(
               'Error upload gambar ${i + 1}: $uploadError',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: AppColors.warning,
-              colorText: AppColors.textOnPrimary,
               duration: const Duration(seconds: 2),
             );
           }
@@ -724,13 +675,7 @@ class _CreatePostViewState extends State<CreatePostView> {
             'CreatePostView');
 
         if (imageUrls.isEmpty && _imageFiles.isNotEmpty) {
-          Get.snackbar(
-            'Error',
-            'Semua gambar gagal diupload. Coba lagi.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: AppColors.error,
-            colorText: AppColors.textOnPrimary,
-          );
+          AppSnackbar.error('Semua gambar gagal diupload. Coba lagi.');
           setState(() => _isLoading = false);
           return;
         }
@@ -752,22 +697,10 @@ class _CreatePostViewState extends State<CreatePostView> {
 
       Get.back(); // Close create post view
 
-      Get.snackbar(
-        'Berhasil',
-        'Postingan berhasil dibuat',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.success,
-        colorText: AppColors.textOnPrimary,
-      );
+      AppSnackbar.success('Postingan berhasil dibuat');
     } catch (e) {
       Logger.error('Failed to create post', e, null, 'CreatePostView');
-      Get.snackbar(
-        'Gagal',
-        'Tidak dapat membuat postingan, silakan coba lagi',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.textOnPrimary,
-      );
+      AppSnackbar.error('Tidak dapat membuat postingan, silakan coba lagi');
     } finally {
       setState(() => _isLoading = false);
     }

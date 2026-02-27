@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/helpers/app_snackbar.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/mission_controller.dart';
 import '../../shared/widgets/_dialog_widgets/mission_loading_modal.dart';
@@ -777,12 +778,9 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
         widget.controller.resetMission();
         Get.until((route) => route.settings.name == AppPages.PLACE_DETAIL);
 
-        Get.snackbar(
-          'Selamat!',
+        AppSnackbar.success(
           'Kamu mendapatkan total ${widget.controller.expReward} XP',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.success,
-          colorText: AppColors.textOnPrimary,
+          title: 'Selamat!',
         );
       }
     } else {

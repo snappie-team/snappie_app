@@ -5,7 +5,10 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/helpers/app_snackbar.dart';
 import '../../../core/helpers/error_handler.dart';
+import '../../../core/services/location_service.dart';
+import 'package:geolocator/geolocator.dart';
 import '../controllers/mission_controller.dart';
 
 /// Halaman untuk mengambil foto misi
@@ -78,10 +81,28 @@ class _MissionPhotoViewStatefulState extends State<_MissionPhotoViewStateful>
       }
 
       await _setupCameraController(_cameras[_selectedCameraIndex]);
+
+      // Pre-request lokasi setelah kamera berhasil diinisialisasi,
+      // agar saat submit foto, lokasi sudah tersedia.
+      _preRequestLocationPermission();
     } catch (e) {
       setState(() {
         _errorMessage = ErrorHandler.getReadableMessage(e, tag: 'MissionPhotoView');
       });
+    }
+  }
+
+  /// Minta izin lokasi di background setelah kamera aktif.
+  /// Tidak memblokir UI — jika gagal, akan diminta ulang saat submit.
+  Future<void> _preRequestLocationPermission() async {
+    try {
+      final locationService = Get.find<LocationService>();
+      await locationService.getCurrentPosition(
+        showSnackbars: false,
+        accuracy: LocationAccuracy.medium,
+      );
+    } catch (_) {
+      // Abaikan — akan diminta ulang saat submitPhoto
     }
   }
 
@@ -141,11 +162,7 @@ class _MissionPhotoViewStatefulState extends State<_MissionPhotoViewStateful>
         _flashMode = newFlashMode;
       });
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Gagal mengubah mode flash',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppSnackbar.error('Gagal mengubah mode flash');
     }
   }
 
@@ -185,13 +202,7 @@ class _MissionPhotoViewStatefulState extends State<_MissionPhotoViewStateful>
       controller.setCapturedImage(filePath);
       Get.toNamed('/mission-photo-preview');
     } catch (e) {
-      Get.snackbar(
-        'Gagal',
-        ErrorHandler.getReadableMessage(e, tag: 'MissionPhotoView'),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'MissionPhotoView'));
     } finally {
       if (mounted) {
         setState(() {

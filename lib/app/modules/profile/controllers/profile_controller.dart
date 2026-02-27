@@ -8,6 +8,7 @@ import 'package:snappie_app/app/data/repositories/achievement_repository_impl.da
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../core/helpers/app_snackbar.dart';
 import '../../../core/helpers/error_handler.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/models/post_model.dart';
@@ -263,11 +264,7 @@ class ProfileController extends GetxController {
 
   void editProfile() {
     // TODO: Implement edit profile functionality
-    Get.snackbar(
-      'Edit Profile',
-      'Edit profile feature coming soon!',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    AppSnackbar.info('Edit profile feature coming soon!', title: 'Edit Profile');
   }
 
   Future<void> logout() async {
@@ -310,13 +307,7 @@ class ProfileController extends GetxController {
         Get.back();
 
         // Show success message
-        Get.snackbar(
-          'Logout Berhasil',
-          'Anda telah keluar dari aplikasi',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        AppSnackbar.success('Anda telah keluar dari aplikasi', title: 'Logout Berhasil');
 
         // Navigate back to login screen
         Get.offAllNamed(AppPages.LOGIN);
@@ -328,32 +319,18 @@ class ProfileController extends GetxController {
       }
 
       // Show error message
-      Get.snackbar(
-        'Gagal',
-        ErrorHandler.getReadableMessage(e, tag: 'ProfileController'),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'ProfileController'));
     }
   }
 
   void viewAchievements() {
     // TODO: Implement view achievements functionality
-    Get.snackbar(
-      'Achievements',
-      'View achievements feature coming soon!',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    AppSnackbar.info('View achievements feature coming soon!', title: 'Achievements');
   }
 
   void viewHistory() {
     // TODO: Implement view history functionality
-    Get.snackbar(
-      'History',
-      'View history feature coming soon!',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    AppSnackbar.info('View history feature coming soon!', title: 'History');
   }
 
   void _setLoading(bool loading) {

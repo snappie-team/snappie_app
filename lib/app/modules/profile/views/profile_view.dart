@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
+import '../../../core/services/deep_link_service.dart';
 import '../controllers/profile_controller.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
@@ -704,8 +705,8 @@ class ProfileView extends GetView<ProfileController> {
     final username = user?.username ?? '';
     final displayName = user?.name ?? 'User';
     final profileLink = username.isNotEmpty
-        ? 'https://snappie.app/u/$username'
-        : 'https://snappie.app/profile';
+        ? DeepLinkService.profileUrl(username)
+        : 'https://snappie-team.github.io';
 
     Get.bottomSheet(
       ShareProfileModal(

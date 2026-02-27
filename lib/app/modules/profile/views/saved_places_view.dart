@@ -4,6 +4,7 @@ import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart'
 import '../controllers/profile_controller.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/repositories/place_repository_impl.dart';
+import '../../../core/helpers/app_snackbar.dart';
 import '../../../routes/app_pages.dart';
 import '../../shared/widgets/index.dart';
 
@@ -190,11 +191,7 @@ class SavedPlacesView extends GetView<ProfileController> {
       // Close loading if open
       if (Get.isDialogOpen == true) Get.back();
 
-      Get.snackbar(
-        'Error',
-        'Gagal memuat detail tempat',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppSnackbar.error('Gagal memuat detail tempat');
     }
   }
 }

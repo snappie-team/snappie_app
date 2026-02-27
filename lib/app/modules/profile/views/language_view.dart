@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/helpers/app_snackbar.dart';
 import '../../../core/localization/locale_keys.g.dart';
 
 /// Language selection page with simple radio options and a save button.
@@ -125,12 +125,9 @@ class _LanguageViewState extends State<LanguageView> {
   Future<void> _onSave() async {
     setState(() => _saving = true);
 
-    Get.snackbar(
-      'Segera Hadir',
+    AppSnackbar.warning(
       'Fitur ini akan segera hadir',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.amber,
-      colorText: Colors.black,
+      title: 'Segera Hadir',
       duration: const Duration(seconds: 2),
     );
 

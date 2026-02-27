@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../core/helpers/app_snackbar.dart';
 import '../../../data/models/articles_model.dart';
 import '../../../data/repositories/articles_repository_impl.dart';
 
@@ -156,20 +157,7 @@ class ArticlesController extends GetxController {
 
   void bookmarkArticle(int articleId) {
     // TODO: Implement bookmark functionality
-    Get.snackbar(
-      'Bookmarked',
-      'Article bookmarked successfully!',
-      snackPosition: SnackPosition.BOTTOM,
-    );
-  }
-
-  void shareArticle(int articleId) {
-    // TODO: Implement share functionality
-    Get.snackbar(
-      'Shared',
-      'Article shared successfully!',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    AppSnackbar.info('Article bookmarked successfully!', title: 'Bookmarked');
   }
 
   void _setLoading(bool loading) {

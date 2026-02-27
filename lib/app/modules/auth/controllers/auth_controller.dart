@@ -4,6 +4,7 @@ import 'package:snappie_app/app/core/constants/food_type.dart';
 import 'package:snappie_app/app/core/constants/place_value.dart';
 import 'package:snappie_app/app/core/services/google_auth_service.dart';
 import 'package:snappie_app/app/core/services/logger_service.dart';
+import 'package:snappie_app/app/core/helpers/app_snackbar.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/constants/remote_assets.dart';
@@ -130,23 +131,19 @@ class AuthController extends GetxController {
     // Check if overlay is available before showing snackbar
     try {
       if (Get.overlayContext != null) {
-        Get.snackbar(
-          title,
-          message,
-          snackPosition: SnackPosition.BOTTOM,
+        AppSnackbar.show(
+          title: title,
+          message: message,
           backgroundColor: backgroundColor,
-          colorText: Colors.white,
         );
       } else {
         // If no overlay available, schedule it for next frame
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (Get.overlayContext != null) {
-            Get.snackbar(
-              title,
-              message,
-              snackPosition: SnackPosition.BOTTOM,
+            AppSnackbar.show(
+              title: title,
+              message: message,
               backgroundColor: backgroundColor,
-              colorText: Colors.white,
             );
           } else {
             Logger.warning(
@@ -189,11 +186,11 @@ class AuthController extends GetxController {
       if (result.success) {
         _isLoggedIn.value = true;
 
-        _showSnackbar(
-          'Success',
-          'Google Sign In successful. wait a minute sir',
-          Colors.green,
-        );
+        // _showSnackbar(
+        //   'Success',
+        //   'Google Sign In successful.',
+        //   Colors.green,
+        // );
 
         // Navigate to main app
         Get.offAllNamed(AppPages.MAIN);

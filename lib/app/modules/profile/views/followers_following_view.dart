@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/helpers/app_snackbar.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/helpers/error_handler.dart';
 import '../../../data/models/social_model.dart';
@@ -345,21 +346,9 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
           ? 'Anda sekarang mengikuti ${user.name ?? user.username}'
           : 'Anda berhenti mengikuti ${user.name ?? user.username}';
 
-      Get.snackbar(
-        'Berhasil',
-        message,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      AppSnackbar.success(message);
     } catch (e) {
-      Get.snackbar(
-        'Gagal',
-        ErrorHandler.getReadableMessage(e, tag: 'FollowersFollowingView'),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'FollowersFollowingView'));
     }
   }
 

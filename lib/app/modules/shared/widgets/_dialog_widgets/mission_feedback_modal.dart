@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/core/constants/app_assets.dart';
 import '../../../../core/constants/app_colors.dart';
 
 /// Feedback result model
@@ -127,7 +128,7 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    
+
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -190,7 +191,7 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
             ],
           ),
           const SizedBox(height: 12),
-          
+
           // Progress bar with coin reward
           Row(
             children: [
@@ -216,15 +217,15 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
                 ),
               ),
               const SizedBox(width: 12),
-              
+
               // Coin reward badge
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.monetization_on,
-                    color: AppColors.warning,
-                    size: 18,
+                  Image.asset(
+                    AppAssets.images.coin,
+                    width: 28,
+                    height: 28,
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -298,7 +299,7 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
-          
+
           // Two images side by side for comparison
           if (_comparisonImages.length >= 2)
             Row(
@@ -637,7 +638,7 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
-          
+
           // Star rating
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -663,9 +664,9 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
               );
             }),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Question 2: Tags
           Text(
             'Apa yang paling kamu sukai dari proses pencarian tempat di aplikasi Snappie?',
@@ -677,7 +678,7 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
-          
+
           // Tags wrap
           Wrap(
             spacing: 8,
@@ -726,9 +727,9 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
               );
             }).toList(),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Question 3: Free text feedback
           Text(
             'Masukan',
@@ -739,7 +740,7 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
             ),
           ),
           const SizedBox(height: 8),
-          
+
           TextField(
             controller: _feedbackController,
             maxLines: 3,

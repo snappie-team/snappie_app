@@ -352,7 +352,32 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
             ],
           ),
 
-          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final boxWidth = constraints.constrainWidth();
+                const dashWidth = 4.0;
+                const dashHeight = 1.0;
+                final dashCount = (boxWidth / (2 * dashWidth)).floor();
+                return Flex(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  direction: Axis.horizontal,
+                  children: List.generate(dashCount, (_) {
+                    return SizedBox(
+                      width: dashWidth,
+                      height: dashHeight,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: AppColors.accent,
+                        ),
+                      ),
+                    );
+                  }),
+                );
+              },
+            ),
+          ),
 
           // Bottom section: Coin cost left, Detail button right
           Row(
@@ -361,12 +386,12 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
               // Coin requirement
               Row(
                 children: [
-                  Image.asset(
-                    AppAssets.images.coin,
-                    width: 18,
-                    height: 18,
-                  ),
-                  const SizedBox(width: 4),
+                  // Image.asset(
+                  //   AppAssets.images.coin,
+                  //   width: 18,
+                  //   height: 18,
+                  // ),
+                  // const SizedBox(width: 4),
                   Text(
                     '${reward.coinRequirement ?? 0} Koin',
                     style: TextStyle(

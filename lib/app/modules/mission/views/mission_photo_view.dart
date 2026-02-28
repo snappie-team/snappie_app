@@ -87,7 +87,8 @@ class _MissionPhotoViewStatefulState extends State<_MissionPhotoViewStateful>
       _preRequestLocationPermission();
     } catch (e) {
       setState(() {
-        _errorMessage = ErrorHandler.getReadableMessage(e, tag: 'MissionPhotoView');
+        _errorMessage =
+            ErrorHandler.getReadableMessage(e, tag: 'MissionPhotoView');
       });
     }
   }
@@ -130,7 +131,8 @@ class _MissionPhotoViewStatefulState extends State<_MissionPhotoViewStateful>
       }
     } catch (e) {
       setState(() {
-        _errorMessage = ErrorHandler.getReadableMessage(e, tag: 'MissionPhotoView');
+        _errorMessage =
+            ErrorHandler.getReadableMessage(e, tag: 'MissionPhotoView');
       });
     }
   }
@@ -197,12 +199,14 @@ class _MissionPhotoViewStatefulState extends State<_MissionPhotoViewStateful>
           'mission_photo_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final String filePath = '${directory.path}/$fileName';
 
-      await File(image.path).copy(filePath);
-
+      await File(image.path).copy(filePath); // Re-inserted line
       controller.setCapturedImage(filePath);
-      Get.toNamed('/mission-photo-preview');
+      // PERBAIKAN: Gunakan offNamed agar MissionPhotoView (dan kameranya)
+      // langsung di-dispose sebelum masuk ke halaman preview.
+      Get.offNamed('/mission-photo-preview');
     } catch (e) {
-      AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'MissionPhotoView'));
+      AppSnackbar.error(
+          ErrorHandler.getReadableMessage(e, tag: 'MissionPhotoView'));
     } finally {
       if (mounted) {
         setState(() {
@@ -370,6 +374,30 @@ class _MissionPhotoViewStatefulState extends State<_MissionPhotoViewStateful>
           ),
 
           // Capture button
+          // GestureDetector(
+          //   onTap: _isCapturing ? null : _capturePhoto,
+          //   child: Container(
+          //     width: 72,
+          //     height: 72,
+          //     decoration: BoxDecoration(
+          //       shape: BoxShape.circle,
+          //       border: Border.all(
+          //         color: Colors.white,
+          //         width: 4,
+          //       ),
+          //     ),
+          //     child: Container(
+          //       margin: const EdgeInsets.all(4),
+          //       decoration: BoxDecoration(
+          //         shape: BoxShape.circle,
+          //         color: _isCapturing
+          //             ? AppColors.primary.withOpacity(0.5)
+          //             : AppColors.primary,
+          //       ),
+          //     ),
+          //   ),
+          // ),
+
           GestureDetector(
             onTap: _isCapturing ? null : _capturePhoto,
             child: Container(
@@ -387,18 +415,9 @@ class _MissionPhotoViewStatefulState extends State<_MissionPhotoViewStateful>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: _isCapturing
-                      ? AppColors.primary.withOpacity(0.5)
+                      ? AppColors.primary.withAlpha(50)
                       : AppColors.primary,
                 ),
-                child: _isCapturing
-                    ? const Padding(
-                        padding: EdgeInsets.all(20),
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 3,
-                        ),
-                      )
-                    : null,
               ),
             ),
           ),

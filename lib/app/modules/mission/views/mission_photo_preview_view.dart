@@ -85,7 +85,9 @@ class MissionPhotoPreviewView extends GetView<MissionController> {
           TextButton.icon(
             onPressed: () {
               controller.clearCapturedImage();
-              Get.back();
+              // PERBAIKAN: Karena sebelumnya kita pakai offNamed, kita harus
+              // push lagi ke halaman kamera jika user ingin membatalkan (retake).
+              Get.offNamed(AppPages.MISSION_PHOTO);
             },
             icon: Icon(
               Icons.arrow_back,
@@ -139,8 +141,8 @@ class MissionPhotoPreviewView extends GetView<MissionController> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-        ),
-      )),
+            ),
+          )),
     );
   }
 
@@ -154,13 +156,17 @@ class MissionPhotoPreviewView extends GetView<MissionController> {
     MissionLoadingModal.hide();
 
     if (success) {
-      // Pop back to MissionPhotoView first - this will trigger its dispose
-      // and free camera resources before showing modals
-      Get.back();
-      
-      // Small delay to ensure camera is disposed
+      // Kasih jeda sedikit agar loading modal tertutup sempurna
       await Future.delayed(const Duration(milliseconds: 100));
-      
+
+      // PERBAIKAN: Harus di-pop sampai PlaceDetail agar MissionPhotoView
+      // (yang memegang State Kamera) ikut ter-dispose.
+      // Get.back() HANYA menghapus preview, membuat kamera aktif kembali di background!
+      Get.until((route) => route.settings.name == AppPages.PLACE_DETAIL);
+
+      // Berikan waktu pada platform untuk benar-benar mematikan proses kamera (menghindari ANR)
+      await Future.delayed(const Duration(milliseconds: 400));
+
       // Show success modal
       final claimResult = await MissionSuccessModal.show(
         title: 'Misi Berhasil!',
@@ -178,10 +184,8 @@ class MissionPhotoPreviewView extends GetView<MissionController> {
 
         if (continueNext == true) {
           controller.nextStep();
-          Get.offNamed(AppPages.MISSION_REVIEW);
-        } else {
-          // Return to place detail
-          Get.until((route) => route.settings.name == AppPages.PLACE_DETAIL);
+          // Karena kita sudah pop sampai PLACE_DETAIL, kita push route baru
+          Get.toNamed(AppPages.MISSION_REVIEW);
         }
       }
     } else {

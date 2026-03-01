@@ -24,6 +24,9 @@ class EnvironmentConfig {
   static String get apiVersion => _getEnv('API_VERSION');
   static const Duration connectionTimeout = Duration(seconds: 60);
   static const Duration receiveTimeout = Duration(seconds: 60);
+
+  static String get appVersion => _getEnv('APP_VERSION');
+  static int get appVersionCode => int.parse(_getEnv('APP_VERSION_CODE'));
   
   // Registration API Key
   static String get registrationApiKey => _getEnv('REGISTRATION_API_KEY');

@@ -6,6 +6,10 @@ class AppConstants {
   static String get apiVersion => EnvironmentConfig.apiVersion;
   static Duration get connectionTimeout => EnvironmentConfig.connectionTimeout;
   static Duration get receiveTimeout => EnvironmentConfig.receiveTimeout;
+
+  // App Info
+  static String get appVersion => EnvironmentConfig.appVersion;
+  static int get appVersionCode => EnvironmentConfig.appVersionCode;
   
   // Storage Keys
   static const String tokenKey = 'auth_token';
@@ -13,12 +17,6 @@ class AppConstants {
   static const String themeKey = 'theme_mode';
   static const String languageKey = 'language';
   static const String onboardingKey = 'onboarding_completed';
-  
-  // App Info
-  static const String appName = 'Snappie App';
-  static const String appVersion = '1.2.4';
-  static const int appVersionCode = 9;
-  static const String appDescription = 'Discover and explore amazing places';
   
   // Pagination
   static const int defaultPageSize = 20;

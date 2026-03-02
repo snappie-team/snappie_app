@@ -459,24 +459,12 @@ class _PostCardState extends State<PostCard> {
   }
 
   Widget _buildImageSection(BuildContext context, PostModel? post) {
-    double imageHeight = 300;
     final imageUrls = post?.imageUrls ?? [];
     Logger.debug('imageUrls: $imageUrls', 'PostCard');
 
     // If no images, show placeholder
     if (imageUrls.isEmpty) {
-      return Container(
-        height: imageHeight,
-        width: double.infinity,
-        color: AppColors.background,
-        child: Center(
-          child: Icon(
-            Icons.restaurant,
-            color: AppColors.textTertiary,
-            size: imageHeight * 0.3,
-          ),
-        ),
-      );
+      return SizedBox.shrink();
     }
 
     // If only one image, show it without carousel
@@ -491,25 +479,28 @@ class _PostCardState extends State<PostCard> {
             postActionsBuilder: (_) => _buildOverlayPostActions(),
           );
         },
-        child: Container(
-          height: imageHeight,
-          width: double.infinity,
-          child: ClipRRect(
-            child: Image.network(
-              imageUrls.first,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: AppColors.background,
-                  child: Center(
-                    child: Icon(
-                      Icons.restaurant,
-                      color: AppColors.textTertiary,
-                      size: imageHeight * 0.3,
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: Container(
+            width: double.infinity,
+            child: ClipRRect(
+              child: Image.network(
+                imageUrls.first,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: AppColors.background,
+                    child: Center(
+                      child: Icon(
+                        Icons.restaurant,
+                        color: AppColors.textTertiary,
+                        size: 90,
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -520,8 +511,8 @@ class _PostCardState extends State<PostCard> {
     final PageController pageController = PageController();
     final RxInt currentImageIndex = 0.obs;
 
-    return Container(
-      height: imageHeight,
+    return AspectRatio(
+      aspectRatio: 1,
       child: PageView.builder(
         controller: pageController,
         itemCount: imageUrls.length,
@@ -541,24 +532,25 @@ class _PostCardState extends State<PostCard> {
               width: double.infinity,
               child: Stack(
                 children: [
-                  ClipRRect(
-                    child: Image.network(
-                      imageUrls[index],
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: imageHeight,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: AppColors.background,
-                          child: Center(
-                            child: Icon(
-                              Icons.restaurant,
-                              color: AppColors.textTertiary,
-                              size: imageHeight * 0.3,
+                  Positioned.fill(
+                    child: ClipRRect(
+                      child: Image.network(
+                        imageUrls[index],
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: AppColors.background,
+                            child: Center(
+                              child: Icon(
+                                Icons.restaurant,
+                                color: AppColors.textTertiary,
+                                size: 90,
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   ),
                   // Image counter overlay
@@ -576,8 +568,8 @@ class _PostCardState extends State<PostCard> {
                       child: Text(
                         '${index + 1}/${imageUrls.length}',
                         style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: FontSize.getSize(FontSizeOption.xxSmall),
+                          color: AppColors.textOnPrimary,
+                          fontSize: FontSize.getSize(FontSizeOption.small),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -932,7 +924,7 @@ class _PostCardState extends State<PostCard> {
                                                   color:
                                                       AppColors.textSecondary,
                                                   fontSize: FontSize.getSize(
-                                                      FontSizeOption.xxSmall),
+                                                      FontSizeOption.small),
                                                 ),
                                               ),
                                             ],

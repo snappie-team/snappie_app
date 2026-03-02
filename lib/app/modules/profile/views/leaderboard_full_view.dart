@@ -102,11 +102,29 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // User avatar
-          Obx(() => AvatarWidget(
-                imageUrl: _profileController.userAvatar,
-                size: AvatarSize.large,
-              )),
+          // User avatar with crown if top 3
+          Obx(() {
+            final rank = _profileController.userRank;
+            String? crownImage;
+            Color? crownColor;
+            if (rank == 1) {
+              crownImage = AppAssets.frames.crownGold;
+              crownColor = const Color(0xFFAD7A10);
+            } else if (rank == 2) {
+              crownImage = AppAssets.frames.crownSilver;
+              crownColor = const Color(0xFF758691);
+            } else if (rank == 3) {
+              crownImage = AppAssets.frames.crownBronze;
+              crownColor = const Color(0xFF58290F);
+            }
+            return AvatarWidget(
+              imageUrl: _profileController.userAvatar,
+              size: AvatarSize.large,
+              showCrown: crownImage != null,
+              topRankCrown: crownImage,
+              topRankColor: crownColor,
+            );
+          }),
 
           const SizedBox(width: 16),
 

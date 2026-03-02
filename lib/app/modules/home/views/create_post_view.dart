@@ -15,10 +15,8 @@ import 'package:snappie_app/app/data/repositories/place_repository_impl.dart';
 import 'package:snappie_app/app/data/repositories/post_repository_impl.dart';
 import 'package:snappie_app/app/data/repositories/user_repository_impl.dart';
 import 'package:snappie_app/app/modules/home/controllers/home_controller.dart';
-import 'package:snappie_app/app/modules/shared/layout/controllers/main_controller.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/modules/shared/widgets/index.dart';
-import 'package:snappie_app/app/routes/app_pages.dart';
 
 class CreatePostView extends StatefulWidget {
   const CreatePostView({super.key});
@@ -173,27 +171,28 @@ class _CreatePostViewState extends State<CreatePostView> {
 
                         // Image carousel
                         if (_imageFiles.isNotEmpty)
-                          Container(
-                            width: double.infinity,
-                            height: 400,
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            color: AppColors.background,
-                            child: Stack(
-                              children: [
-                                PageView.builder(
-                                  controller: _pageController,
-                                  onPageChanged: (index) {
-                                    setState(() => _currentImageIndex = index);
-                                  },
-                                  itemCount: _imageFiles.length,
-                                  itemBuilder: (context, index) {
-                                    return Image.file(
-                                      _imageFiles[index],
-                                      width: double.infinity,
-                                      fit: BoxFit.contain,
-                                    );
-                                  },
-                                ),
+                          AspectRatio(
+                            aspectRatio: 1,
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              color: AppColors.background,
+                              child: Stack(
+                                children: [
+                                  PageView.builder(
+                                    controller: _pageController,
+                                    onPageChanged: (index) {
+                                      setState(() => _currentImageIndex = index);
+                                    },
+                                    itemCount: _imageFiles.length,
+                                    itemBuilder: (context, index) {
+                                      return Image.file(
+                                        _imageFiles[index],
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  ),
                                 // Image counter
                                 if (_imageFiles.length > 1)
                                   Positioned(
@@ -247,6 +246,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                               ],
                             ),
                           ),
+                        ),
 
                         // Selected place chip
                         if (_selectedPlace != null)
@@ -434,7 +434,12 @@ class _CreatePostViewState extends State<CreatePostView> {
                 }).toList();
 
           return PopScope(
-            canPop: true,
+            canPop: !force,
+            onPopInvokedWithResult: (didPop, _) {
+              if (!didPop && force) {
+                _exitCreatePostToHome();
+              }
+            },
             child: Container(
               height: Get.height * 0.9,
               decoration: BoxDecoration(
@@ -564,17 +569,14 @@ class _CreatePostViewState extends State<CreatePostView> {
   }
 
   void _exitCreatePostToHome() {
+    // Tutup bottom sheet dulu, lalu kembali dari halaman create post
     if (Get.isBottomSheetOpen == true) {
+      Get.back(); // tutup bottom sheet
+    }
+    // Kembali ke halaman sebelumnya (main)
+    if (Navigator.of(context).canPop()) {
       Get.back();
     }
-
-    Get.offAllNamed(AppPages.MAIN);
-
-    Future.delayed(Duration.zero, () {
-      try {
-        Get.find<MainController>().changeTab(0);
-      } catch (_) {}
-    });
   }
 
   Future<void> _pickImage() async {

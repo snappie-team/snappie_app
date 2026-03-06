@@ -5,12 +5,12 @@ import 'package:snappie_app/app/modules/profile/views/user_challenge_view.dart';
 import 'package:snappie_app/app/modules/profile/views/user_profile_view.dart';
 import 'package:snappie_app/app/modules/profile/views/saved_places_view.dart';
 import 'package:snappie_app/app/modules/profile/views/saved_posts_view.dart';
-import 'package:snappie_app/app/modules/profile/views/rewards_view.dart';
 import 'package:snappie_app/app/modules/profile/views/followers_following_view.dart';
 import 'package:snappie_app/app/modules/profile/views/leaderboard_full_view.dart';
 import 'package:snappie_app/app/modules/profile/views/coins_history_view.dart';
 import 'package:snappie_app/app/modules/profile/views/invite_friends_view.dart';
 import 'package:snappie_app/app/modules/profile/views/settings_view.dart';
+import 'package:snappie_app/app/modules/profile/views/app_feedback_view.dart';
 import 'package:snappie_app/app/modules/profile/views/edit_profile_view.dart';
 import 'package:snappie_app/app/modules/profile/views/language_view.dart';
 import 'package:snappie_app/app/modules/profile/views/help_center_view.dart';
@@ -87,6 +87,7 @@ class AppPages {
   static const FOLLOWERS_FOLLOWING = '/followers-following';
   static const COINS_HISTORY = '/coins-history';
   static const INVITE_FRIENDS = '/invite-friends';
+  static const APP_FEEDBACK = '/app-feedback';
 
   // Mission
   static const MISSION_PHOTO = '/mission-photo';
@@ -217,6 +218,10 @@ class AppPages {
       name: INVITE_FRIENDS,
       page: () => const InviteFriendsView(),
     ),
+    GetPage(
+      name: APP_FEEDBACK,
+      page: () => const AppFeedbackView(),
+    ),
 
     // Mission module
     GetPage(
@@ -249,10 +254,6 @@ class AppPages {
     GetPage(
       name: LEADERBOARD,
       page: () => const LeaderboardFullView(),
-    ),
-    GetPage(
-      name: REWARDS,
-      page: () => const RewardsView(),
     ),
     GetPage(
       name: ACHIEVEMENTS,

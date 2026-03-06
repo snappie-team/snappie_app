@@ -32,33 +32,38 @@ const CheckinModelSchema = CollectionSchema(
       name: r'imageUrl',
       type: IsarType.string,
     ),
-    r'latitude': PropertySchema(
+    r'isAnonymous': PropertySchema(
       id: 3,
+      name: r'isAnonymous',
+      type: IsarType.bool,
+    ),
+    r'latitude': PropertySchema(
+      id: 4,
       name: r'latitude',
       type: IsarType.double,
     ),
     r'longitude': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'longitude',
       type: IsarType.double,
     ),
     r'placeId': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'placeId',
       type: IsarType.long,
     ),
     r'status': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'status',
       type: IsarType.bool,
     ),
     r'updatedAt': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
     r'userId': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'userId',
       type: IsarType.long,
     )
@@ -141,12 +146,13 @@ void _checkinModelSerialize(
   writer.writeDateTime(offsets[0], object.createdAt);
   writer.writeLong(offsets[1], object.id);
   writer.writeString(offsets[2], object.imageUrl);
-  writer.writeDouble(offsets[3], object.latitude);
-  writer.writeDouble(offsets[4], object.longitude);
-  writer.writeLong(offsets[5], object.placeId);
-  writer.writeBool(offsets[6], object.status);
-  writer.writeDateTime(offsets[7], object.updatedAt);
-  writer.writeLong(offsets[8], object.userId);
+  writer.writeBool(offsets[3], object.isAnonymous);
+  writer.writeDouble(offsets[4], object.latitude);
+  writer.writeDouble(offsets[5], object.longitude);
+  writer.writeLong(offsets[6], object.placeId);
+  writer.writeBool(offsets[7], object.status);
+  writer.writeDateTime(offsets[8], object.updatedAt);
+  writer.writeLong(offsets[9], object.userId);
 }
 
 CheckinModel _checkinModelDeserialize(
@@ -159,13 +165,14 @@ CheckinModel _checkinModelDeserialize(
   object.createdAt = reader.readDateTimeOrNull(offsets[0]);
   object.id = reader.readLongOrNull(offsets[1]);
   object.imageUrl = reader.readStringOrNull(offsets[2]);
+  object.isAnonymous = reader.readBoolOrNull(offsets[3]);
   object.isarId = id;
-  object.latitude = reader.readDoubleOrNull(offsets[3]);
-  object.longitude = reader.readDoubleOrNull(offsets[4]);
-  object.placeId = reader.readLongOrNull(offsets[5]);
-  object.status = reader.readBoolOrNull(offsets[6]);
-  object.updatedAt = reader.readDateTimeOrNull(offsets[7]);
-  object.userId = reader.readLongOrNull(offsets[8]);
+  object.latitude = reader.readDoubleOrNull(offsets[4]);
+  object.longitude = reader.readDoubleOrNull(offsets[5]);
+  object.placeId = reader.readLongOrNull(offsets[6]);
+  object.status = reader.readBoolOrNull(offsets[7]);
+  object.updatedAt = reader.readDateTimeOrNull(offsets[8]);
+  object.userId = reader.readLongOrNull(offsets[9]);
   return object;
 }
 
@@ -183,16 +190,18 @@ P _checkinModelDeserializeProp<P>(
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 4:
       return (reader.readDoubleOrNull(offset)) as P;
     case 5:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 6:
-      return (reader.readBoolOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 7:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 8:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 9:
       return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1004,6 +1013,34 @@ extension CheckinModelQueryFilter
     });
   }
 
+  QueryBuilder<CheckinModel, CheckinModel, QAfterFilterCondition>
+      isAnonymousIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'isAnonymous',
+      ));
+    });
+  }
+
+  QueryBuilder<CheckinModel, CheckinModel, QAfterFilterCondition>
+      isAnonymousIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'isAnonymous',
+      ));
+    });
+  }
+
+  QueryBuilder<CheckinModel, CheckinModel, QAfterFilterCondition>
+      isAnonymousEqualTo(bool? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isAnonymous',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<CheckinModel, CheckinModel, QAfterFilterCondition> isarIdEqualTo(
       Id value) {
     return QueryBuilder.apply(this, (query) {
@@ -1521,6 +1558,19 @@ extension CheckinModelQuerySortBy
     });
   }
 
+  QueryBuilder<CheckinModel, CheckinModel, QAfterSortBy> sortByIsAnonymous() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isAnonymous', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CheckinModel, CheckinModel, QAfterSortBy>
+      sortByIsAnonymousDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isAnonymous', Sort.desc);
+    });
+  }
+
   QueryBuilder<CheckinModel, CheckinModel, QAfterSortBy> sortByLatitude() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'latitude', Sort.asc);
@@ -1632,6 +1682,19 @@ extension CheckinModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<CheckinModel, CheckinModel, QAfterSortBy> thenByIsAnonymous() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isAnonymous', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CheckinModel, CheckinModel, QAfterSortBy>
+      thenByIsAnonymousDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isAnonymous', Sort.desc);
+    });
+  }
+
   QueryBuilder<CheckinModel, CheckinModel, QAfterSortBy> thenByIsarId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isarId', Sort.asc);
@@ -1738,6 +1801,12 @@ extension CheckinModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<CheckinModel, CheckinModel, QDistinct> distinctByIsAnonymous() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isAnonymous');
+    });
+  }
+
   QueryBuilder<CheckinModel, CheckinModel, QDistinct> distinctByLatitude() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'latitude');
@@ -1801,6 +1870,12 @@ extension CheckinModelQueryProperty
     });
   }
 
+  QueryBuilder<CheckinModel, bool?, QQueryOperations> isAnonymousProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isAnonymous');
+    });
+  }
+
   QueryBuilder<CheckinModel, double?, QQueryOperations> latitudeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'latitude');
@@ -1850,6 +1925,10 @@ CheckinModel _$CheckinModelFromJson(Map<String, dynamic> json) => CheckinModel()
   ..longitude = (json['longitude'] as num?)?.toDouble()
   ..imageUrl = json['image_url'] as String?
   ..status = json['status'] as bool?
+  ..isAnonymous = _readIsAnonymous(json, 'is_anonymous') as bool?
+  ..user = json['user'] == null
+      ? null
+      : UserPost.fromJson(json['user'] as Map<String, dynamic>)
   ..createdAt = json['created_at'] == null
       ? null
       : DateTime.parse(json['created_at'] as String)
@@ -1866,6 +1945,8 @@ Map<String, dynamic> _$CheckinModelToJson(CheckinModel instance) =>
       'longitude': instance.longitude,
       'image_url': instance.imageUrl,
       'status': instance.status,
+      'is_anonymous': instance.isAnonymous,
+      'user': instance.user,
       'created_at': instance.createdAt?.toIso8601String(),
       'updated_at': instance.updatedAt?.toIso8601String(),
     };

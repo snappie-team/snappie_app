@@ -44,6 +44,10 @@ class CheckinRemoteDataSourceImpl implements CheckinRemoteDataSource {
       }
 
       if (additionalInfo != null && additionalInfo.isNotEmpty) {
+        // Ekstrak is_anonymous ke top-level payload agar disimpan sebagai field langsung
+        if (additionalInfo.containsKey('is_anonymous')) {
+          payload['is_anonymous'] = additionalInfo['is_anonymous'];
+        }
         payload['additional_info'] = additionalInfo;
       }
 

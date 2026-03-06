@@ -181,6 +181,17 @@ void _fixNumericFieldTypes(Json data) {
     'totalReview',
     'totalAchievement',
     'totalChallenge',
+    // snake_case variants (fromJson membaca snake_case via @JsonKey)
+    'total_coin',
+    'total_exp',
+    'total_following',
+    'total_follower',
+    'total_checkin',
+    'total_post',
+    'total_article',
+    'total_review',
+    'total_achievement',
+    'total_challenge',
     'id'
   ];
 

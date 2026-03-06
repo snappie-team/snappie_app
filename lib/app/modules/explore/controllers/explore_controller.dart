@@ -511,6 +511,10 @@ class ExploreController extends GetxController {
       final status =
           await gamificationRepository.getPlaceStatus(placeId: placeId);
       _placeStatus.value = status;
+      Logger.debug(
+        'Place status: checkin=${status.hasCheckinThisMonth}, review=${status.hasReviewThisMonth}, appReview=${status.appReviewSubmittedThisMonth}, canSubmitAppReview=${status.canSubmitAppReview}',
+        'ExploreController',
+      );
     } catch (e) {
       Logger.error('Error loading place status', e, null, 'ExploreController');
     } finally {

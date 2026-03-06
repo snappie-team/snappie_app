@@ -540,7 +540,7 @@ class _FeedbackStep3 extends StatelessWidget {
   }
 }
 
-/// Feedback Step 4: Rating, tags, dan masukan
+/// Feedback Step 4: Rating tempat, tags, dan masukan
 class _FeedbackStep4 extends StatefulWidget {
   final MissionController controller;
 
@@ -556,12 +556,12 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
   final TextEditingController _feedbackController = TextEditingController();
 
   final List<String> _availableTags = [
-    'Tampilan mudah dipahami',
-    'Informasi tempat',
-    'Filter pencarian',
-    'Pencarian cepat responsif',
-    'Hasil pencarian akurat',
-    'Pencarian penuh hadiah',
+    'Suasana nyaman',
+    'Makanan enak',
+    'Harga terjangkau',
+    'Pelayanan ramah',
+    'Tempat bersih',
+    'Lokasi strategis',
   ];
 
   @override
@@ -580,9 +580,9 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Question 1: Rating
+            // Question 1: Rating tempat
             Text(
-              'Seberapa besar kamu merekomendasikan aplikasi Snappie kepada temanmu?',
+              'Seberapa besar kamu merekomendasikan tempat ini kepada temanmu?',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -618,9 +618,9 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
 
             const SizedBox(height: 32),
 
-            // Question 2: Tags
+            // Question 2: Tags tempat
             Text(
-              'Apa yang paling kamu sukai dari proses pencarian tempat di aplikasi Snappie?',
+              'Apa yang paling kamu sukai dari tempat ini?',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -680,9 +680,9 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
 
             const SizedBox(height: 32),
 
-            // Question 3: Free text feedback
+            // Question 3: Masukan tempat
             Text(
-              'Masukan',
+              'Masukan untuk tempat ini',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -695,7 +695,7 @@ class _FeedbackStep4State extends State<_FeedbackStep4> {
               controller: _feedbackController,
               maxLines: 4,
               decoration: InputDecoration(
-                hintText: 'Berikan pendapat atau masukan jika ada',
+                hintText: 'Berikan pendapat atau masukan untuk tempat ini',
                 hintStyle: TextStyle(
                   color: AppColors.textTertiary,
                   fontSize: 14,

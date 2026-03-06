@@ -17,6 +17,7 @@ import '../../../data/models/review_model.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/helpers/app_snackbar.dart';
 import '../../mission/controllers/mission_controller.dart';
+import '../../profile/controllers/profile_controller.dart';
 
 class PlaceDetailView extends GetView<ExploreController> {
   const PlaceDetailView({super.key});
@@ -133,6 +134,17 @@ class PlaceDetailView extends GetView<ExploreController> {
             right: 0,
             bottom: 0,
             child: _buildMissionCtaCard(place),
+          );
+        }),
+        // Floating feedback button - shown when checkin + review done but feedback not yet submitted
+        Obx(() {
+          final showFeedback = controller.hasReviewThisMonth &&
+              controller.canSubmitAppReview;
+          if (!showFeedback) return const SizedBox.shrink();
+          return Positioned(
+            right: 0,
+            bottom: controller.showMissionCta ? 200 : 120,
+            child: _buildFeedbackFab(place),
           );
         }),
       ],
@@ -1154,6 +1166,119 @@ class PlaceDetailView extends GetView<ExploreController> {
       ),
       child: child,
     );
+  }
+
+  Widget _buildFeedbackFab(PlaceModel place) {
+    return GestureDetector(
+      onTap: () => _showFeedbackModal(place),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppColors.accent, AppColors.accent.withAlpha(220)],
+          ),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(12),
+            bottomLeft: Radius.circular(12),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.accent.withAlpha(80),
+              blurRadius: 8,
+              offset: const Offset(-2, 2),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.rate_review_rounded, color: Colors.white, size: 18),
+            const SizedBox(height: 6),
+            RotatedBox(
+              quarterTurns: 3,
+              child: Text(
+                'Feedback',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                  letterSpacing: 0.5,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showFeedbackModal(PlaceModel place) async {
+    final placeImages = (place.imageUrls ?? [])
+        .where((img) => img.url != null)
+        .map((img) => img.url!)
+        .toList();
+
+    final feedbackResult = await MissionFeedbackModal.show(
+      placeName: place.name ?? 'Tempat',
+      coinReward: place.coinReward ?? 25,
+      placeImages: placeImages,
+    );
+
+    if (feedbackResult != null && feedbackResult.completed) {
+      final reviewId = controller.placeStatus?.reviewId;
+      if (reviewId == null) return;
+
+      MissionLoadingModal.show(message: 'Mengirim feedback...');
+
+      try {
+        // Get existing review additional_info and merge feedback
+        final existingReview = controller.reviews
+            .firstWhereOrNull((r) => r.id == reviewId);
+        final existingInfo = existingReview?.additionalInfo ?? {};
+
+        final updatedInfo = <String, dynamic>{
+          ...existingInfo,
+          'feedback': feedbackResult.answers,
+          'is_submitted_app_review': true,
+        };
+
+        await controller.reviewRepository.updateReview(
+          reviewId: reviewId,
+          additionalInfo: updatedInfo,
+        );
+
+        // Update coins/exp in profile
+        try {
+          final profileController = Get.find<ProfileController>();
+          if ((place.coinReward ?? 0) > 0) {
+            await profileController.addCoins(place.coinReward!);
+          }
+          if ((place.expReward ?? 0) > 0) {
+            await profileController.addExp(place.expReward!);
+          }
+        } catch (_) {}
+
+        MissionLoadingModal.hide();
+
+        // Reload gamification status to hide the button
+        if (place.id != null) {
+          await controller.loadPlaceGamificationStatus(place.id!);
+        }
+
+        await MissionSuccessModal.show(
+          title: 'Feedback Terkirim!',
+          description:
+              'Terima kasih atas partisipasimu!\nKamu mendapatkan ${place.expReward ?? 0} XP dan ${place.coinReward ?? 0} Koin!',
+        );
+      } catch (e) {
+        MissionLoadingModal.hide();
+        Logger.error('Error submitting feedback', e, null, 'PlaceDetail');
+        AppSnackbar.error('Gagal mengirim feedback. Silakan coba lagi');
+      }
+    }
   }
 
   Widget _buildMissionCtaCard(PlaceModel place) {

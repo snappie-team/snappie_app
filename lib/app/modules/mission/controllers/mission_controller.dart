@@ -219,6 +219,7 @@ class MissionController extends GetxController {
         imageUrl: imageUrl,
         additionalInfo: {
           'device': GetPlatform.isAndroid ? 'android' : 'ios',
+          'is_anonymous': hideUsername.value,
         },
       );
 

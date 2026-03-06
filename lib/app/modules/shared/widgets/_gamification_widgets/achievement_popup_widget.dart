@@ -102,7 +102,7 @@ class _AchievementPopupWidgetState extends State<AchievementPopupWidget>
       final actionInfo = _actionLabel(action);
       return TextSpan(
         children: [
-          const TextSpan(text: 'Anda memperoleh '),
+          const TextSpan(text: 'Memperoleh '),
           nameSpan,
           const TextSpan(text: ' dengan mencapai '),
           TextSpan(text: '$target ${actionInfo.unit}', style: primaryStyle),

@@ -26,6 +26,15 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _init());
+  }
+
+  Future<void> _init() async {
+    // Ensure profile data is loaded first (for user avatar/rank)
+    if (_profileController.userData == null) {
+      _profileController.initializeIfNeeded();
+      await _profileController.loadUserProfile();
+    }
     _loadLeaderboard();
   }
 
@@ -40,8 +49,9 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
       }
 
       // Make a copy of the list to ensure state updates correctly
-      final entries =
-          List<LeaderboardEntry>.from(_profileController.leaderboard);
+      final entries = _selectedTab == 0
+          ? List<LeaderboardEntry>.from(_profileController.weeklyLeaderboard)
+          : List<LeaderboardEntry>.from(_profileController.monthlyLeaderboard);
       Logger.debug(
           'Loaded ${entries.length} leaderboard entries for ${_selectedTab == 0 ? "weekly" : "monthly"}',
           'Leaderboard');
@@ -104,7 +114,9 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
         children: [
           // User avatar with crown if top 3
           Obx(() {
-            final rank = _profileController.userRank;
+            final rank = _selectedTab == 0
+                ? _profileController.weeklyUserRank
+                : _profileController.monthlyUserRank;
             String? crownImage;
             Color? crownColor;
             if (rank == 1) {
@@ -160,7 +172,7 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
                           ),
                         ),
                         Text(
-                          'Peringkat ${_profileController.userRank ?? '-'}',
+                          'Peringkat ${(_selectedTab == 0 ? _profileController.weeklyUserRank : _profileController.monthlyUserRank) ?? '-'}',
                           style: TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 16,
@@ -340,6 +352,7 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
   }
 
   Widget _buildTopRankItem(LeaderboardEntry entry, int position) {
+    final isCurrentUser = entry.userId == _profileController.userData?.id;
     // Crown color based on position
     Color crownColor;
     String crownImage;
@@ -366,9 +379,18 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
     final isFirst = position == 1;
     final avatarSize = isFirst ? AvatarSize.large : AvatarSize.medium;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: isCurrentUser
+          ? BoxDecoration(
+              color: AppColors.primary.withAlpha(50),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.primary, width: 1.5),
+            )
+          : null,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
         AvatarWidget(
           imageUrl: entry.imageUrl ?? 'avatar_f1_hdpi.png',
           size: avatarSize,
@@ -405,6 +427,7 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
           ),
         ),
       ],
+      ),
     );
   }
 
@@ -442,16 +465,21 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
     final isCurrentUser = entry.userId == _profileController.userData?.id;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      margin: isCurrentUser ? const EdgeInsets.symmetric(vertical: 2) : EdgeInsets.zero,
       decoration: BoxDecoration(
-        border: isLast
-            ? null
-            : Border(
-                bottom: BorderSide(
-                  color: AppColors.backgroundContainer,
-                  width: 1,
-                ),
-              ),
+        color: isCurrentUser ? AppColors.primary.withAlpha(50) : null,
+        borderRadius: isCurrentUser ? BorderRadius.circular(12) : null,
+        border: isCurrentUser
+            ? Border.all(color: AppColors.primary, width: 1.5)
+            : isLast
+                ? null
+                : Border(
+                    bottom: BorderSide(
+                      color: AppColors.backgroundContainer,
+                      width: 1,
+                    ),
+                  ),
       ),
       child: Row(
         children: [

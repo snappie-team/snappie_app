@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/data/models/leaderboard_model.dart';
+import 'package:snappie_app/app/data/models/achievement_model.dart';
 import 'package:snappie_app/app/data/repositories/place_repository_impl.dart';
 import 'package:snappie_app/app/data/repositories/user_repository_impl.dart';
 import 'package:snappie_app/app/data/repositories/post_repository_impl.dart';
@@ -31,8 +32,11 @@ class ProfileController extends GetxController {
   final _userPosts = <PostModel>[].obs;
   final _savedPlaces = <SavedPlacePreview>[].obs;
   final _savedPosts = <SavedPostPreview>[].obs;
-  final _leaderboard = <LeaderboardEntry>[].obs;
-  final _userRank = Rxn<int>();
+  final _weeklyLeaderboard = <LeaderboardEntry>[].obs;
+  final _monthlyLeaderboard = <LeaderboardEntry>[].obs;
+  final _userAchievements = <UserAchievement>[].obs;
+  final _weeklyUserRank = Rxn<int>();
+  final _monthlyUserRank = Rxn<int>();
   final _isLoading = false.obs;
   final _isLoadingPosts = false.obs;
   final _isLoadingSaved = false.obs;
@@ -47,8 +51,11 @@ class ProfileController extends GetxController {
   List<PostModel> get userPosts => _userPosts;
   List<SavedPlacePreview> get savedPlaces => _savedPlaces;
   List<SavedPostPreview> get savedPosts => _savedPosts;
-  List<LeaderboardEntry> get leaderboard => _leaderboard;
-  int? get userRank => _userRank.value;
+  List<LeaderboardEntry> get weeklyLeaderboard => _weeklyLeaderboard;
+  List<LeaderboardEntry> get monthlyLeaderboard => _monthlyLeaderboard;
+  List<UserAchievement> get userAchievements => _userAchievements;
+  int? get weeklyUserRank => _weeklyUserRank.value;
+  int? get monthlyUserRank => _monthlyUserRank.value;
   bool get isLoading => _isLoading.value;
   bool get isLoadingPosts => _isLoadingPosts.value;
   bool get isLoadingSaved => _isLoadingSaved.value;
@@ -70,7 +77,7 @@ class ProfileController extends GetxController {
   int get totalArticles => _userData.value?.totalArticle ?? 0;
   int get totalReviews => _userData.value?.totalReview ?? 0;
   int get totalAchievements => _userData.value?.totalAchievement ?? 0;
-  int get totalChallenges => _userData.value?.totalChallenge ?? 0;
+  int get totalChallenges => _completedChallengesCount.value;
 
   // Gamification challenge badge counter
   final _completedChallengesCount = 0.obs;
@@ -115,6 +122,7 @@ class ProfileController extends GetxController {
       loadUserPosts(),
       loadSavedItems(),
       loadLeaderboard(),
+      loadUserAchievements(),
     ]);
   }
 
@@ -198,27 +206,49 @@ class ProfileController extends GetxController {
     await loadWeeklyLeaderboard();
   }
 
+  /// Load user achievements untuk menampilkan badge terbaru
+  Future<void> loadUserAchievements() async {
+    try {
+      final achievements = await achievementRepository.getUserAchievements();
+      _userAchievements.assignAll(achievements);
+      Logger.info(
+          'User achievements loaded: ${achievements.length}', 'Profile');
+    } catch (e) {
+      Logger.error('Error loading user achievements', e, null, 'Profile');
+      _userAchievements.clear();
+    }
+
+    // Load challenges count
+    try {
+      final challenges = await achievementRepository.getUserChallenges();
+      _completedChallengesCount.value =
+          challenges.where((c) => c.isCompleted == true).length;
+    } catch (e) {
+      Logger.error('Error loading challenges count', e, null, 'Profile');
+    }
+  }
+
   Future<void> loadWeeklyLeaderboard() async {
     _isLoadingAchievements.value = true;
 
     try {
       final entries = await achievementRepository.getWeeklyLeaderboard();
-      _leaderboard.assignAll(entries);
+      _weeklyLeaderboard.assignAll(entries);
 
       // Find current user's rank
       final userId = _userData.value?.id;
       if (userId != null) {
         final userEntry = entries.firstWhereOrNull((e) => e.userId == userId);
-        _userRank.value = userEntry?.rank;
+        _weeklyUserRank.value = userEntry?.rank;
       }
 
       Logger.info(
-          'Weekly Leaderboard loaded: ${entries.length} entries, user rank: ${_userRank.value}',
+          'Weekly Leaderboard loaded: ${entries.length} entries, user rank: ${_weeklyUserRank.value}',
           'Profile');
     } catch (e) {
       Logger.error('Error loading weekly leaderboard', e, null, 'Profile');
-      _leaderboard.clear();
-      _userRank.value = null;
+      _weeklyLeaderboard.clear();
+      _weeklyUserRank.value = null;
     }
 
     _isLoadingAchievements.value = false;
@@ -229,22 +259,22 @@ class ProfileController extends GetxController {
 
     try {
       final entries = await achievementRepository.getMonthlyLeaderboard();
-      _leaderboard.assignAll(entries);
+      _monthlyLeaderboard.assignAll(entries);
 
       // Find current user's rank
       final userId = _userData.value?.id;
       if (userId != null) {
         final userEntry = entries.firstWhereOrNull((e) => e.userId == userId);
-        _userRank.value = userEntry?.rank;
+        _monthlyUserRank.value = userEntry?.rank;
       }
 
       Logger.info(
-          'Monthly Leaderboard loaded: ${entries.length} entries, user rank: ${_userRank.value}',
+          'Monthly Leaderboard loaded: ${entries.length} entries, user rank: ${_monthlyUserRank.value}',
           'Profile');
     } catch (e) {
       Logger.error('Error loading monthly leaderboard', e, null, 'Profile');
-      _leaderboard.clear();
-      _userRank.value = null;
+      _monthlyLeaderboard.clear();
+      _monthlyUserRank.value = null;
     }
 
     _isLoadingAchievements.value = false;
@@ -388,6 +418,28 @@ class ProfileController extends GetxController {
       Logger.debug(
           'Profile: Added $amount coins, new total: ${_userData.value!.totalCoin}',
           'Profile');
+    }
+  }
+
+  /// Subtract coins from user balance
+  void subtractCoins(int amount) {
+    if (_userData.value != null) {
+      _userData.value = UserModel()
+        ..id = _userData.value!.id
+        ..name = _userData.value!.name
+        ..username = _userData.value!.username
+        ..email = _userData.value!.email
+        ..imageUrl = _userData.value!.imageUrl
+        ..totalCoin = ((_userData.value!.totalCoin ?? 0) - amount).clamp(0, double.infinity).toInt()
+        ..totalExp = _userData.value!.totalExp
+        ..totalFollowing = _userData.value!.totalFollowing
+        ..totalFollower = _userData.value!.totalFollower
+        ..totalCheckin = _userData.value!.totalCheckin
+        ..totalPost = _userData.value!.totalPost
+        ..totalArticle = _userData.value!.totalArticle
+        ..totalReview = _userData.value!.totalReview
+        ..totalAchievement = _userData.value!.totalAchievement
+        ..totalChallenge = _userData.value!.totalChallenge;
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/modules/shared/widgets/index.dart';
 import '../../../core/constants/app_assets.dart';
@@ -22,6 +23,14 @@ class _UserAchievementViewState extends State<UserAchievementView> {
   final AchievementRepository _repository = Get.find<AchievementRepository>();
   final ProfileController _profileController = Get.find<ProfileController>();
 
+  /// Arguments dari navigasi (dari notifikasi)
+  Map<String, dynamic>? get _args => Get.arguments as Map<String, dynamic>?;
+  int? get _externalUserId => _args?['userId'] as int?;
+  bool get _autoShowPopup => _args?['autoShowPopup'] == true;
+  Map<String, dynamic>? get _metadata => _args?['metadata'] as Map<String, dynamic>?;
+
+  bool _hasAutoShownPopup = false;
+
   bool _isLoading = true;
   List<UserAchievement> _achievements = [];
 
@@ -35,34 +44,190 @@ class _UserAchievementViewState extends State<UserAchievementView> {
     setState(() => _isLoading = true);
 
     try {
-      final userId = _profileController.userData?.id;
-      if (userId != null) {
-        final result = await _repository.getUserAchievements();
-        setState(() {
-          _achievements = result;
-        });
-      }
+      final result = await _repository.getUserAchievements(userId: _externalUserId);
+      setState(() {
+        _achievements = result;
+      });
     } catch (e) {
       Logger.error(
           'Error loading achievements', e, null, 'UserAchievementView');
     }
 
     setState(() => _isLoading = false);
+
+    // Auto-show popup dari notifikasi
+    if (_autoShowPopup && !_hasAutoShownPopup && _achievements.isNotEmpty) {
+      _hasAutoShownPopup = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _autoShowAchievementPopup();
+      });
+    }
+  }
+
+  /// Tampilkan popup achievement otomatis dari notifikasi
+  void _autoShowAchievementPopup() {
+    // Cari achievement berdasarkan metadata dari notifikasi
+    UserAchievement? target;
+    if (_metadata != null) {
+      final achievementId = _metadata!['achievement_id'] as int?;
+      final achievementCode = _metadata!['code'] as String?;
+      if (achievementId != null) {
+        target = _achievements.cast<UserAchievement?>().firstWhere(
+              (a) => a!.id == achievementId,
+              orElse: () => null,
+            );
+      }
+      if (target == null && achievementCode != null) {
+        target = _achievements.cast<UserAchievement?>().firstWhere(
+              (a) => a!.code == achievementCode,
+              orElse: () => null,
+            );
+      }
+    }
+    // Jika tidak ditemukan dari metadata, tampilkan yang terbaru completed
+    target ??= _achievements.cast<UserAchievement?>().firstWhere(
+          (a) => a!.isCompleted == true,
+          orElse: () => null,
+        );
+    if (target != null) {
+      _showAchievementDetail(target);
+    }
+  }
+
+  Widget _buildCTASection() {
+    // Ambil achievement terbaru yang sudah completed
+    final completedAchievements = _achievements
+        .where((a) => a.isCompleted == true)
+        .toList();
+    final hasCompleted = completedAchievements.isNotEmpty;
+    final latestBadge = hasCompleted ? completedAchievements.first : null;
+    final badgeIconUrl = latestBadge?.iconUrl;
+
+    // Cari achievement yang belum selesai dengan progress tertinggi
+    final nextAchievement = !hasCompleted
+        ? _achievements.cast<UserAchievement?>().firstWhere(
+              (a) => a!.isCompleted != true,
+              orElse: () => null,
+            )
+        : null;
+
+    final ctaTitle = hasCompleted
+        ? 'Penghargaan Baru: ${latestBadge!.name}'
+        : 'Selesaikan penghargaan pertamamu!';
+    final ctaButtonLabel = hasCompleted ? 'Bagikan' : 'Mulai Sekarang';
+    final ctaButtonIcon = hasCompleted ? Icons.share : Icons.arrow_forward;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              AppColors.warning.withAlpha(25),
+              AppColors.textOnPrimary,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    ctaTitle,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.accent,
+                    ),
+                  ),
+                  if (nextAchievement != null && !hasCompleted) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      '${nextAchievement.name} — ${nextAchievement.progress ?? 0}/${nextAchievement.target ?? 0}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    onPressed: hasCompleted
+                        ? _shareAchievement
+                        : () => Get.back(),
+                    icon: Icon(ctaButtonIcon, size: 16),
+                    label: Text(ctaButtonLabel),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      textStyle: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            // Badge terbaru atau icon default
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: (badgeIconUrl != null && badgeIconUrl.isNotEmpty)
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        'assets/images/achievement/$badgeIconUrl.png',
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Icon(
+                      Icons.emoji_events,
+                      color: AppColors.accent,
+                      size: 36,
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _shareAchievement() {
+    final username = _profileController.userData?.username ?? '';
+    final completed = _achievements.where((a) => a.isCompleted == true).length;
+    final message =
+        'Saya sudah mengumpulkan $completed penghargaan di Snappie! \uD83C\uDFC6\n\nIkuti saya: @$username';
+    Share.share(message, subject: 'Pencapaian Snappie');
   }
 
   @override
   Widget build(BuildContext context) {
+    final isOtherUser = _externalUserId != null;
     return ScaffoldFrame.detail(
-      title: 'Penghargaan Saya',
+      title: isOtherUser ? 'Penghargaan' : 'Penghargaan Saya',
       slivers: [
         const SliverToBoxAdapter(
           child: SizedBox(height: 12),
         ),
         SliverToBoxAdapter(
-          child: PromotionalBanner(
-            title: 'Penghargaan Baru',
-            subtitle: 'Lihat penghargaan yang telah Anda kumpulkan',
-          ),
+          child: _buildCTASection(),
         ),
         if (_isLoading)
           const SliverToBoxAdapter(

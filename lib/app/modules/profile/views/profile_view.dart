@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../../../core/services/deep_link_service.dart';
@@ -7,6 +8,7 @@ import '../controllers/profile_controller.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/user_model.dart';
+import '../../../data/models/achievement_model.dart';
 import '../../shared/widgets/index.dart';
 
 // Route aliases for cleaner navigation
@@ -238,13 +240,13 @@ class ProfileView extends GetView<ProfileController> {
           // border: Border.all(color: AppColors.accent),
           borderRadius: BorderRadius.circular(12),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 12.0),
         child: Column(
           children: [
             Text(
               count,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: FontSize.getSize(FontSizeOption.xl3),
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
               ),
@@ -253,7 +255,7 @@ class ProfileView extends GetView<ProfileController> {
             Text(
               label,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: FontSize.getSize(FontSizeOption.medium),
                 color: AppColors.textSecondary,
               ),
             ),
@@ -271,7 +273,7 @@ class ProfileView extends GetView<ProfileController> {
           controller.setSelectedTabIndex(index);
         },
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           decoration: BoxDecoration(
               color: isSelected ? AppColors.primary : Colors.transparent,
               borderRadius: BorderRadius.circular(24)),
@@ -282,6 +284,7 @@ class ProfileView extends GetView<ProfileController> {
                   ? AppColors.textOnPrimary
                   : AppColors.textSecondary,
               fontWeight: FontWeight.w600,
+              fontSize: FontSize.getSize(FontSizeOption.regular),
             ),
           ),
         ),
@@ -394,8 +397,8 @@ class ProfileView extends GetView<ProfileController> {
                   // Papan Peringkat Section
                   _buildAchievementSection(
                     title: 'Papan Peringkat',
-                    value: controller.userRank != null
-                        ? '#${controller.userRank}'
+                    value: controller.weeklyUserRank != null
+                        ? '${controller.weeklyUserRank}'
                         : '-',
                     onTap: () {
                       Get.toNamed(Routes.LEADERBOARD);
@@ -448,23 +451,7 @@ class ProfileView extends GetView<ProfileController> {
                     onTap: () {
                       Get.toNamed(Routes.ACHIEVEMENTS);
                     },
-                    assetWidget: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          AppAssets.images.achievement,
-                          height: 100,
-                        ),
-                        Image.asset(
-                          AppAssets.images.leaderboard,
-                          height: 100,
-                        ),
-                        Image.asset(
-                          AppAssets.images.achievement,
-                          height: 100,
-                        ),
-                      ],
-                    ),
+                    assetWidget: _buildAchievementBadgesRow(),
                   ),
 
                   const SizedBox(height: 4),
@@ -498,6 +485,99 @@ class ProfileView extends GetView<ProfileController> {
       default:
         return [];
     }
+  }
+
+  // ===== ACHIEVEMENT BADGE WIDGETS =====
+
+  /// Menampilkan 3 badge achievement terbaru (seperti user_profile_view)
+  Widget _buildAchievementBadgesRow() {
+    final achievements = controller.userAchievements
+        .where((a) => a.isCompleted == true)
+        .toList();
+    if (achievements.isEmpty) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            AppAssets.images.achievement,
+            height: 100,
+          ),
+          Image.asset(
+            AppAssets.images.leaderboard,
+            height: 100,
+          ),
+          Image.asset(
+            AppAssets.images.achievement,
+            height: 100,
+          ),
+        ],
+      );
+    }
+
+    // Ambil 3 achievement terbaru
+    final displayAchievements = achievements.take(3).toList();
+
+    return GridView.builder(
+      shrinkWrap: true,
+      padding: EdgeInsets.zero,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: 0.85,
+      ),
+      itemCount: displayAchievements.length,
+      itemBuilder: (context, index) {
+        return _buildAchievementBadgeItem(displayAchievements[index]);
+      },
+    );
+  }
+
+  Widget _buildAchievementBadgeItem(UserAchievement achievement) {
+    final isUnlocked = achievement.isCompleted ?? false;
+    final iconUrl = achievement.iconUrl;
+
+    final imageWidget = (iconUrl != null && iconUrl.isNotEmpty)
+        ? Image.asset(
+            'assets/images/achievement/$iconUrl.png',
+            fit: BoxFit.cover,
+            width: 100,
+          )
+        : Image.asset(
+            AppAssets.images.unlocked,
+            fit: BoxFit.cover,
+            width: 75,
+          );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          imageWidget,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              '${achievement.name}',
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: isUnlocked
+                    ? AppColors.textPrimary
+                    : AppColors.textTertiary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildSavedSection({

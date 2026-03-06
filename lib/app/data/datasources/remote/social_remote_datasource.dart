@@ -7,8 +7,9 @@ import '../../../core/helpers/api_response_helper.dart';
 import '../../models/social_model.dart';
 
 abstract class SocialRemoteDataSource {
-  /// Get follow data (followers and following) for current user
-  Future<SocialFollowData> getFollowData();
+  /// Get follow data (followers and following) for a user
+  /// If [userId] is provided, fetches data for that user; otherwise for current user
+  Future<SocialFollowData> getFollowData({int? userId});
   
   /// Follow a user by their ID
   Future<void> followUser(int userId);
@@ -19,9 +20,12 @@ class SocialRemoteDataSourceImpl implements SocialRemoteDataSource {
   SocialRemoteDataSourceImpl(this.dioClient);
 
   @override
-  Future<SocialFollowData> getFollowData() async {
+  Future<SocialFollowData> getFollowData({int? userId}) async {
     try {
-      final resp = await dioClient.dio.get(ApiEndpoints.socialFollow);
+      final resp = await dioClient.dio.get(
+        ApiEndpoints.socialFollow,
+        data: userId != null ? {'user_id': userId} : null,
+      );
       final data = extractApiResponseData<SocialFollowData>(
         resp,
         (json) => SocialFollowData.fromJson(json),

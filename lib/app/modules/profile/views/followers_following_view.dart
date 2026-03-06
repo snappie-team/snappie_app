@@ -33,6 +33,9 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
   // Local state to track follow status changes (userId -> isFollowed)
   final Map<int, bool> _followStatusOverrides = {};
 
+  // Get userId from arguments (null = current user)
+  int? get _userId => Get.arguments?['userId'] as int?;
+
   // Get view type from arguments (0 = followers, 1 = following)
   FollowViewType get _viewType {
     final initialTab = Get.arguments?['initialTab'] ?? 0;
@@ -80,7 +83,7 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
     setState(() => _isLoading = true);
 
     try {
-      final followData = await _socialRepository.getFollowData();
+      final followData = await _socialRepository.getFollowData(userId: _userId);
 
       _followers = followData.followers ?? [];
       _following = followData.following ?? [];

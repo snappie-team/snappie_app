@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/helpers/app_snackbar.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/logger_service.dart';
+import '../../../data/models/achievement_model.dart';
+import '../../../data/models/gamification_response_model.dart';
 import '../../../data/models/post_model.dart';
 import '../../../data/repositories/achievement_repository_impl.dart';
 import '../../../data/repositories/user_repository_impl.dart';
 import '../../../data/repositories/post_repository_impl.dart';
+import '../../../routes/app_pages.dart';
 import '../../shared/widgets/index.dart';
 import '../../home/controllers/home_controller.dart';
 
@@ -47,6 +52,10 @@ class _UserProfileViewState extends State<UserProfileView> {
 
   // User posts
   List<PostModel> _userPosts = [];
+
+  // User achievements (completed only)
+  List<UserAchievement> _achievements = [];
+  bool _isLoadingAchievements = false;
 
   @override
   void initState() {
@@ -94,8 +103,9 @@ class _UserProfileViewState extends State<UserProfileView> {
 
       _loadUserRank();
 
-      // Load user posts
+      // Load user posts dan achievements in parallel
       _loadUserPosts();
+      _loadUserAchievements();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -135,6 +145,26 @@ class _UserProfileViewState extends State<UserProfileView> {
     }
   }
 
+  Future<void> _loadUserAchievements() async {
+    try {
+      if (!mounted) return;
+      setState(() => _isLoadingAchievements = true);
+
+      final result = await _achievementRepository.getUserAchievements(userId: _userId);
+      final completed = result.where((a) => a.isCompleted == true).toList();
+      if (!mounted) return;
+
+      setState(() {
+        _achievements = completed;
+        _isLoadingAchievements = false;
+      });
+    } catch (e) {
+      Logger.error('Error loading user achievements', e, null, 'UserProfileView');
+      if (!mounted) return;
+      setState(() => _isLoadingAchievements = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_errorMessage.isNotEmpty) {
@@ -145,6 +175,7 @@ class _UserProfileViewState extends State<UserProfileView> {
 
     return ScaffoldFrame.detail(
       title: 'Profil',
+      backgroundColor: AppColors.background,
       onRefresh: _loadUserProfile,
       slivers: [
         _isLoading
@@ -197,6 +228,9 @@ class _UserProfileViewState extends State<UserProfileView> {
     return Column(
       children: [
         _buildHeader(),
+        if (_achievements.isNotEmpty || _isLoadingAchievements)
+          _buildAchievementsSection(),
+        const SizedBox(height: 8),
         _buildPostsSection(),
       ],
     );
@@ -279,13 +313,19 @@ class _UserProfileViewState extends State<UserProfileView> {
                   child: _buildStatColumn('$_totalPosts', 'Postingan'),
                 ),
                 Container(
-                  width: 1,
+                  width: 1, 
                   height: 40,
                   color: AppColors.borderLight,
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                 ),
                 Expanded(
-                  child: _buildStatColumn('$_totalFollowers', 'Pengikut'),
+                  child: GestureDetector(
+                    onTap: () => Get.toNamed(
+                      AppPages.FOLLOWERS_FOLLOWING,
+                      arguments: {'initialTab': 0, 'userId': _userId},
+                    ),
+                    child: _buildStatColumn('$_totalFollowers', 'Pengikut'),
+                  ),
                 ),
                 Container(
                   width: 1,
@@ -294,7 +334,13 @@ class _UserProfileViewState extends State<UserProfileView> {
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                 ),
                 Expanded(
-                  child: _buildStatColumn('$_totalFollowing', 'Mengikuti'),
+                  child: GestureDetector(
+                    onTap: () => Get.toNamed(
+                      AppPages.FOLLOWERS_FOLLOWING,
+                      arguments: {'initialTab': 1, 'userId': _userId},
+                    ),
+                    child: _buildStatColumn('$_totalFollowing', 'Mengikuti'),
+                  ),
                 ),
               ],
             ),
@@ -397,6 +443,171 @@ class _UserProfileViewState extends State<UserProfileView> {
                   : _buildPostsList(),
         ],
       ),
+    );
+  }
+
+  /// Section daftar badge achievement yang sudah diraih
+  Widget _buildAchievementsSection() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundContainer,
+        boxShadow: [
+            BoxShadow(
+            color: AppColors.shadowMedium,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ]
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'Penghargaan (${_achievements.length})',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (_isLoadingAchievements)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else if (_achievements.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Center(
+                child: Text(
+                  'Belum ada penghargaan',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            )
+          else ...[
+            GridView.builder(
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 0.85,
+              ),
+              itemCount: _achievements.length > 3 ? 3 : _achievements.length,
+              itemBuilder: (context, index) {
+                return _buildAchievementBadge(_achievements[index]);
+              },
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () => Get.toNamed(
+                  AppPages.ACHIEVEMENTS,
+                  arguments: {'userId': _userId},
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: AppColors.accent),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                ),
+                child: Text(
+                  'Selengkapnya',
+                  style: TextStyle(
+                    color: AppColors.accent,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAchievementBadge(UserAchievement achievement) {
+    final isUnlocked = achievement.isCompleted ?? false;
+    final iconUrl = achievement.iconUrl;
+
+    final imageWidget = (iconUrl != null && iconUrl.isNotEmpty)
+        ? Image.asset(
+            'assets/images/achievement/$iconUrl.png',
+            fit: BoxFit.cover,
+            width: 100,
+          )
+        : Image.asset(
+            AppAssets.images.unlocked,
+            fit: BoxFit.cover,
+            width: 75,
+          );
+
+    return GestureDetector(
+      onTap: isUnlocked ? () => _showAchievementDetail(achievement) : null,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            imageWidget,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                '${achievement.name}',
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: isUnlocked
+                      ? AppColors.textPrimary
+                      : AppColors.textTertiary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAchievementDetail(UserAchievement userAchievement) {
+    final summary = AchievementSummary(
+      id: userAchievement.id,
+      code: userAchievement.code,
+      name: userAchievement.name,
+      subtitle: userAchievement.subtitle,
+      description: userAchievement.description,
+      type: userAchievement.type,
+      iconUrl: userAchievement.iconUrl,
+      criteriaAction: userAchievement.criteriaAction,
+      criteriaTarget: userAchievement.criteriaTarget,
+      rewardCoins: userAchievement.rewardCoins,
+      rewardXp: userAchievement.rewardXp,
+      completedAt: userAchievement.completedAt,
+    );
+
+    Get.dialog(
+      AchievementPopupWidget(achievement: summary),
+      barrierDismissible: true,
+      useSafeArea: false,
     );
   }
 

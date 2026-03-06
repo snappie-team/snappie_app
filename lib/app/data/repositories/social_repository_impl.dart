@@ -4,7 +4,7 @@ import '../datasources/remote/social_remote_datasource.dart';
 import '../models/social_model.dart';
 
 abstract class SocialRepository {
-  Future<SocialFollowData> getFollowData();
+  Future<SocialFollowData> getFollowData({int? userId});
   Future<void> followUser(int userId);
 }
 
@@ -18,11 +18,11 @@ class SocialRepositoryImpl implements SocialRepository {
   });
 
   @override
-  Future<SocialFollowData> getFollowData() async {
+  Future<SocialFollowData> getFollowData({int? userId}) async {
     if (!await networkInfo.isConnected) {
       throw NetworkException('No internet connection');
     }
-    return await remoteDataSource.getFollowData();
+    return await remoteDataSource.getFollowData(userId: userId);
   }
 
   @override

@@ -53,10 +53,18 @@ class UserAchievement {
   bool? isCompleted;
   @JsonKey(name: 'completed_at')
   String? completedAt;
+  @JsonKey(name: 'is_claimed')
+  bool? isClaimed;
+  @JsonKey(name: 'claimed_at')
+  String? claimedAt;
+  @JsonKey(name: 'user_achievement_id')
+  int? userAchievementId;
   @JsonKey(name: 'criteria_action')
   String? criteriaAction;
   @JsonKey(name: 'criteria_target')
   int? criteriaTarget;
+  @JsonKey(name: 'additional_info')
+  Map<String, dynamic>? additionalInfo;
 
   UserAchievement();
 
@@ -172,4 +180,56 @@ class PaginatedChallenges {
   factory PaginatedChallenges.fromJson(Map<String, dynamic> json) =>
       _$PaginatedChallengesFromJson(json);
   Map<String, dynamic> toJson() => _$PaginatedChallengesToJson(this);
+}
+
+/// Response model untuk claim challenge
+@JsonSerializable()
+class ClaimChallengeResponse {
+  ClaimChallengeInfo? challenge;
+  @JsonKey(name: 'user_stats')
+  ClaimUserStats? userStats;
+
+  ClaimChallengeResponse();
+
+  factory ClaimChallengeResponse.fromJson(Map<String, dynamic> json) =>
+      _$ClaimChallengeResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$ClaimChallengeResponseToJson(this);
+}
+
+@JsonSerializable()
+class ClaimChallengeInfo {
+  int? id;
+  String? code;
+  String? name;
+  String? description;
+  @JsonKey(name: 'icon_url')
+  String? iconUrl;
+  @JsonKey(name: 'reward_coins')
+  int? rewardCoins;
+  @JsonKey(name: 'reward_xp')
+  int? rewardXp;
+
+  ClaimChallengeInfo();
+
+  factory ClaimChallengeInfo.fromJson(Map<String, dynamic> json) =>
+      _$ClaimChallengeInfoFromJson(json);
+  Map<String, dynamic> toJson() => _$ClaimChallengeInfoToJson(this);
+}
+
+@JsonSerializable()
+class ClaimUserStats {
+  @JsonKey(name: 'total_coin')
+  int? totalCoin;
+  @JsonKey(name: 'total_exp')
+  int? totalExp;
+  @JsonKey(name: 'total_achievement')
+  int? totalAchievement;
+  @JsonKey(name: 'total_challenge')
+  int? totalChallenge;
+
+  ClaimUserStats();
+
+  factory ClaimUserStats.fromJson(Map<String, dynamic> json) =>
+      _$ClaimUserStatsFromJson(json);
+  Map<String, dynamic> toJson() => _$ClaimUserStatsToJson(this);
 }

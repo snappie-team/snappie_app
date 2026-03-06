@@ -114,7 +114,7 @@ class MissionSuccessModal extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: onClaim,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: AppColors.success,
                   foregroundColor: AppColors.textOnPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(

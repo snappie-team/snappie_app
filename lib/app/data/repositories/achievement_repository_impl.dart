@@ -8,7 +8,7 @@ import '../models/reward_model.dart';
 abstract class AchievementRepository {
   Future<List<LeaderboardEntry>> getWeeklyLeaderboard();
   Future<List<LeaderboardEntry>> getMonthlyLeaderboard();
-  Future<List<UserAchievement>> getUserAchievements();
+  Future<List<UserAchievement>> getUserAchievements({int? userId});
   Future<List<UserAchievement>> getUserChallenges();
   Future<PaginatedUserRewards> getUserRewards(int userId,
       {int page, int perPage});
@@ -17,6 +17,11 @@ abstract class AchievementRepository {
   Future<PaginatedChallenges> getChallenges(int userId,
       {int page, int perPage});
   Future<List<UserReward>> getAvailableRewards();
+  Future<List<UserAchievement>> getClaimableChallenges();
+  Future<ClaimChallengeResponse> claimChallenge(int challengeId);
+  Future<List<UserAchievement>> getClaimHistory({int page, int perPage});
+  Future<UserReward> redeemReward(int rewardId);
+  Future<Map<String, dynamic>> useReward(int userRewardId);
 }
 
 class AchievementRepositoryImpl implements AchievementRepository {
@@ -45,11 +50,11 @@ class AchievementRepositoryImpl implements AchievementRepository {
   }
 
   @override
-  Future<List<UserAchievement>> getUserAchievements() async {
+  Future<List<UserAchievement>> getUserAchievements({int? userId}) async {
     if (!await networkInfo.isConnected) {
       throw NetworkException('No internet connection');
     }
-    return await remoteDataSource.getUserAchievements();
+    return await remoteDataSource.getUserAchievements(userId: userId);
   }
 
   @override
@@ -96,5 +101,48 @@ class AchievementRepositoryImpl implements AchievementRepository {
       throw NetworkException('No internet connection');
     }
     return await remoteDataSource.getAvailableRewards();
+  }
+
+  @override
+  Future<List<UserAchievement>> getClaimableChallenges() async {
+    if (!await networkInfo.isConnected) {
+      throw NetworkException('No internet connection');
+    }
+    return await remoteDataSource.getClaimableChallenges();
+  }
+
+  @override
+  Future<ClaimChallengeResponse> claimChallenge(int challengeId) async {
+    if (!await networkInfo.isConnected) {
+      throw NetworkException('No internet connection');
+    }
+    return await remoteDataSource.claimChallenge(challengeId);
+  }
+
+  @override
+  Future<List<UserAchievement>> getClaimHistory({
+    int page = 1,
+    int perPage = 20,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      throw NetworkException('No internet connection');
+    }
+    return await remoteDataSource.getClaimHistory(page: page, perPage: perPage);
+  }
+
+  @override
+  Future<UserReward> redeemReward(int rewardId) async {
+    if (!await networkInfo.isConnected) {
+      throw NetworkException('No internet connection');
+    }
+    return await remoteDataSource.redeemReward(rewardId);
+  }
+
+  @override
+  Future<Map<String, dynamic>> useReward(int userRewardId) async {
+    if (!await networkInfo.isConnected) {
+      throw NetworkException('No internet connection');
+    }
+    return await remoteDataSource.useReward(userRewardId);
   }
 }

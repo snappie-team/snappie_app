@@ -38,8 +38,12 @@ class ApiEndpoints {
   // App endpoints
   static const String appUpdate = '/app/update';
   static const String userChallengesProgress = '/gamification/challenges';
+  static const String claimableChallenges = '/gamification/challenges/claimable';
+  static const String claimChallenge = '/gamification/challenges/claim/{challenge_id}';
+  static const String challengeClaimHistory = '/gamification/challenges/claim-history';
   static const String gamificationRewards = '/gamification/rewards';
   static const String redeemReward = '/gamification/rewards/{id}/redeem';
+  static const String useReward = '/gamification/rewards/{id}/use';
 
   // Place endpoints
   static const String places = '/places';

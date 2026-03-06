@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-03-07
+### Added
+- Sistem klaim tantangan dengan 3 status UI (sedang berlangsung → ambil hadiah → sudah diklaim)
+- Sistem reward 3 fase (Tukar → Pakai → Lihat Kupon) dengan kode kupon dan countdown timer
+- Halaman feedback aplikasi di Settings → Masukan & Saran, lengkap dengan modal terima kasih
+- Tombol FAB feedback melayang pada halaman detail tempat
+- Badge pencapaian ditampilkan pada halaman profil pengguna
+- Navigasi ke halaman followers dan following dari profil
+- Edit postingan langsung dari notifikasi
+- Navigasi notifikasi ke konten terkait (tantangan, pencapaian, tempat, postingan)
+- Check-in anonim (tanpa login)
+
+### Changed
+- Leaderboard dipisah menjadi mingguan dan bulanan untuk menghindari race condition data
+- Tampilan post card dan image carousel dioptimasi untuk performa lebih baik
+- Mahkota peringkat (emas/perak/perunggu) kini tampil pada avatar leaderboard
+- Halaman settings diperbarui dengan layout yang lebih bersih dan konsisten
+- Tampilan explore dipoles dengan perbaikan visual
+- Feedback misi ditingkatkan dengan UX yang lebih baik
+- Model data diperbarui untuk kompatibilitas dengan API terbaru
+- Route dan endpoint yang tidak terpakai dibersihkan
+
+### Fixed
+- Tipe notifikasi kini dibedakan dengan benar antara tantangan dan pencapaian
+- Race condition pada data leaderboard saat berpindah tab mingguan/bulanan
+
 ## [1.2.4] - 2026-02-28
 ### Added
 - Deep link system: dukungan buka konten langsung via link (snappie:// dan https://snappie-team.github.io)

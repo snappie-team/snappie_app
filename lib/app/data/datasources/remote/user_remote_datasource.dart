@@ -31,6 +31,7 @@ abstract class UserRemoteDataSource {
     Map<String, dynamic>? notificationPreferences,
     Map<String, dynamic>? userSettings, // {language, theme}
     Map<String, dynamic>? userNotification, // {push_notification}
+    Map<String, dynamic>? userFeedback,
   });
 }
 
@@ -52,6 +53,13 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       final userData = raw['user'] as Map<String, dynamic>?;
       if (userData == null) {
         throw ServerException('User data not found in response', 500);
+      }
+      // Merge stats ke dalam user data agar totalAchievement, totalChallenge, dll. terisi
+      final stats = raw['stats'] as Map<String, dynamic>?;
+      if (stats != null) {
+        for (final entry in stats.entries) {
+          userData.putIfAbsent(entry.key, () => entry.value);
+        }
       }
       final userJson =
           flattenAdditionalInfoForUser(userData, removeContainer: false);
@@ -111,6 +119,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     Map<String, dynamic>? notificationPreferences,
     Map<String, dynamic>? userSettings,
     Map<String, dynamic>? userNotification,
+    Map<String, dynamic>? userFeedback,
   }) async {
     try {
       final payload = <String, dynamic>{};
@@ -143,6 +152,9 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       }
       if (userNotification != null && userNotification.isNotEmpty) {
         additional['user_notification'] = userNotification;
+      }
+      if (userFeedback != null && userFeedback.isNotEmpty) {
+        additional['user_feedback'] = userFeedback;
       }
 
       if (additional.isNotEmpty) payload['additional_info'] = additional;

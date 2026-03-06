@@ -71,6 +71,7 @@ class UserRepository {
     Map<String, dynamic>? notificationPreferences,
     Map<String, dynamic>? userSettings, // { language, theme }
     Map<String, dynamic>? userNotification, // { push_notification }
+    Map<String, dynamic>? userFeedback,
   }) async {
     if (!await networkInfo.isConnected) {
       throw NetworkException('No internet connection');
@@ -91,6 +92,7 @@ class UserRepository {
       notificationPreferences: notificationPreferences,
       userSettings: userSettings,
       userNotification: userNotification,
+      userFeedback: userFeedback,
     );
 
     await localDataSource.cacheUser(updated);

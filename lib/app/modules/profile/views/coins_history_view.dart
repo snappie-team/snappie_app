@@ -1,7 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:snappie_app/app/core/constants/font_size.dart';
+import 'package:snappie_app/app/core/helpers/app_snackbar.dart';
 import 'package:snappie_app/app/data/models/reward_model.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import '../../../core/constants/app_assets.dart';
@@ -276,18 +280,24 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
 
   Widget _buildRewardItem(UserReward reward, bool isLast) {
     final canRedeem = reward.canRedeem ?? false;
+    final alreadyRedeemed = reward.isRedeemed == true;
+    // Voucher tidak aktif atau stock habis → grey out, kecuali sudah ditukar
+    final isUnavailable = !alreadyRedeemed &&
+        (reward.status == false || (reward.stock != null && reward.stock! <= 0));
+    // Koin tidak cukup tapi voucher masih aktif → card berwarna, tombol Tukar disabled
+    final hasEnoughCoins = (reward.coinRequirement ?? 0) <= _profileController.totalCoins;
 
     final card = Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: canRedeem
-            ? AppColors.warning.withAlpha(30)
-            : Colors.grey.withAlpha(30),
+        color: isUnavailable
+            ? Colors.grey.withAlpha(30)
+            : AppColors.warning.withAlpha(30),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: canRedeem
-              ? AppColors.warning.withAlpha(60)
-              : Colors.grey.withAlpha(60),
+          color: isUnavailable
+              ? Colors.grey.withAlpha(60)
+              : AppColors.warning.withAlpha(60),
           width: 1,
         ),
       ),
@@ -403,26 +413,31 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
                 ],
               ),
               // Detail button
-              OutlinedButton(
-                onPressed: canRedeem ? () => _showRewardDetail(reward) : null,
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: AppColors.accent),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  'Detail',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.accent,
-                  ),
-                ),
+              Builder(
+                builder: (context) {
+                  final isButtonDisabled = reward.isExpired == true || isUnavailable;
+                  return OutlinedButton(
+                    onPressed: isButtonDisabled ? null : () => _showRewardDetail(reward),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: isButtonDisabled ? Colors.grey : AppColors.accent),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      _getRewardButtonLabel(reward),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: isButtonDisabled ? Colors.grey : AppColors.accent,
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -430,7 +445,7 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
       ),
     );
 
-    if (!canRedeem) {
+    if (isUnavailable) {
       return ColorFiltered(
         colorFilter: const ColorFilter.matrix(<double>[
           0.2126,
@@ -461,245 +476,562 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
     return card;
   }
 
+  String _getRewardButtonLabel(UserReward reward) {
+    if (reward.isExpired == true) return 'Kedaluwarsa';
+    if (reward.isUsed == true) return 'Lihat Kupon';
+    if (reward.isRedeemed == true) return 'Pakai';
+    return 'Detail';
+  }
+
   void _showRewardDetail(UserReward reward) {
     final coinReq = reward.coinRequirement ?? 0;
-    final canRedeem = reward.canRedeem ?? false;
+    bool isLoading = false;
+
+    // Determine phase:
+    // Phase 1: Not redeemed → show "Tukar"
+    // Phase 2: Redeemed but not used → show "Pakai"
+    // Phase 3: Used (show code) or Expired → show "Selesai/Habis"
+    bool isRedeemed = reward.isRedeemed ?? false;
+    bool isUsed = reward.isUsed ?? false;
+    bool isExpired = reward.isExpired ?? false;
+    String? redemptionCode = reward.redemptionCode;
+    String? expiresAt = reward.expiresAt;
+    int? userRewardId = reward.userRewardId;
 
     Get.bottomSheet(
-      Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.85,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.backgroundContainer,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header: Title + Close
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 12, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Tukar Kupon',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: Icon(Icons.close, color: AppColors.textSecondary),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
+      StatefulBuilder(
+        builder: (context, setSheetState) {
+          final hasEnoughCoins = coinReq <= _profileController.totalCoins;
+          final canRedeem = !isRedeemed && hasEnoughCoins && (reward.stock ?? 0) > 0;
+
+          // Determine header title and button
+          String headerTitle;
+          String buttonLabel;
+          Color buttonColor;
+          bool buttonEnabled;
+          VoidCallback? buttonAction;
+
+          if (isExpired) {
+            // Expired: disabled
+            headerTitle = 'Kupon';
+            buttonLabel = 'Kedaluwarsa';
+            buttonColor = AppColors.textSecondary.withAlpha(50);
+            buttonEnabled = false;
+            buttonAction = null;
+          } else if (isUsed) {
+            // Already used: show coupon sheet with existing code
+            headerTitle = 'Kupon Kamu';
+            buttonLabel = 'Lihat Kupon';
+            buttonColor = AppColors.primary;
+            buttonEnabled = true;
+            buttonAction = () {
+              if (Get.isBottomSheetOpen == true) Get.back();
+              _showCouponSheet(
+                reward.name ?? 'Kupon',
+                redemptionCode ?? '',
+                expiresAt,
+              );
+            };
+          } else if (isRedeemed) {
+            // Phase 2: Pakai
+            headerTitle = 'Kupon Kamu';
+            buttonLabel = 'Pakai';
+            buttonColor = AppColors.primary;
+            buttonEnabled = !isLoading;
+            buttonAction = () async {
+              if (userRewardId == null) return;
+              setSheetState(() => isLoading = true);
+              try {
+                final result = await _achievementRepo.useReward(userRewardId!);
+                final code = result['redemption_code'] as String?;
+                final expiry = result['expires_at'] as String?;
+                await _loadRewards();
+                // Close detail sheet then open coupon sheet
+                if (Get.isBottomSheetOpen == true) Get.back();
+                if (code != null) {
+                  _showCouponSheet(reward.name ?? 'Kupon', code, expiry);
+                }
+              } catch (e) {
+                setSheetState(() => isLoading = false);
+                Logger.error('Error using reward', e, null, 'Coins');
+                AppSnackbar.error('Gagal memakai kupon. Silakan coba lagi');
+              }
+            };
+          } else {
+            // Phase 1: Tukar
+            headerTitle = 'Tukar Kupon';
+            buttonLabel = 'Tukar';
+            buttonColor = AppColors.accent;
+            buttonEnabled = canRedeem && !isLoading;
+            buttonAction = () async {
+              setSheetState(() => isLoading = true);
+              try {
+                final userRewardResult = await _achievementRepo.redeemReward(reward.id!);
+                _profileController.subtractCoins(coinReq);
+                setSheetState(() {
+                  isRedeemed = true;
+                  userRewardId = userRewardResult.id;
+                  isLoading = false;
+                });
+                AppSnackbar.success(
+                  'Kupon ${reward.name ?? ''} berhasil ditukar!',
+                  title: 'Berhasil',
+                );
+                await _loadRewards();
+              } catch (e) {
+                setSheetState(() => isLoading = false);
+                Logger.error('Error redeeming reward', e, null, 'Coins');
+                AppSnackbar.error('Gagal menukar kupon. Silakan coba lagi');
+              }
+            };
+          }
+
+          return Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.85,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.backgroundContainer,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
               ),
             ),
-
-            // Scrollable content
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 16),
-
-                    // Reward image
-                    Center(
-                      child: SizedBox(
-                        width: 140,
-                        height: 140,
-                        child: reward.imageUrl != null &&
-                                reward.imageUrl!.isNotEmpty
-                            ? Image.network(
-                                reward.imageUrl!,
-                                fit: BoxFit.contain,
-                                errorBuilder: (_, __, ___) => Image.asset(
-                                  AppAssets.images.coupon,
-                                  fit: BoxFit.contain,
-                                ),
-                              )
-                            : Image.asset(
-                                AppAssets.images.coupon,
-                                fit: BoxFit.contain,
-                              ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Reward name
-                    Center(
-                      child: Text(
-                        reward.name ?? 'Kupon',
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header: Title + Close
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 12, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        headerTitle,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
                         ),
-                        textAlign: TextAlign.center,
                       ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(Icons.close, color: AppColors.textSecondary),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Scrollable content
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
+
+                        // Reward image
+                        Center(
+                          child: SizedBox(
+                            width: 140,
+                            height: 140,
+                            child: reward.imageUrl != null &&
+                                    reward.imageUrl!.isNotEmpty
+                                ? Image.network(
+                                    reward.imageUrl!,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (_, __, ___) => Image.asset(
+                                      AppAssets.images.coupon,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  )
+                                : Image.asset(
+                                    AppAssets.images.coupon,
+                                    fit: BoxFit.contain,
+                                  ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Reward name
+                        Center(
+                          child: Text(
+                            reward.name ?? 'Kupon',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        // Stock info (only in phase 1)
+                        if (!isRedeemed && reward.stock != null)
+                          Center(
+                            child: Text(
+                              'Tersisa ${reward.stock} Kupon',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+
+                        const SizedBox(height: 16),
+
+                        // Description section
+                        if (reward.description != null &&
+                            reward.description!.isNotEmpty) ...[
+                          Text(
+                            'Deskripsi',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          if (reward.additionalInfo?.deskripsi != null &&
+                              reward.additionalInfo!.deskripsi!.isNotEmpty) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              reward.additionalInfo!.deskripsi!,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary,
+                                height: 1.5,
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 16),
+                        ],
+
+                        // Cara Pakai section
+                        if (reward.additionalInfo?.caraPakai != null &&
+                            reward.additionalInfo!.caraPakai!.isNotEmpty) ...[
+                          Text(
+                            'Cara Pakai',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          ...reward.additionalInfo!.caraPakai!
+                              .asMap()
+                              .entries
+                              .map((entry) => _buildNumberedItem(
+                                  entry.key + 1, entry.value)),
+                          const SizedBox(height: 16),
+                        ],
+
+                        // Syarat dan Ketentuan section
+                        if (reward.additionalInfo?.syaratKetentuan != null &&
+                            reward.additionalInfo!.syaratKetentuan!
+                                .isNotEmpty) ...[
+                          Text(
+                            'Syarat dan Ketentuan',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          ...reward.additionalInfo!.syaratKetentuan!
+                              .asMap()
+                              .entries
+                              .map((entry) => _buildNumberedItem(
+                                  entry.key + 1, entry.value)),
+                          const SizedBox(height: 16),
+                        ],
+                      ],
                     ),
+                  ),
+                ),
 
-                    const SizedBox(height: 8),
+                // Bottom: Action button
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundContainer,
+                    border: Border(
+                      top: BorderSide(color: AppColors.border, width: 1),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      // Phase 1: Show coin cost info
+                      if (!isRedeemed) ...[
+                        if (!hasEnoughCoins)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              'Koin kamu belum cukup untuk menukar kupon ini',
+                              style: TextStyle(
+                                fontSize: FontSize.getSize(
+                                    FontSizeOption.mediumSmall),
+                                color: AppColors.error,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          )
+                        else
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Text.rich(
+                              maxLines: 2,
+                              TextSpan(
+                                text:
+                                    'Tukar ${reward.name ?? 'Kupon'} dengan ',
+                                style: TextStyle(
+                                  fontSize: FontSize.getSize(
+                                      FontSizeOption.mediumSmall),
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: '$coinReq Koin',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.accent,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                      ],
 
-                    // Stock info
-                    if (reward.stock != null)
-                      Center(
+                      // Phase 2: Show "Pakai" info
+                      if (isRedeemed && !isUsed && !isExpired)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(
+                            'Tekan "Pakai" untuk mengaktifkan kode kupon',
+                            style: TextStyle(
+                              fontSize:
+                                  FontSize.getSize(FontSizeOption.mediumSmall),
+                              color: AppColors.textSecondary,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: buttonEnabled ? buttonAction : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: buttonColor,
+                            disabledBackgroundColor:
+                                AppColors.textSecondary.withAlpha(50),
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(99),
+                            ),
+                          ),
+                          child: isLoading
+                              ? SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor:
+                                        AlwaysStoppedAnimation<Color>(
+                                            AppColors.textOnPrimary),
+                                  ),
+                                )
+                              : Text(
+                                  buttonLabel,
+                                  style: TextStyle(
+                                    color: buttonEnabled
+                                        ? Colors.white
+                                        : AppColors.textSecondary,
+                                    fontSize: FontSize.getSize(
+                                        FontSizeOption.medium),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+      isScrollControlled: true,
+    );
+  }
+
+  void _showCouponSheet(String rewardName, String code, String? expiresAt) {
+    Timer? countdownTimer;
+    Duration remaining = Duration.zero;
+
+    if (expiresAt != null) {
+      try {
+        final expiryDate = DateTime.parse(expiresAt);
+        remaining = expiryDate.difference(DateTime.now());
+        if (remaining.isNegative) remaining = Duration.zero;
+      } catch (_) {}
+    }
+
+    Get.bottomSheet(
+      StatefulBuilder(
+        builder: (context, setSheetState) {
+          countdownTimer ??= Timer.periodic(const Duration(seconds: 1), (_) {
+            if (remaining.inSeconds > 0) {
+              setSheetState(() {
+                remaining = remaining - const Duration(seconds: 1);
+              });
+            } else {
+              countdownTimer?.cancel();
+            }
+          });
+
+          final hours = remaining.inHours;
+          final minutes = remaining.inMinutes % 60;
+          final seconds = remaining.inSeconds % 60;
+          final countdownText = hours > 0
+              ? '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}'
+              : '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+
+          return Container(
+            decoration: BoxDecoration(
+              color: AppColors.backgroundContainer,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Kode Kupon untuk $rewardName',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                // Code box
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppColors.textSecondary.withAlpha(80),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        code,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      GestureDetector(
+                        onTap: () {
+                          Clipboard.setData(ClipboardData(text: code));
+                          AppSnackbar.success('Kode kupon disalin',
+                              title: 'Berhasil');
+                        },
                         child: Text(
-                          'Tersisa ${reward.stock} Kupon',
+                          'Salin',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 14,
                             color: AppColors.textSecondary,
                           ),
                         ),
                       ),
-
-                    const SizedBox(height: 16),
-
-                    // Description section
-                    if (reward.description != null &&
-                        reward.description!.isNotEmpty) ...[
-                      Text(
-                        'Deskripsi',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        reward.description!,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-
-                    // Cara Pakai section
-                    Text(
-                      'Cara Pakai',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    _buildNumberedItem(1, 'Tukar kupon dengan $coinReq Koin.'),
-                    _buildNumberedItem(
-                        2, 'Tekan "Pakai" saat akan melakukan pembayaran.'),
-                    _buildNumberedItem(
-                        3, 'Berikan kode kupon yang muncul saat pembayaran.'),
-
-                    const SizedBox(height: 16),
-
-                    // Syarat dan Ketentuan section
-                    Text(
-                      'Syarat dan Ketentuan',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    _buildNumberedItem(1,
-                        'Kupon berlaku selama 3 hari setelah penukaran dengan koin.'),
-                    _buildNumberedItem(2,
-                        'Kode kupon yang muncul setelah tekan "Pakai" hanya berlaku selama 1 jam.'),
-                    _buildNumberedItem(3,
-                        'Kode kupon hanya dapat digunakan 1 kali saat pembayaran.'),
-
-                    const SizedBox(height: 16),
-                  ],
-                ),
-              ),
-            ),
-
-            // Bottom: Coin cost + Tukar button
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-              decoration: BoxDecoration(
-                color: AppColors.backgroundContainer,
-                border: Border(
-                  top: BorderSide(color: AppColors.border, width: 1),
-                ),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Tukar ${reward.name ?? 'Kupon'} dengan ',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      Text(
-                        '$coinReq Koin',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.accent,
-                        ),
-                      ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: canRedeem
-                          ? () {
-                              // TODO: Call redeem API
-                              Navigator.pop(context);
-                            }
-                          : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.accent,
-                        disabledBackgroundColor: AppColors.border,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(99),
-                        ),
-                      ),
-                      child: Text(
-                        'Tukar',
-                        style: TextStyle(
-                          color: canRedeem
-                              ? Colors.white
-                              : AppColors.textSecondary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                ),
+                if (expiresAt != null) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'Berlaku sampai:',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    countdownText,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: remaining.inSeconds > 0
+                          ? AppColors.accent
+                          : AppColors.error,
                     ),
                   ),
                 ],
-              ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Get.back(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(99),
+                      ),
+                    ),
+                    child: Text(
+                      'Ok',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: FontSize.getSize(FontSizeOption.medium),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
       isScrollControlled: true,
-    );
+    ).then((_) {
+      countdownTimer?.cancel();
+    });
+  }
+
+  String _formatExpiryDate(String isoDate) {
+    try {
+      final date = DateTime.parse(isoDate);
+      return DateFormat('dd MMM yyyy, HH:mm', 'id').format(date);
+    } catch (_) {
+      return isoDate;
+    }
   }
 
   Widget _buildNumberedItem(int number, String text) {

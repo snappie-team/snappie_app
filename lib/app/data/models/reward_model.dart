@@ -22,6 +22,20 @@ class UserReward {
   bool? status;
   @JsonKey(name: 'additional_info')
   RewardAdditionalInfo? additionalInfo;
+  @JsonKey(name: 'user_reward_id')
+  int? userRewardId;
+  @JsonKey(name: 'is_redeemed')
+  bool? isRedeemed;
+  @JsonKey(name: 'is_used')
+  bool? isUsed;
+  @JsonKey(name: 'is_expired')
+  bool? isExpired;
+  @JsonKey(name: 'redemption_code')
+  String? redemptionCode;
+  @JsonKey(name: 'used_at')
+  String? usedAt;
+  @JsonKey(name: 'expires_at')
+  String? expiresAt;
   @JsonKey(name: 'created_at')
   String? createdAt;
   @JsonKey(name: 'updated_at')
@@ -40,6 +54,11 @@ class RewardAdditionalInfo {
   String? redemptionCode;
   @JsonKey(name: 'redeemed_at')
   String? redeemedAt;
+  String? deskripsi;
+  @JsonKey(name: 'cara_pakai')
+  List<String>? caraPakai;
+  @JsonKey(name: 'syarat_ketentuan')
+  List<String>? syaratKetentuan;
 
   RewardAdditionalInfo();
 

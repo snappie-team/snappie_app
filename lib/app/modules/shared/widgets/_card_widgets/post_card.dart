@@ -20,11 +20,13 @@ import '../../../../routes/app_pages.dart';
 class PostCard extends StatefulWidget {
   final PostModel post;
   final bool? isOthersProfile;
+  final bool autoOpenComments;
 
   const PostCard({
     super.key,
     required this.post,
     this.isOthersProfile = false,
+    this.autoOpenComments = false,
   });
 
   @override
@@ -59,6 +61,8 @@ class _PostCardState extends State<PostCard> {
     }
   }
 
+  bool _hasAutoOpenedComments = false;
+
   void _initializeLocalState() {
     _likesCount = (post.likesCount ?? 0).obs;
     _commentsCount = (post.commentsCount ?? 0).obs;
@@ -71,6 +75,14 @@ class _PostCardState extends State<PostCard> {
     final hasLiked =
         post.likes?.any((like) => like.userId == currentUserId) ?? false;
     _isLiked = hasLiked.obs;
+
+    // Auto-open comments jika diminta (dari notifikasi komentar)
+    if (widget.autoOpenComments && !_hasAutoOpenedComments) {
+      _hasAutoOpenedComments = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showComments();
+      });
+    }
   }
 
   @override
@@ -202,6 +214,9 @@ class _PostCardState extends State<PostCard> {
             case 'profile':
               _viewProfile();
               break;
+            case 'edit':
+              _navigateToEditPost();
+              break;
             case 'delete':
               _confirmDeletePostModal();
               break;
@@ -215,7 +230,9 @@ class _PostCardState extends State<PostCard> {
         },
         itemBuilder: (context) => [
           menuItem(value: 'profile', text: 'Lihat Profil'),
-          if (isOwner) ...[
+          if (isOwner) ...[          
+            const PopupMenuDivider(height: 8),
+            menuItem(value: 'edit', text: 'Edit'),          
             const PopupMenuDivider(height: 8),
             menuItem(value: 'delete', text: 'Hapus'),
           ] else if (canShowUnfollow) ...[
@@ -246,6 +263,10 @@ class _PostCardState extends State<PostCard> {
 
     // Navigate to user profile
     Get.toNamed(AppPages.USER_PROFILE, arguments: {'userId': userId});
+  }
+
+  void _navigateToEditPost() {
+    Get.toNamed(AppPages.CREATE_POST, arguments: post);
   }
 
   void _showReportModal() {

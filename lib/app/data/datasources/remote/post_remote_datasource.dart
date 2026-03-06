@@ -28,6 +28,13 @@ abstract class PostRemoteDataSource {
     List<String>? hashtags,
     String? locationDetails,
   });
+  Future<PostModel> updatePost({
+    required int postId,
+    String? content,
+    List<String>? imageUrls,
+    int? placeId,
+    List<String>? hashtags,
+  });
   Future<void> deletePost(int postId);
 }
 
@@ -255,6 +262,54 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   }
 
   @override
+  Future<PostModel> updatePost({
+    required int postId,
+    String? content,
+    List<String>? imageUrls,
+    int? placeId,
+    List<String>? hashtags,
+  }) async {
+    try {
+      final payload = <String, dynamic>{};
+
+      if (content != null) payload['content'] = content;
+      if (imageUrls != null) payload['image_urls'] = imageUrls;
+      if (placeId != null) payload['place_id'] = placeId;
+
+      if (hashtags != null && hashtags.isNotEmpty) {
+        payload['additional_info'] = {'hashtags': hashtags};
+      }
+
+      final endpoint =
+          ApiEndpoints.postDetail.replaceAll('{id}', postId.toString());
+
+      final response = await dioClient.dio.put(
+        endpoint,
+        data: payload,
+      );
+
+      return extractApiResponseData<PostModel>(
+        response,
+        (json) {
+          final raw = Map<String, dynamic>.from(json as Map<String, dynamic>);
+          final postJson =
+              flattenAdditionalInfoForPost(raw, removeContainer: false);
+          return PostModel.fromJson(postJson);
+        },
+      );
+    } on ApiResponseException catch (e) {
+      if (e.errors != null) {
+        throw ValidationException(e.message, errors: e.errors);
+      }
+      throw ServerException(e.message, e.statusCode ?? 500);
+    } on DioException catch (e) {
+      throw _mapDioException(e);
+    } catch (e) {
+      throw ServerException('Unexpected error occurred: $e', 500);
+    }
+  }
+
+  @override
   Future<void> deletePost(int postId) async {
     try {
       final endpoint =
@@ -266,35 +321,6 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       throw ServerException('Failed to delete post: $e', 500);
     }
   }
-
-  // @override
-  // Future<PostModel> createPost(PostModel post) async {
-  //   try {
-  //     final response = await dio.post('/posts', data: post.toJson());
-  //     return PostModel.fromJson(response.data);
-  //   } catch (e) {
-  //     throw Exception('Failed to create post: $e');
-  //   }
-  // }
-
-  // @override
-  // Future<PostModel> updatePost(PostModel post) async {
-  //   try {
-  //     final response = await dio.put('/posts/${post.id}', data: post.toJson());
-  //     return PostModel.fromJson(response.data);
-  //   } catch (e) {
-  //     throw Exception('Failed to update post: $e');
-  //   }
-  // }
-
-  // @override
-  // Future<void> deletePost(int id) async {
-  //   try {
-  //     await dio.delete('/posts/$id');
-  //   } catch (e) {
-  //     throw Exception('Failed to delete post: $e');
-  //   }
-  // }
 
   Exception _mapDioException(DioException e) {
     final status = e.response?.statusCode;

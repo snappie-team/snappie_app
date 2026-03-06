@@ -125,10 +125,78 @@ class _NotificationsViewState extends State<NotificationsView> {
     );
   }
 
+  /// Navigasi ke halaman sesuai context notifikasi
+  void _handleNotificationTap(NotificationModel notification) {
+    // Tandai sudah dibaca
+    if (!notification.isRead && notification.id != null) {
+      controller.markAsRead(notification.id!);
+    }
+
+    // Navigasi berdasarkan tipe notifikasi
+    switch (notification.notificationType) {
+      case NotificationType.like:
+        if (notification.relatedPostId != null) {
+          Get.toNamed(
+            AppPages.POST_DETAIL,
+            arguments: {'postId': notification.relatedPostId},
+          );
+        }
+        break;
+      case NotificationType.comment:
+        if (notification.relatedPostId != null) {
+          Get.toNamed(
+            AppPages.POST_DETAIL,
+            arguments: {
+              'postId': notification.relatedPostId,
+              'openComments': true,
+            },
+          );
+        }
+        break;
+      case NotificationType.follow:
+        if (notification.relatedUserId != null) {
+          Get.toNamed(
+            AppPages.USER_PROFILE,
+            arguments: {'userId': notification.relatedUserId},
+          );
+        }
+        break;
+      case NotificationType.achievement:
+        // Cek achievement type dari metadata
+        final isChallenge = notification.metadata?['achievement_type'] == 'challenge';
+        if (isChallenge) {
+          Get.toNamed(
+            AppPages.CHALLENGES,
+            arguments: {
+              'autoShowPopup': true,
+              'metadata': notification.metadata,
+            },
+          );
+        } else {
+          Get.toNamed(
+            AppPages.ACHIEVEMENTS,
+            arguments: {
+              'autoShowPopup': true,
+              'metadata': notification.metadata,
+            },
+          );
+        }
+        break;
+      case NotificationType.reward:
+        Get.toNamed(AppPages.REWARDS);
+        break;
+      case NotificationType.system:
+        // Notifikasi sistem tidak memiliki halaman tujuan
+        break;
+    }
+  }
+
   Widget _buildNotificationCard(NotificationModel notification) {
     final isUnread = !notification.isRead;
 
-    return Container(
+    return GestureDetector(
+      onTap: () => _handleNotificationTap(notification),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
@@ -179,6 +247,7 @@ class _NotificationsViewState extends State<NotificationsView> {
               ],
             ),
           ),
+          const SizedBox(width: 4),
           // Action button
           if (notification.actionLabel != null &&
               notification.relatedUserId != null)
@@ -256,6 +325,7 @@ class _NotificationsViewState extends State<NotificationsView> {
             ],
           ),
         ],
+      ),
       ),
     );
   }

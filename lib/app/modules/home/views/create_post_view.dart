@@ -10,6 +10,7 @@ import 'package:snappie_app/app/core/services/cloudinary_service.dart';
 import 'package:snappie_app/app/core/services/logger_service.dart';
 import 'package:snappie_app/app/core/helpers/error_handler.dart';
 import 'package:snappie_app/app/data/models/place_model.dart';
+import 'package:snappie_app/app/data/models/post_model.dart';
 import 'package:snappie_app/app/data/models/user_model.dart';
 import 'package:snappie_app/app/data/repositories/place_repository_impl.dart';
 import 'package:snappie_app/app/data/repositories/post_repository_impl.dart';
@@ -38,6 +39,14 @@ class _CreatePostViewState extends State<CreatePostView> {
   static const int _maxImages = 5;
   bool _hasForcedPlaceSelection = false;
 
+  // Edit mode
+  PostModel? _existingPost;
+  bool get _isEditMode => _existingPost != null;
+  final List<String> _existingImageUrls = [];
+
+  /// Total semua gambar (existing URLs + file baru)
+  int get _totalImages => _existingImageUrls.length + _imageFiles.length;
+
   UserModel? _userData;
   List<PlaceModel> _places = [];
   bool _isLoadingPlaces = false;
@@ -64,6 +73,14 @@ class _CreatePostViewState extends State<CreatePostView> {
       });
     }
 
+    // Cek apakah ada PostModel dari arguments (edit mode)
+    final args = Get.arguments;
+    if (args is PostModel) {
+      _existingPost = args;
+      _contentController.text = args.content ?? '';
+      _existingImageUrls.addAll(args.imageUrls ?? []);
+    }
+
     // Add listener to text controller to update button state
     _contentController.addListener(() {
       setState(() {});
@@ -82,7 +99,7 @@ class _CreatePostViewState extends State<CreatePostView> {
 
   bool get _isFormValid {
     return _contentController.text.trim().isNotEmpty &&
-        _imageFiles.isNotEmpty &&
+        _totalImages > 0 &&
         _selectedPlace != null;
   }
 
@@ -94,8 +111,23 @@ class _CreatePostViewState extends State<CreatePostView> {
       setState(() {
         _userData = userData;
         _places = placeData;
+
+        // Edit mode: cocokkan place dari post dengan daftar places
+        if (_isEditMode && _existingPost!.placeId != null) {
+          _selectedPlace = _places.cast<PlaceModel?>().firstWhere(
+                (p) => p!.id == _existingPost!.placeId,
+                orElse: () => null,
+              );
+          // Jika tidak ditemukan di list, buat PlaceModel dari data post
+          if (_selectedPlace == null && _existingPost!.place != null) {
+            _selectedPlace = PlaceModel()
+              ..id = _existingPost!.placeId
+              ..name = _existingPost!.place?.name;
+          }
+        }
       });
-      if (!_hasForcedPlaceSelection && mounted) {
+      // Hanya force place selection untuk create mode
+      if (!_isEditMode && !_hasForcedPlaceSelection && mounted) {
         _hasForcedPlaceSelection = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted || _selectedPlace != null) return;
@@ -118,7 +150,7 @@ class _CreatePostViewState extends State<CreatePostView> {
     return LoadingOverlayWidget(
       isLoading: _isLoading,
       child: ScaffoldFrame.detail(
-        title: 'Buat Postingan',
+        title: _isEditMode ? 'Edit Postingan' : 'Buat Postingan',
         slivers: [
           SliverFillRemaining(
             hasScrollBody: false,
@@ -144,7 +176,9 @@ class _CreatePostViewState extends State<CreatePostView> {
                               children: [
                                 // Avatar
                                 AvatarWidget(
-                                  imageUrl: _userData?.imageUrl ?? '',
+                                  imageUrl: _userData?.imageUrl ??
+                                      _existingPost?.user?.imageUrl ??
+                                      '',
                                   size: AvatarSize.medium,
                                 ),
                                 const SizedBox(width: 12),
@@ -170,7 +204,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                           ),
 
                         // Image carousel
-                        if (_imageFiles.isNotEmpty)
+                        if (_totalImages > 0)
                           AspectRatio(
                             aspectRatio: 1,
                             child: Container(
@@ -184,17 +218,41 @@ class _CreatePostViewState extends State<CreatePostView> {
                                     onPageChanged: (index) {
                                       setState(() => _currentImageIndex = index);
                                     },
-                                    itemCount: _imageFiles.length,
+                                    itemCount: _totalImages,
                                     itemBuilder: (context, index) {
-                                      return Image.file(
-                                        _imageFiles[index],
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
-                                      );
+                                      if (index < _existingImageUrls.length) {
+                                        // Gambar existing (URL)
+                                        return Image.network(
+                                          _existingImageUrls[index],
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            return Container(
+                                              color: AppColors.surface,
+                                              child: Icon(
+                                                Icons.broken_image,
+                                                color:
+                                                    AppColors.textTertiary,
+                                                size: 64,
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      } else {
+                                        // Gambar baru (File)
+                                        final fileIndex = index -
+                                            _existingImageUrls.length;
+                                        return Image.file(
+                                          _imageFiles[fileIndex],
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                        );
+                                      }
                                     },
                                   ),
                                 // Image counter
-                                if (_imageFiles.length > 1)
+                                if (_totalImages > 1)
                                   Positioned(
                                     top: 8,
                                     left: 8,
@@ -206,7 +264,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Text(
-                                        '${_currentImageIndex + 1}/${_imageFiles.length}',
+                                        '${_currentImageIndex + 1}/$_totalImages',
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 12,
@@ -220,19 +278,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                                   top: 8,
                                   right: 8,
                                   child: IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _imageFiles
-                                            .removeAt(_currentImageIndex);
-                                        if (_currentImageIndex >=
-                                                _imageFiles.length &&
-                                            _currentImageIndex > 0) {
-                                          _currentImageIndex--;
-                                          _pageController
-                                              .jumpToPage(_currentImageIndex);
-                                        }
-                                      });
-                                    },
+                                    onPressed: _removeCurrentImage,
                                     icon: AppIcon(
                                       AppAssets.icons.close,
                                       color: AppColors.textOnPrimary,
@@ -373,7 +419,9 @@ class _CreatePostViewState extends State<CreatePostView> {
                           child: ElevatedButton(
                             onPressed: (_isLoading || !_isFormValid)
                                 ? null
-                                : _submitPost,
+                                : _isEditMode
+                                    ? _submitEdit
+                                    : _submitPost,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
                               foregroundColor: AppColors.textOnPrimary,
@@ -395,7 +443,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                                     ),
                                   )
                                 : Text(
-                                    'Unggah',
+                                    _isEditMode ? 'Simpan' : 'Unggah',
                                     style: TextStyle(
                                       color: AppColors.textOnPrimary,
                                       fontWeight: FontWeight.w600,
@@ -582,7 +630,7 @@ class _CreatePostViewState extends State<CreatePostView> {
   Future<void> _pickImage() async {
     try {
       // Check if already at max limit
-      if (_imageFiles.length >= _maxImages) {
+      if (_totalImages >= _maxImages) {
         AppSnackbar.warning('Maksimal $_maxImages gambar', title: 'Batas Maksimal');
         return;
       }
@@ -596,7 +644,7 @@ class _CreatePostViewState extends State<CreatePostView> {
       if (pickedFiles.isNotEmpty) {
         setState(() {
           // Add files up to the max limit
-          final remainingSlots = _maxImages - _imageFiles.length;
+          final remainingSlots = _maxImages - _totalImages;
           final filesToAdd = pickedFiles.take(remainingSlots);
 
           for (var file in filesToAdd) {
@@ -703,6 +751,102 @@ class _CreatePostViewState extends State<CreatePostView> {
     } catch (e) {
       Logger.error('Failed to create post', e, null, 'CreatePostView');
       AppSnackbar.error('Tidak dapat membuat postingan, silakan coba lagi');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _removeCurrentImage() {
+    setState(() {
+      if (_currentImageIndex < _existingImageUrls.length) {
+        // Hapus gambar existing (URL)
+        _existingImageUrls.removeAt(_currentImageIndex);
+      } else {
+        // Hapus gambar baru (File)
+        final fileIndex = _currentImageIndex - _existingImageUrls.length;
+        _imageFiles.removeAt(fileIndex);
+      }
+      // Perbaiki index jika melebihi total
+      if (_currentImageIndex >= _totalImages && _currentImageIndex > 0) {
+        _currentImageIndex--;
+        _pageController.jumpToPage(_currentImageIndex);
+      }
+    });
+  }
+
+  Future<void> _submitEdit() async {
+    if (_selectedPlace == null) {
+      AppSnackbar.error('Pilih tempat terlebih dahulu');
+      return;
+    }
+
+    if (_contentController.text.trim().isEmpty) {
+      AppSnackbar.error('Konten tidak boleh kosong');
+      return;
+    }
+
+    try {
+      setState(() => _isLoading = true);
+
+      // Upload gambar baru ke Cloudinary
+      List<String> newUploadedUrls = [];
+      if (_imageFiles.isNotEmpty) {
+        Logger.debug(
+            'Uploading ${_imageFiles.length} new images...', 'CreatePostView');
+
+        for (int i = 0; i < _imageFiles.length; i++) {
+          final file = _imageFiles[i];
+          try {
+            final result = await _cloudinaryService.uploadPostImage(file);
+            if (result.success && result.secureUrl != null) {
+              newUploadedUrls.add(result.secureUrl!);
+            } else {
+              AppSnackbar.warning(
+                  'Gagal upload gambar baru ${i + 1}: ${result.error}',
+                  duration: const Duration(seconds: 2));
+            }
+          } catch (uploadError) {
+            Logger.error('Exception uploading image ${i + 1}', uploadError,
+                null, 'CreatePostView');
+            AppSnackbar.warning('Error upload gambar ${i + 1}',
+                duration: const Duration(seconds: 2));
+          }
+        }
+      }
+
+      // Gabungkan URL existing + URL baru
+      final allImageUrls = [..._existingImageUrls, ...newUploadedUrls];
+
+      if (allImageUrls.isEmpty) {
+        AppSnackbar.error('Post harus memiliki minimal 1 gambar');
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      Logger.debug(
+          'Updating post ${_existingPost!.id} with ${allImageUrls.length} images...',
+          'CreatePostView');
+
+      final updatedPost = await _postRepository.updatePost(
+        postId: _existingPost!.id!,
+        content: _contentController.text.trim(),
+        imageUrls: allImageUrls,
+        placeId: _selectedPlace!.id!,
+      );
+
+      // Update home feed
+      try {
+        final homeController = Get.find<HomeController>();
+        homeController.updatePost(updatedPost);
+      } catch (_) {
+        // HomeController mungkin belum terdaftar
+      }
+
+      Get.back(result: updatedPost);
+      AppSnackbar.success('Postingan berhasil diperbarui');
+    } catch (e) {
+      Logger.error('Failed to update post', e, null, 'CreatePostView');
+      AppSnackbar.error('Gagal memperbarui postingan. Silakan coba lagi');
     } finally {
       setState(() => _isLoading = false);
     }

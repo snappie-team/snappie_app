@@ -8,7 +8,7 @@ import '../../shared/widgets/index.dart';
 import '../../shared/widgets/_card_widgets/post_card.dart';
 
 /// Post Detail View - Full screen view for a single post
-/// Menerima postId dari arguments: {'postId': int}
+/// Menerima postId dari arguments: {'postId': int, 'openComments': bool?}
 class PostDetailView extends StatefulWidget {
   const PostDetailView({super.key});
 
@@ -20,6 +20,7 @@ class _PostDetailViewState extends State<PostDetailView> {
   final _postRepository = Get.find<PostRepository>();
 
   late int _postId;
+  bool _openComments = false;
 
   bool _isLoading = true;
   // bool _isLoadingComments = false;
@@ -34,6 +35,7 @@ class _PostDetailViewState extends State<PostDetailView> {
     super.initState();
     final args = Get.arguments as Map<String, dynamic>?;
     _postId = args?['postId'] ?? 0;
+    _openComments = args?['openComments'] == true;
 
     if (_postId == 0) {
       setState(() {
@@ -90,7 +92,10 @@ class _PostDetailViewState extends State<PostDetailView> {
               )
             : SliverFillRemaining(
                 hasScrollBody: false,
-                child: PostCard(post: _post!),
+                child: PostCard(
+                  post: _post!,
+                  autoOpenComments: _openComments,
+                ),
               ),
       ],
     );

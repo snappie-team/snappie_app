@@ -114,6 +114,29 @@ class PostRepository {
     );
   }
 
+  /// Update a post
+  /// Returns the updated PostModel
+  /// Throws: [NetworkException], [ServerException], [AuthenticationException], [AuthorizationException], [ValidationException]
+  Future<PostModel> updatePost({
+    required int postId,
+    String? content,
+    List<String>? imageUrls,
+    int? placeId,
+    List<String>? hashtags,
+  }) async {
+    if (!(await networkInfo.isConnected)) {
+      throw NetworkException('No internet connection');
+    }
+
+    return await remoteDataSource.updatePost(
+      postId: postId,
+      content: content,
+      imageUrls: imageUrls,
+      placeId: placeId,
+      hashtags: hashtags,
+    );
+  }
+
   /// Delete a post
   /// Throws: [NetworkException], [ServerException], [AuthenticationException], [AuthorizationException]
   Future<void> deletePost(int postId) async {

@@ -86,20 +86,16 @@ class _ReviewsViewState extends State<ReviewsView> {
     }
 
     return Obx(() {
-      return LoadingOverlayWidget(
-        isLoading: controller.isLoadingReviews,
-        message: 'Memuat ulasan...',
-        child: ScaffoldFrame.detail(
-          title: 'Ulasan',
-          onRefresh: () async {
-            await controller.loadPlaceReviews(place.id!);
-          },
-          slivers: [
-            SliverToBoxAdapter(
-              child: _buildContent(context, place),
-            ),
-          ],
-        ),
+      return ScaffoldFrame.detail(
+        title: 'Ulasan',
+        onRefresh: () async {
+          await controller.loadPlaceReviews(place.id!);
+        },
+        slivers: [
+          SliverToBoxAdapter(
+            child: _buildContent(context, place),
+          ),
+        ],
       );
     });
   }
@@ -273,6 +269,7 @@ class _ReviewsViewState extends State<ReviewsView> {
     int? tempSelected = _selectedRating;
 
     showModalBottomSheet<void>(
+      isScrollControlled: true,
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/routes/app_pages.dart';
 import '../controllers/explore_controller.dart';
@@ -151,6 +152,7 @@ class ExploreView extends GetView<ExploreController> {
   void _showPlaceValueDropdown() {
     showModalBottomSheet(
       context: Get.context!,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -221,7 +223,7 @@ class ExploreView extends GetView<ExploreController> {
                           placeValue,
                           maxLines: 2,
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: FontSize.getSize(FontSizeOption.mediumSmall),
                             fontWeight: FontWeight.w500,
                             color: isSelected ? AppColors.primary : Colors.black87,
                           ),
@@ -272,6 +274,7 @@ class ExploreView extends GetView<ExploreController> {
   void _showFoodTypeDropdown() {
     showModalBottomSheet(
       context: Get.context!,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -342,7 +345,7 @@ class ExploreView extends GetView<ExploreController> {
                           foodType,
                           maxLines: 2,
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: FontSize.getSize(FontSizeOption.mediumSmall),
                             fontWeight: FontWeight.w500,
                             color: isSelected ? AppColors.primary : Colors.black87,
                           ),
@@ -395,6 +398,7 @@ class ExploreView extends GetView<ExploreController> {
   void _showRatingDropdown() {
     showModalBottomSheet(
       context: Get.context!,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -485,6 +489,7 @@ class ExploreView extends GetView<ExploreController> {
   void _showPriceDropdown() {
     showModalBottomSheet(
       context: Get.context!,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),

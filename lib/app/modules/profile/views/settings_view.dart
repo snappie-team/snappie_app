@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/core/constants/app_constants.dart';
 import '../../../core/constants/app_colors.dart';
@@ -62,6 +61,13 @@ class SettingsView extends StatelessWidget {
                     iconAsset: AppAssets.icons.faq,
                     title: 'FAQ',
                     onTap: () => Get.toNamed(AppPages.FAQ),
+                  ),
+
+                  // Masukan & Saran
+                  _buildMenuItem(
+                    icon: Icons.rate_review_outlined,
+                    title: 'Masukan & Saran',
+                    onTap: () => Get.toNamed(AppPages.APP_FEEDBACK),
                   ),
 
                   _buildMenuItem(
@@ -267,100 +273,150 @@ class SettingsView extends StatelessWidget {
           ];
 
     String currentAvatar = controller.userAvatar;
+    String? pendingAvatar;
+    bool isSaving = false;
 
-    bool isSelected(String avatar) {
-      // Support both asset names and full URLs
+    bool isCurrentAvatar(String avatar) {
       return currentAvatar.endsWith(avatar) || currentAvatar.contains(avatar);
     }
 
     Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Handle bar
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
+      StatefulBuilder(
+        builder: (context, setSheetState) {
+          return Container(
+            padding: const EdgeInsets.all(24),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
-            const SizedBox(height: 20),
-
-            // Title
-            const Text(
-              'Pilih Avatar',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Avatar grid
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              itemCount: avatars.length,
-              itemBuilder: (context, index) {
-                final avatar = avatars[index];
-                final selected = isSelected(avatar);
-                return GestureDetector(
-                  onTap: () async {
-                    Get.back();
-                    // Update avatar
-                    try {
-                      await controller.userRepository.updateUserProfile(
-                        imageUrl:
-                            'https://res.cloudinary.com/deqnkuhbv/image/upload/v1761044273/snappie/assets/avatar/$avatar',
-                      );
-                      await controller.loadUserProfile();
-                      AppSnackbar.success('Avatar berhasil diubah');
-                    } catch (e) {
-                      AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'SettingsView'));
-                    }
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: selected
-                            ? AppColors.primary
-                            : AppColors.backgroundContainer,
-                        width: selected ? 3 : 2,
-                      ),
-                    ),
-                    child: AvatarWidget(
-                      imageUrl: avatar,
-                      size: AvatarSize.large,
-                    ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Handle bar
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                );
-              },
+                ),
+                const SizedBox(height: 20),
+
+                // Title
+                const Text(
+                  'Pilih Avatar',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Avatar grid
+                GridView.builder(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                  ),
+                  itemCount: avatars.length,
+                  itemBuilder: (context, index) {
+                    final avatar = avatars[index];
+                    final isActive = pendingAvatar != null
+                        ? pendingAvatar == avatar
+                        : isCurrentAvatar(avatar);
+                    return GestureDetector(
+                      onTap: () {
+                        setSheetState(() => pendingAvatar = avatar);
+                      },
+                      child: Container(
+                        decoration: isActive
+                            ? BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.05),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: AppColors.primary,
+                                  width: 4,
+                                ),
+                              )
+                            : null,
+                        child: AvatarWidget(
+                          imageUrl: avatar,
+                          size: AvatarSize.extraLarge,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                // Tombol Simpan
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: (pendingAvatar != null &&
+                            !isCurrentAvatar(pendingAvatar!) &&
+                            !isSaving)
+                        ? () async {
+                            setSheetState(() => isSaving = true);
+                            try {
+                              await controller.userRepository.updateUserProfile(
+                                imageUrl:
+                                    'https://res.cloudinary.com/deqnkuhbv/image/upload/v1761044273/snappie/assets/avatar/$pendingAvatar',
+                              );
+                              await controller.loadUserProfile();
+                              Get.back();
+                              AppSnackbar.success('Avatar berhasil diubah');
+                            } catch (e) {
+                              setSheetState(() => isSaving = false);
+                              AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'SettingsView'));
+                            }
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      disabledBackgroundColor: AppColors.shadowDark,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: isSaving
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Simpan',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
             ),
-            const SizedBox(height: 16),
-          ],
-        ),
+          );
+        },
       ),
       isScrollControlled: true,
     );
   }
 
-  void _showFramePicker(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    final currentFrame = prefs.getString('selected_frame');
+  void _showFramePicker(BuildContext context) {
+    final profileController = Get.find<ProfileController>();
+    final currentFrameAsset = profileController.selectedFrameUrl.value;
 
     final frames = [
       {'id': 'none', 'name': 'Tanpa Bingkai', 'asset': ''},
@@ -369,139 +425,190 @@ class SettingsView extends StatelessWidget {
       {'id': 'mvp', 'name': 'MVP', 'asset': AppAssets.frames.mvp},
     ];
 
+    String? pendingFrameId;
+    bool isSaving = false;
+
     Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Handle bar
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
+      StatefulBuilder(
+        builder: (context, setSheetState) {
+          return Container(
+            padding: const EdgeInsets.all(24),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
-            const SizedBox(height: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Handle bar
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 20),
 
-            // Title
-            const Text(
-              'Pilih Bingkai',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Bingkai akan ditampilkan di avatar kamu',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 20),
+                // Title
+                const Text(
+                  'Pilih Bingkai',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Bingkai akan ditampilkan di avatar kamu',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 20),
 
-            // Frame grid
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.85,
-              ),
-              itemCount: frames.length,
-              itemBuilder: (context, index) {
-                final frame = frames[index];
-                final frameId = frame['id']!;
-                final frameName = frame['name']!;
-                final frameAsset = frame['asset']!;
-                final isSelected = currentFrame == frameId ||
-                    (currentFrame == null && frameId == 'none');
+                // Frame grid
+                GridView.builder(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.85,
+                  ),
+                  itemCount: frames.length,
+                  itemBuilder: (context, index) {
+                    final frame = frames[index];
+                    final frameId = frame['id']!;
+                    final frameName = frame['name']!;
+                    final frameAsset = frame['asset']!;
+                    final isActive = pendingFrameId != null
+                        ? pendingFrameId == frameId
+                        : (frameAsset == (currentFrameAsset ?? '') );
 
-                return GestureDetector(
-                  onTap: () async {
-                    Get.back();
-                    try {
-                      // Get ProfileController
-                      final ProfileController profileController =
-                          Get.find<ProfileController>();
-
-                      // Update frame using controller method
-                      await profileController.updateSelectedFrame(
-                        frameId == 'none' ? null : frameAsset,
-                      );
-
-                      AppSnackbar.success('Bingkai berhasil diubah');
-                    } catch (e) {
-                      AppSnackbar.error('Tidak dapat mengubah bingkai');
-                    }
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isSelected
-                            ? AppColors.primary
-                            : Colors.grey.shade300,
-                        width: isSelected ? 3 : 2,
-                      ),
-                      color: isSelected
-                          ? AppColors.primary.withOpacity(0.05)
-                          : Colors.white,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (frameAsset.isEmpty)
-                          Icon(
-                            Icons.block,
-                            size: 48,
-                            color: isSelected ? AppColors.primary : Colors.grey,
-                          )
-                        else
-                          SizedBox(
-                            width: 80,
-                            height: 80,
-                            child: Image.asset(
-                              frameAsset,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stack) => Icon(
-                                Icons.broken_image,
+                    return GestureDetector(
+                      onTap: () {
+                        setSheetState(() => pendingFrameId = frameId);
+                      },
+                      child: Container(
+                        decoration: isActive
+                            ? BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: AppColors.primary,
+                                  width: 3,
+                                ),
+                                color: AppColors.primary.withOpacity(0.05),
+                              )
+                            : null,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (frameAsset.isEmpty)
+                              Icon(
+                                Icons.block,
                                 size: 48,
-                                color: Colors.grey,
+                                color: isActive ? AppColors.primary : Colors.grey,
+                              )
+                            else
+                              SizedBox(
+                                width: 80,
+                                height: 80,
+                                child: Image.asset(
+                                  frameAsset,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stack) => Icon(
+                                    Icons.broken_image,
+                                    size: 48,
+                                    color: Colors.grey,
+                                  ),
+                                ),
                               ),
+                            const SizedBox(height: 12),
+                            Text(
+                              frameName,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight:
+                                    isActive ? FontWeight.w700 : FontWeight.w500,
+                                color:
+                                    isActive ? AppColors.primary : Colors.black87,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                // Tombol Simpan
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: (pendingFrameId != null &&
+                            pendingFrameId != (frames.firstWhereOrNull(
+                                (f) => f['asset'] == (currentFrameAsset ?? '')))?['id'] &&
+                            !isSaving)
+                        ? () async {
+                            setSheetState(() => isSaving = true);
+                            try {
+                              final ProfileController profileController =
+                                  Get.find<ProfileController>();
+                              final selectedFrame = frames.firstWhere(
+                                  (f) => f['id'] == pendingFrameId);
+                              final frameAsset = selectedFrame['asset']!;
+
+                              await profileController.updateSelectedFrame(
+                                pendingFrameId == 'none' ? null : frameAsset,
+                              );
+
+                              Get.back();
+                              AppSnackbar.success('Bingkai berhasil diubah');
+                            } catch (e) {
+                              setSheetState(() => isSaving = false);
+                              AppSnackbar.error('Tidak dapat mengubah bingkai');
+                            }
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      disabledBackgroundColor: AppColors.shadowDark,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: isSaving
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Simpan',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
                             ),
                           ),
-                        const SizedBox(height: 12),
-                        Text(
-                          frameName,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight:
-                                isSelected ? FontWeight.w700 : FontWeight.w500,
-                            color:
-                                isSelected ? AppColors.primary : Colors.black87,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
                   ),
-                );
-              },
+                ),
+                const SizedBox(height: 16),
+              ],
             ),
-            const SizedBox(height: 16),
-          ],
-        ),
+          );
+        },
       ),
       isScrollControlled: true,
     );

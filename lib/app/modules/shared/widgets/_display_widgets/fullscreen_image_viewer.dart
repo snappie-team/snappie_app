@@ -10,6 +10,8 @@ class FullscreenImageViewer {
   /// [imageUrls] - List of image URLs to display
   /// [initialIndex] - Starting index in the image list (default: 0)
   /// [postOverlay] - Optional PostModel to show user info overlay (for social posts)
+  /// [imageLabels] - Optional list of labels (e.g. usernames) to show per image at the top
+  /// [imageLabelAvatars] - Optional list of avatar URLs corresponding to imageLabels
   static void show({
     required BuildContext context,
     required List<String> imageUrls,
@@ -17,6 +19,8 @@ class FullscreenImageViewer {
     bool isCarousel = false,
     PostModel? postOverlay,
     WidgetBuilder? postActionsBuilder,
+    List<String?>? imageLabels,
+    List<String?>? imageLabelAvatars,
   }) {
     if (imageUrls.isEmpty) return;
     
@@ -102,6 +106,52 @@ class FullscreenImageViewer {
                       ),
                     ),
                   ),
+                  // Label overlay (username) di atas gambar
+                  if (imageLabels != null &&
+                      currentIndex < imageLabels.length &&
+                      imageLabels[currentIndex] != null &&
+                      imageLabels[currentIndex]!.isNotEmpty)
+                    Positioned(
+                      top: mediaQuery.padding.top,
+                      left: 20,
+                      right: 60, // Beri ruang untuk tombol close
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (imageLabelAvatars != null &&
+                                currentIndex < imageLabelAvatars.length &&
+                                imageLabelAvatars[currentIndex] != null &&
+                                imageLabelAvatars[currentIndex]!.isNotEmpty)
+                              ...[
+                                AvatarWidget(
+                                  imageUrl:
+                                      imageLabelAvatars[currentIndex]!,
+                                  size: AvatarSize.small,
+                                ),
+                                const SizedBox(width: 8),
+                              ],
+                            Flexible(
+                              child: Text(
+                                imageLabels[currentIndex]!,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   if (showCarousel)
                     Positioned(
                       bottom: mediaQuery.padding.bottom + 12,

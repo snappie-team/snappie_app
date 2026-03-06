@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:snappie_app/app/core/constants/app_assets.dart';
 import 'package:snappie_app/app/core/constants/app_colors.dart';
+import 'package:snappie_app/app/core/constants/font_size.dart';
 import 'package:snappie_app/app/core/localization/locale_keys.g.dart';
 import '../controllers/onboarding_controller.dart';
 
@@ -26,21 +27,18 @@ class OnboardingView extends GetView<OnboardingController> {
                     children: [
                       _buildOnboardingPage(
                         imagePath: AppAssets.images.onboarding1,
-                        height: 300,
                         title: tr(LocaleKeys.onboarding_page1_title),
                         description:
                             tr(LocaleKeys.onboarding_page1_description),
                       ),
                       _buildOnboardingPage(
                         imagePath: AppAssets.images.onboarding2,
-                        height: 200,
                         title: tr(LocaleKeys.onboarding_page2_title),
                         description:
                             tr(LocaleKeys.onboarding_page2_description),
                       ),
                       _buildOnboardingPage(
                         imagePath: AppAssets.images.onboarding3,
-                        height: 300,
                         title: tr(LocaleKeys.onboarding_page3_title),
                         description:
                             tr(LocaleKeys.onboarding_page3_description),
@@ -59,7 +57,6 @@ class OnboardingView extends GetView<OnboardingController> {
 
   Widget _buildOnboardingPage({
     required String imagePath,
-    required double height,
     required String title,
     required String description,
   }) {
@@ -71,7 +68,7 @@ class OnboardingView extends GetView<OnboardingController> {
           // Image
           Image.asset(
             imagePath,
-            height: height,
+            height: 200,
             fit: BoxFit.contain,
           ),
           const SizedBox(height: 16),
@@ -85,12 +82,12 @@ class OnboardingView extends GetView<OnboardingController> {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           // Description
           Text(
             description,
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: FontSize.getSize(FontSizeOption.medium),
               color: Colors.black54,
               height: 1.5,
             ),

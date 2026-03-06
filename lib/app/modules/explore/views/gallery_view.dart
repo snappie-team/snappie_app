@@ -133,26 +133,47 @@ class _GalleryViewState extends State<GalleryView> {
       return _buildEmptyState('Belum ada foto dari tempat ini');
     }
 
+    final labels = (place?.imageUrls ?? [])
+        .where((img) => img.url != null)
+        .map((img) => img.description ?? '')
+        .toList();
+
     return _buildPhotoGrid(
       photos: photos,
       showLabel: true,
+      imageLabels: labels,
     );
   }
 
-  /// Tab 2: Galeri Misi - from checkin.imageUrl
+  /// Tab 2: Galeri Misi - from checkin.imageUrl, tampilkan username di fullscreen
   Widget _buildGaleriMisiTab() {
     return Obx(() {
       if (controller.isLoadingGalleryCheckins) {
         return const Center(child: CircularProgressIndicator());
       }
 
-      final photos = controller.galleryCheckinImages;
+      final checkins = controller.galleryCheckins
+          .where((c) => c.imageUrl != null && c.imageUrl!.isNotEmpty)
+          .toList();
 
-      if (photos.isEmpty) {
+      if (checkins.isEmpty) {
         return _buildEmptyState('Belum ada foto misi dari pengunjung');
       }
 
-      return _buildPhotoGrid(photos: photos);
+      final photos = checkins.map((c) => c.imageUrl!).toList();
+      // Sembunyikan username jika checkin bersifat anonim
+      final labels = checkins.map((c) =>
+        (c.isAnonymous == true) ? 'Anonim' : (c.user?.name ?? c.user?.username)
+      ).toList();
+      final avatars = checkins.map((c) =>
+        (c.isAnonymous == true) ? null : c.user?.imageUrl
+      ).toList();
+
+      return _buildPhotoGrid(
+        photos: photos,
+        imageLabels: labels,
+        imageLabelAvatars: avatars,
+      );
     });
   }
 
@@ -206,6 +227,8 @@ class _GalleryViewState extends State<GalleryView> {
   Widget _buildPhotoGrid({
     required List<String> photos,
     bool showLabel = false,
+    List<String?>? imageLabels,
+    List<String?>? imageLabelAvatars,
   }) {
     return GridView.builder(
       padding: const EdgeInsets.all(16),
@@ -222,6 +245,8 @@ class _GalleryViewState extends State<GalleryView> {
           photos: photos,
           index: index,
           showLabel: showLabel,
+          imageLabels: imageLabels,
+          imageLabelAvatars: imageLabelAvatars,
         );
       },
     );
@@ -232,14 +257,18 @@ class _GalleryViewState extends State<GalleryView> {
     required List<String> photos,
     required int index,
     bool showLabel = false,
+    List<String?>? imageLabels,
+    List<String?>? imageLabelAvatars,
   }) {
     return GestureDetector(
       onTap: () {
         FullscreenImageViewer.show(
-            context: context,
-            imageUrls: photos,
-            initialIndex: index,
-          isCarousel: true
+          context: context,
+          imageUrls: photos,
+          initialIndex: index,
+          isCarousel: true,
+          imageLabels: imageLabels,
+          imageLabelAvatars: imageLabelAvatars,
         );
       },
       child: ClipRRect(

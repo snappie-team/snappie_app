@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2026-03-07
+### Added
+- Validasi ketersediaan username secara real-time saat registrasi
+- Dukungan endpoint `check-username` pada layer API auth
+
+### Changed
+- Gambar jaringan dimigrasikan ke `CachedNetworkImage` di berbagai halaman untuk loading/error handling yang lebih konsisten
+- Preload data tab utama saat startup agar perpindahan tab terasa lebih cepat
+- Splash screen Android 12 diperbarui dengan resource native terbaru
+
+### Fixed
+- Pesan error registrasi kini lebih jelas (termasuk kasus username/email sudah dipakai)
+- UX onboarding dan register diperbaiki agar alur input lebih stabil
+
 ## [1.3.0] - 2026-03-07
 ### Added
 - Sistem klaim tantangan dengan 3 status UI (sedang berlangsung → ambil hadiah → sudah diklaim)

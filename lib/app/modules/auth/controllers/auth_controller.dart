@@ -49,6 +49,11 @@ class AuthController extends GetxController {
   final _isFirstnameValid = false.obs;
   final _isLastnameValid = false.obs;
   final _isUsernameValid = false.obs;
+  final _isUsernameAvailable = true.obs;
+  final _isCheckingUsername = false.obs;
+  final _usernameError = Rxn<String>();
+
+  int _usernameCheckVersion = 0;
 
   List<String> get foodTypes => FoodTypeExtension.allLabels;
   List<String> get placeValues => PlaceValueExtension.allLabels;
@@ -80,6 +85,9 @@ class AuthController extends GetxController {
   RxBool get isFirstnameValid => _isFirstnameValid;
   RxBool get isLastnameValid => _isLastnameValid;
   RxBool get isUsernameValid => _isUsernameValid;
+  RxBool get isUsernameAvailable => _isUsernameAvailable;
+  RxBool get isCheckingUsername => _isCheckingUsername;
+  Rxn<String> get usernameError => _usernameError;
 
   // Keep controller alive during auth flow
   @override
@@ -104,7 +112,40 @@ class AuthController extends GetxController {
     usernameController.addListener(() {
       final username = usernameController.text.trim();
       _isUsernameValid.value = username.length >= 8;
+
+      // Reset availability when typing
+      if (username.length < 8) {
+        _isUsernameAvailable.value = true;
+        _usernameError.value = null;
+        _isCheckingUsername.value = false;
+        return;
+      }
+
+      // Debounced availability check
+      _isCheckingUsername.value = true;
+      _usernameError.value = null;
+      _usernameCheckVersion++;
+      final currentVersion = _usernameCheckVersion;
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (_usernameCheckVersion == currentVersion) {
+          _checkUsernameAvailability(username);
+        }
+      });
     });
+  }
+
+  Future<void> _checkUsernameAvailability(String username) async {
+    try {
+      final available = await authService.checkUsernameAvailability(username);
+      // Only update if username hasn't changed
+      if (usernameController.text.trim() == username) {
+        _isUsernameAvailable.value = available;
+        _isCheckingUsername.value = false;
+        _usernameError.value = available ? null : 'Username sudah digunakan';
+      }
+    } catch (_) {
+      _isCheckingUsername.value = false;
+    }
   }
 
   @override
@@ -309,7 +350,7 @@ class AuthController extends GetxController {
     final startTime = DateTime.now();
 
     try {
-      final success = await authService.registerUser(
+      final error = await authService.registerUser(
         name:
             '${firstnameController.text.trim()} ${lastnameController.text.trim()}',
         username: usernameController.text.trim(),
@@ -329,7 +370,7 @@ class AuthController extends GetxController {
       // Close modal before proceeding
       ProcessingModal.hide();
 
-      if (success) {
+      if (error == null) {
         // Set loading false before navigation
         _isRegisterLoading.value = false;
 
@@ -354,7 +395,7 @@ class AuthController extends GetxController {
       } else {
         _showSnackbar(
           'Gagal',
-          'Registrasi gagal. Silakan coba lagi.',
+          error,
           Colors.red,
         );
       }
@@ -412,6 +453,15 @@ class AuthController extends GetxController {
       _showSnackbar(
         'Error',
         'Username must be at least 8 characters long',
+        Colors.red,
+      );
+      return false;
+    }
+
+    if (!_isUsernameAvailable.value) {
+      _showSnackbar(
+        'Error',
+        'Username sudah digunakan. Silakan pilih username lain.',
         Colors.red,
       );
       return false;

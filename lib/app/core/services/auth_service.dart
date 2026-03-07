@@ -359,7 +359,43 @@ class AuthService extends GetxService {
   }
 
   // TODO: replace /auth/login email-only with Firebase-ID-token check before public release.
-  Future<bool> registerUser({
+
+  /// Check if a username is available. Returns `true` if available.
+  Future<bool> checkUsernameAvailability(String username) async {
+    try {
+      final dio = dio_lib.Dio(
+        dio_lib.BaseOptions(
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+        ),
+      );
+
+      final requestUrl = ApiEndpoints.getFullUrl(ApiEndpoints.checkUsername);
+      final response = await dio.post(
+        requestUrl,
+        data: {'username': username},
+        options: dio_lib.Options(
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ${EnvironmentConfig.registrationApiKey}',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return data['data']?['available'] == true;
+      }
+      return false;
+    } catch (e) {
+      Logger.error('CHECK USERNAME ERROR', e, null, 'Auth');
+      return false;
+    }
+  }
+
+  /// Returns `null` on success, or an error message string on failure.
+  Future<String?> registerUser({
     required String name,
     required String username,
     required String email,
@@ -423,15 +459,15 @@ class AuthService extends GetxService {
           final loginResult = await loginWithEmail(email);
 
           if (!loginResult.success) {
-            return false;
+            return 'Registrasi berhasil, tetapi login otomatis gagal. Silakan login manual.';
           }
 
-          return true;
+          return null; // success
         } else {
-          return false;
+          return 'Registrasi gagal. Silakan coba lagi.';
         }
       } else {
-        return false;
+        return 'Registrasi gagal. Silakan coba lagi.';
       }
     } catch (e) {
       Logger.error('REGISTRATION ERROR', e, null, 'Auth');
@@ -441,9 +477,35 @@ class AuthService extends GetxService {
         Logger.debug('DioError Message: ${e.message}', 'Auth');
         Logger.debug('DioError Response: ${e.response?.data}', 'Auth');
         Logger.debug('DioError Status: ${e.response?.statusCode}', 'Auth');
+
+        // Parse 422 validation errors
+        if (e.response?.statusCode == 422) {
+          final data = e.response?.data;
+          if (data is Map<String, dynamic>) {
+            final errors = data['errors'];
+            if (errors is Map<String, dynamic>) {
+              if (errors.containsKey('username')) {
+                return 'Username sudah digunakan. Silakan pilih username lain.';
+              }
+              if (errors.containsKey('email')) {
+                return 'Email sudah terdaftar.';
+              }
+              // Return first validation error
+              final firstError = errors.values.first;
+              if (firstError is List && firstError.isNotEmpty) {
+                return firstError.first.toString();
+              }
+            }
+            // Try 'message' field
+            if (data.containsKey('message')) {
+              return data['message'].toString();
+            }
+          }
+          return 'Data tidak valid. Silakan periksa kembali.';
+        }
       }
 
-      return false;
+      return 'Registrasi gagal. Silakan coba lagi.';
     }
   }
 

@@ -60,47 +60,60 @@ class OnboardingView extends GetView<OnboardingController> {
     required String title,
     required String description,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Image
-          Image.asset(
-            imagePath,
-            height: 200,
-            fit: BoxFit.contain,
-          ),
-          const SizedBox(height: 16),
-          // Title
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableHeight = constraints.maxHeight;
+        final imageHeight = (availableHeight * 0.45).clamp(120.0, 250.0);
+        final spacing = availableHeight < 400 ? 8.0 : 16.0;
+
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: availableHeight),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Image
+                  Image.asset(
+                    imagePath,
+                    height: imageHeight,
+                    fit: BoxFit.contain,
+                  ),
+                  SizedBox(height: spacing),
+                  // Title
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: spacing / 2),
+                  // Description
+                  Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: FontSize.getSize(FontSizeOption.medium),
+                      color: Colors.black54,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
-            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
-          // Description
-          Text(
-            description,
-            style: TextStyle(
-              fontSize: FontSize.getSize(FontSizeOption.medium),
-              color: Colors.black54,
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildBottomSection() {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
       child: Column(
         children: [
           // Page indicators
@@ -113,7 +126,7 @@ class OnboardingView extends GetView<OnboardingController> {
                   ),
                 ),
               )),
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
           // Buttons
           Obx(() {
             final isFirstPage = controller.currentPage.value == 0;

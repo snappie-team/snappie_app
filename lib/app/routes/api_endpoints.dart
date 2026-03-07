@@ -9,6 +9,7 @@ class ApiEndpoints {
   // Auth endpoints
   static const String login = '/auth/login';
   static const String register = '/auth/register';
+  static const String checkUsername = '/auth/check-username';
   static const String refreshToken = '/auth/refresh';
   static const String refreshTokenFallback = '/auth/refresh-token';
   static const List<String> refreshTokenCandidates = <String>[

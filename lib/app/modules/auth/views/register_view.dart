@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -92,7 +93,7 @@ class RegisterView extends GetView<AuthController> {
 
                               switch (controller.selectedPageIndex) {
                                 case 0:
-                                  // Page 1: Check if all fields are filled
+                                  // Page 1: Check if all fields are filled and username available
                                   canProceed =
                                       controller.isFirstnameValid.value &&
                                           controller.isLastnameValid.value &&
@@ -102,7 +103,9 @@ class RegisterView extends GetView<AuthController> {
                                               'others' &&
                                           controller.selectedAvatar.value
                                               .isNotEmpty &&
-                                          controller.isUsernameValid.value;
+                                          controller.isUsernameValid.value &&
+                                          controller.isUsernameAvailable.value &&
+                                          !controller.isCheckingUsername.value;
                                   break;
                                 case 1:
                                   // Page 2: Check if exactly 3 food types selected
@@ -464,29 +467,19 @@ class RegisterView extends GetView<AuthController> {
                                             ),
                                             padding: const EdgeInsets.all(4),
                                             child: ClipRRect(
-                                              child: Image.network(
-                                                avatar['path'],
+                                              child: CachedNetworkImage(
+                                                imageUrl: avatar['path'],
                                                 fit: BoxFit.contain,
-                                                loadingBuilder: (context, child,
-                                                    loadingProgress) {
-                                                  if (loadingProgress == null)
-                                                    return child;
+                                                placeholder: (context, url) {
                                                   return Center(
                                                     child:
                                                         CircularProgressIndicator(
-                                                      value: loadingProgress
-                                                                  .expectedTotalBytes !=
-                                                              null
-                                                          ? loadingProgress
-                                                                  .cumulativeBytesLoaded /
-                                                              loadingProgress
-                                                                  .expectedTotalBytes!
-                                                          : null,
+                                                      strokeWidth: 2,
                                                     ),
                                                   );
                                                 },
-                                                errorBuilder: (context, error,
-                                                    stackTrace) {
+                                                errorWidget: (context, url,
+                                                    error) {
                                                   // Fallback to local asset if network fails
                                                   return Image.asset(
                                                     avatar['localPath'],
@@ -536,31 +529,67 @@ class RegisterView extends GetView<AuthController> {
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
-          key: Key('register_username_field'),
-          controller: controller.usernameController,
-          inputFormatters: [
-            FilteringTextInputFormatter.deny(RegExp(r'\s')),
-          ],
-          decoration: InputDecoration(
-            hintText: 'ex: JohnDoe.13',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.grey),
+        Obx(() {
+          Widget? suffixIcon;
+          String? errorText;
+
+          if (controller.isCheckingUsername.value) {
+            suffixIcon = const Padding(
+              padding: EdgeInsets.all(12),
+              child: SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            );
+          } else if (controller.isUsernameValid.value) {
+            if (controller.isUsernameAvailable.value) {
+              suffixIcon = const Padding(
+                padding: EdgeInsets.all(12),
+                child: Icon(Icons.check_circle, color: Colors.green, size: 20),
+              );
+            } else {
+              suffixIcon = const Padding(
+                padding: EdgeInsets.all(12),
+                child: Icon(Icons.cancel, color: Colors.red, size: 20),
+              );
+              errorText = controller.usernameError.value;
+            }
+          }
+
+          return TextField(
+            key: Key('register_username_field'),
+            controller: controller.usernameController,
+            inputFormatters: [
+              FilteringTextInputFormatter.deny(RegExp(r'\s')),
+            ],
+            decoration: InputDecoration(
+              hintText: 'ex: JohnDoe.13',
+              suffixIcon: suffixIcon,
+              errorText: errorText,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.grey),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: errorText != null ? Colors.red : Colors.grey,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: errorText != null ? Colors.red : Colors.blue,
+                  width: 2,
+                ),
+              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.grey),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.blue, width: 2),
-            ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          ),
-          style: const TextStyle(fontSize: 14),
-        ),
+            style: const TextStyle(fontSize: 14),
+          );
+        }),
       ],
     );
   }

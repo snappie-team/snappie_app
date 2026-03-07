@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -222,12 +223,12 @@ class _CreatePostViewState extends State<CreatePostView> {
                                     itemBuilder: (context, index) {
                                       if (index < _existingImageUrls.length) {
                                         // Gambar existing (URL)
-                                        return Image.network(
-                                          _existingImageUrls[index],
+                                        return CachedNetworkImage(
+                                          imageUrl: _existingImageUrls[index],
                                           width: double.infinity,
                                           fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
+                                          errorWidget:
+                                              (context, url, error) {
                                             return Container(
                                               color: AppColors.surface,
                                               child: Icon(

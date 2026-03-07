@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 
@@ -25,54 +26,42 @@ class NetworkImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget imageWidget = Container(
+    Widget imageWidget = CachedNetworkImage(
+      imageUrl: imageUrl,
+      fit: fit,
       width: width,
       height: height,
-      decoration: BoxDecoration(
-        color: backgroundColor ?? AppColors.surfaceContainer,
-        borderRadius: borderRadius,
-      ),
-      child: Image.network(
-        imageUrl,
-        fit: fit,
-        width: width,
-        height: height,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return placeholder ??
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: borderRadius,
-                  color: backgroundColor ?? AppColors.surfaceContainer,
-                ),
-                child: Center(
-                  child: CircularProgressIndicator(
-                    color: AppColors.primary,
-                    value: loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded /
-                            loadingProgress.expectedTotalBytes!
-                        : null,
-                  ),
-                ),
-              );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          return errorWidget ??
-              Container(
-                decoration: BoxDecoration(
-                  color: backgroundColor ?? AppColors.surfaceContainer,
-                  borderRadius: borderRadius,
-                ),
-                child: Icon(
-                  Icons.image_not_supported,
-                  color: AppColors.textTertiary,
-                  size: (width != null && height != null)
-                      ? (width! < height! ? width! * 0.4 : height! * 0.4)
-                      : 24,
-                ),
-              );
-        },
-      ),
+      placeholder: (context, url) => placeholder ??
+          Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              borderRadius: borderRadius,
+              color: backgroundColor ?? AppColors.surfaceContainer,
+            ),
+            child: Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primary,
+                strokeWidth: 2,
+              ),
+            ),
+          ),
+      errorWidget: (context, url, error) => this.errorWidget ??
+          Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              color: backgroundColor ?? AppColors.surfaceContainer,
+              borderRadius: borderRadius,
+            ),
+            child: Icon(
+              Icons.image_not_supported,
+              color: AppColors.textTertiary,
+              size: (width != null && height != null)
+                  ? (width! < height! ? width! * 0.4 : height! * 0.4)
+                  : 24,
+            ),
+          ),
     );
 
     if (borderRadius != null) {

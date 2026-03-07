@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
@@ -351,10 +352,10 @@ class _FeedbackStep2State extends State<_FeedbackStep2> {
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              images[index],
+                            child: CachedNetworkImage(
+                              imageUrl: images[index],
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
+                              errorWidget: (_, __, ___) => Container(
                                 color: AppColors.surfaceContainer,
                                 child: Icon(
                                   Icons.image,

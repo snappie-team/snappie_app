@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_assets.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -90,16 +91,13 @@ class AvatarWidget extends StatelessWidget {
 
   Widget _buildContent() {
     if (imageUrl != null && imageUrl!.isNotEmpty) {
-      return Image.network(
-        imageUrl!,
+      return CachedNetworkImage(
+        imageUrl: imageUrl!,
         fit: BoxFit.contain,
         width: _getSize(),
         height: _getSize(),
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return _buildLoadingPlaceholder();
-        },
-        errorBuilder: (context, error, stackTrace) {
+        placeholder: (context, url) => _buildLoadingPlaceholder(),
+        errorWidget: (context, url, error) {
           // Fallback to local asset if network fails
           final filename = RemoteAssets.getExactFilename(imageUrl!);
           final localImagePath = RemoteAssets.localAvatar(filename);
@@ -133,12 +131,13 @@ class AvatarWidget extends StatelessWidget {
     return Positioned(
       bottom: 0,
       child: IgnorePointer(
-        child: Image.network(
-          frameUrl!,
+        child: CachedNetworkImage(
+          imageUrl: frameUrl!,
           width: frameSize,
           height: frameSize,
           fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
+          placeholder: (context, url) => SizedBox(width: frameSize, height: frameSize),
+          errorWidget: (context, url, error) {
             final filename = RemoteAssets.getExactFilename(frameUrl!)
                 .toLowerCase()
                 .replaceAll('.png', '')
@@ -190,21 +189,19 @@ class AvatarWidget extends StatelessWidget {
   }
 
   Widget _buildLoadingPlaceholder() {
-    return Container(
-      width: _getSize(),
-      height: _getSize(),
-      color: AppColors.surfaceContainer,
-      child: Center(
-        child: SizedBox(
-          width: _getSize() * 0.3,
-          height: _getSize() * 0.3,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-          ),
-        ),
-      ),
-    );
+    // Show local avatar as placeholder while network image loads
+    if (imageUrl != null && imageUrl!.isNotEmpty) {
+      final filename = RemoteAssets.getExactFilename(imageUrl!);
+      final localImagePath = RemoteAssets.localAvatar(filename);
+      return Image.asset(
+        localImagePath,
+        fit: BoxFit.contain,
+        width: _getSize(),
+        height: _getSize(),
+        errorBuilder: (context, error, stackTrace) => _buildFallback(),
+      );
+    }
+    return _buildFallback();
   }
 
   double _getSize() {

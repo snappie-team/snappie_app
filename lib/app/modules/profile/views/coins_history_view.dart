@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -346,10 +347,10 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
                 width: 72,
                 height: 72,
                 child: reward.imageUrl != null && reward.imageUrl!.isNotEmpty
-                    ? Image.network(
-                        reward.imageUrl!,
+                    ? CachedNetworkImage(
+                        imageUrl: reward.imageUrl!,
                         fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => Image.asset(
+                        errorWidget: (_, __, ___) => Image.asset(
                           AppAssets.images.coupon,
                           fit: BoxFit.contain,
                         ),
@@ -640,10 +641,10 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
                             height: 140,
                             child: reward.imageUrl != null &&
                                     reward.imageUrl!.isNotEmpty
-                                ? Image.network(
-                                    reward.imageUrl!,
+                                ? CachedNetworkImage(
+                                    imageUrl: reward.imageUrl!,
                                     fit: BoxFit.contain,
-                                    errorBuilder: (_, __, ___) => Image.asset(
+                                    errorWidget: (_, __, ___) => Image.asset(
                                       AppAssets.images.coupon,
                                       fit: BoxFit.contain,
                                     ),

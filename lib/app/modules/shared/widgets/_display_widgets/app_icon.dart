@@ -71,19 +71,10 @@ class AppIcon extends StatelessWidget {
         BlendMode.srcIn,
       ),
       placeholderBuilder: (context) {
-        // Fallback ke Material Icon jika asset tidak ditemukan
-        if (fallbackIcon != null) {
-          return Icon(
-            fallbackIcon,
-            size: size ?? 24.0,
-            color: color,
-          );
-        }
-        // Default fallback icon
-        return Icon(
-          Icons.image_not_supported,
-          size: size ?? 24.0,
-          color: color ?? Colors.grey,
+        // Hide while loading, show nothing until asset is ready
+        return SizedBox(
+          width: size ?? 24.0,
+          height: size ?? 24.0,
         );
       },
     );

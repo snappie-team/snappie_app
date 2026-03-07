@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -177,12 +178,12 @@ class _MissionReviewViewState extends State<MissionReviewView> {
             child: place?.imageUrls != null &&
                     place!.imageUrls!.isNotEmpty &&
                     place!.imageUrls!.first.url != null
-                ? Image.network(
-                    place!.imageUrls!.first.url!,
+                ? CachedNetworkImage(
+                    imageUrl: place!.imageUrls!.first.url!,
                     width: 70,
                     height: 70,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _buildPlaceholderImage(),
+                    errorWidget: (_, __, ___) => _buildPlaceholderImage(),
                   )
                 : _buildPlaceholderImage(),
           ),

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/core/constants/font_size.dart';
@@ -182,10 +183,13 @@ class PlaceDetailView extends GetView<ExploreController> {
         height: imageHeight,
         width: double.infinity,
         child: ClipRRect(
-          child: Image.network(
-            imageUrls.first,
+          child: CachedNetworkImage(
+            imageUrl: imageUrls.first,
             fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
+            placeholder: (context, url) => Container(
+              color: AppColors.background,
+            ),
+            errorWidget: (context, url, error) {
               return Container(
                 color: AppColors.background,
                 child: Center(
@@ -226,12 +230,15 @@ class PlaceDetailView extends GetView<ExploreController> {
               child: Stack(
                 children: [
                   ClipRRect(
-                    child: Image.network(
-                      imageUrls[index],
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrls[index],
                       fit: BoxFit.cover,
                       width: double.infinity,
                       height: imageHeight,
-                      errorBuilder: (context, error, stackTrace) {
+                      placeholder: (context, url) => Container(
+                        color: AppColors.background,
+                      ),
+                      errorWidget: (context, url, error) {
                         return Container(
                           color: AppColors.background,
                           child: Center(

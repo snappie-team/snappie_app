@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/core/constants/app_assets.dart';
@@ -328,10 +329,10 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            Image.network(
-                              _comparisonImages[0],
+                            CachedNetworkImage(
+                              imageUrl: _comparisonImages[0],
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
+                              errorWidget: (_, __, ___) => Container(
                                 color: AppColors.surfaceContainer,
                                 child: Icon(
                                   Icons.image,
@@ -382,10 +383,10 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            Image.network(
-                              _comparisonImages[1],
+                            CachedNetworkImage(
+                              imageUrl: _comparisonImages[1],
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
+                              errorWidget: (_, __, ___) => Container(
                                 color: AppColors.surfaceContainer,
                                 child: Icon(
                                   Icons.image,

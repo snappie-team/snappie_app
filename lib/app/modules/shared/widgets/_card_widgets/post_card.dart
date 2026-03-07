@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
@@ -505,11 +506,14 @@ class _PostCardState extends State<PostCard> {
           child: Container(
             width: double.infinity,
             child: ClipRRect(
-              child: Image.network(
-                imageUrls.first,
+              child: CachedNetworkImage(
+                imageUrl: imageUrls.first,
                 fit: BoxFit.cover,
                 width: double.infinity,
-                errorBuilder: (context, error, stackTrace) {
+                placeholder: (context, url) => Container(
+                  color: AppColors.background,
+                ),
+                errorWidget: (context, url, error) {
                   return Container(
                     color: AppColors.background,
                     child: Center(
@@ -555,11 +559,14 @@ class _PostCardState extends State<PostCard> {
                 children: [
                   Positioned.fill(
                     child: ClipRRect(
-                      child: Image.network(
-                        imageUrls[index],
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrls[index],
                         fit: BoxFit.cover,
                         width: double.infinity,
-                        errorBuilder: (context, error, stackTrace) {
+                        placeholder: (context, url) => Container(
+                          color: AppColors.background,
+                        ),
+                        errorWidget: (context, url, error) {
                           return Container(
                             color: AppColors.background,
                             child: Center(

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../data/models/place_model.dart';
@@ -172,14 +173,17 @@ class PlaceCardWidget extends StatelessWidget {
             height: config.height! * 0.60,
             width: double.infinity,
             color: AppColors.background,
-            child: Image.network(
-              (place.imageUrls != null &&
+            child: CachedNetworkImage(
+              imageUrl: (place.imageUrls != null &&
                       place.imageUrls!.isNotEmpty &&
                       place.imageUrls!.first.url != null)
                   ? place.imageUrls!.first.url!
                   : 'https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/146/2024/04/30/Sagarmatha-3522761961.jpeg',
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
+              placeholder: (context, url) => Container(
+                color: AppColors.background,
+              ),
+              errorWidget: (context, url, error) {
                 return Container(
                   color: AppColors.background,
                   child: Center(

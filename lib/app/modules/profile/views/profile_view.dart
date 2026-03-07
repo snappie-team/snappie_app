@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snappie_app/app/core/constants/font_size.dart';
@@ -710,10 +711,13 @@ class ProfileView extends GetView<ProfileController> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: place.imageUrl != null
-          ? Image.network(
-              place.imageUrl!,
+          ? CachedNetworkImage(
+              imageUrl: place.imageUrl!,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
+              placeholder: (context, url) => Container(
+                color: AppColors.backgroundContainer,
+              ),
+              errorWidget: (context, url, error) => Container(
                 color: AppColors.backgroundContainer,
                 child: Icon(
                   Icons.image_not_supported,
@@ -758,10 +762,13 @@ class ProfileView extends GetView<ProfileController> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: post.imageUrl != null
-          ? Image.network(
-              post.imageUrl!,
+          ? CachedNetworkImage(
+              imageUrl: post.imageUrl!,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
+              placeholder: (context, url) => Container(
+                color: AppColors.backgroundContainer,
+              ),
+              errorWidget: (context, url, error) => Container(
                 color: AppColors.backgroundContainer,
                 child: Icon(
                   Icons.image_not_supported,

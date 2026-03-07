@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -57,30 +58,21 @@ class FullscreenImageViewer {
                       minScale: 0.5,
                       maxScale: 4.0,
                       child: Center(
-                        child: Image.network(
-                          imageUrls[currentIndex],
+                        child: CachedNetworkImage(
+                          imageUrl: imageUrls[currentIndex],
                           fit: BoxFit.contain,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Center(
-                              child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes != null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
-                                    : null,
-                                color: Colors.white,
-                              ),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) {
-                            return const Center(
-                              child: Icon(
-                                Icons.error_outline,
-                                color: Colors.white,
-                                size: 64,
-                              ),
-                            );
-                          },
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => const Center(
+                            child: Icon(
+                              Icons.error_outline,
+                              color: Colors.white,
+                              size: 64,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -194,8 +186,8 @@ class FullscreenImageViewer {
                                             0.2126, 0.7152, 0.0722, 0, 0,
                                             0, 0, 0, 1, 0,
                                           ]),
-                                    child: Image.network(
-                                      imageUrls[index],
+                                    child: CachedNetworkImage(
+                                      imageUrl: imageUrls[index],
                                       fit: BoxFit.cover,
                                     ),
                                   ),

@@ -19,10 +19,10 @@ import '../../../../data/repositories/articles_repository_impl.dart';
 /// Binding untuk MainLayout
 /// Inject semua controllers yang dibutuhkan oleh tabs di MainLayout
 ///
-/// HYBRID APPROACH:
+/// EAGER APPROACH:
 /// - MainController: permanent (root controller)
-/// - Tab Controllers: lazyPut (dibuat saat pertama kali diakses)
-/// - Combined dengan LazyIndexedChild untuk optimal lazy loading
+/// - Tab Controllers: Get.put (dibuat langsung agar data bisa di-preload saat startup)
+/// - Combined dengan preloading di MainController.onReady()
 class MainBinding extends Bindings {
   @override
   void dependencies() {
@@ -32,25 +32,23 @@ class MainBinding extends Bindings {
       permanent: true,
     );
 
-    // Tab controllers - lazyPut with fenix for auto-recreation
-    // fenix: true ensures controller is auto-recreated if disposed
-    // Di-combine dengan LazyIndexedChild untuk lazy initialization
+    // Tab controllers - eager initialization for preloading
+    // All controllers created immediately so data can be fetched at startup
 
     // Home tab
-    Get.lazyPut<HomeController>(
-      () => HomeController(
+    Get.put<HomeController>(
+      HomeController(
         authService: Get.find<AuthService>(),
         postRepository: Get.find<PostRepository>(),
         socialRepository: Get.find<SocialRepository>(),
         userRepository: Get.find<UserRepository>(),
         articlesRepository: Get.find<ArticlesRepository>(),
       ),
-      fenix: true,
     );
 
     // Explore tab
-    Get.lazyPut<ExploreController>(
-      () => ExploreController(
+    Get.put<ExploreController>(
+      ExploreController(
         userRepository: Get.find<UserRepository>(),
         placeRepository: Get.find<PlaceRepository>(),
         reviewRepository: Get.find<ReviewRepository>(),
@@ -59,25 +57,22 @@ class MainBinding extends Bindings {
         authService: Get.find<AuthService>(),
         gamificationRepository: Get.find<GamificationRepository>(),
       ),
-      fenix: true,
     );
 
     // Articles tab
-    Get.lazyPut<ArticlesController>(
-      () => ArticlesController(),
-      fenix: true,
+    Get.put<ArticlesController>(
+      ArticlesController(),
     );
 
     // Profile tab
-    Get.lazyPut<ProfileController>(
-      () => ProfileController(
+    Get.put<ProfileController>(
+      ProfileController(
         authService: Get.find<AuthService>(),
         userRepository: Get.find<UserRepository>(),
         postRepository: Get.find<PostRepository>(),
         placeRepository: Get.find<PlaceRepository>(),
         achievementRepository: Get.find<AchievementRepository>(),
       ),
-      fenix: true,
     );
   }
 }

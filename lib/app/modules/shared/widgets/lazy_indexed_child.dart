@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Widget untuk lazy load content di IndexedStack
-/// Content hanya di-build saat tab pertama kali aktif
-/// State tetap preserved setelah di-build
+/// Widget wrapper untuk content di IndexedStack
+/// Content di-build langsung saat pertama kali agar semua tab siap
+/// State tetap preserved dengan AutomaticKeepAliveClientMixin
 class LazyIndexedChild extends StatefulWidget {
   final Widget Function() builder;
   final bool isActive;
@@ -20,23 +20,21 @@ class LazyIndexedChild extends StatefulWidget {
 class _LazyIndexedChildState extends State<LazyIndexedChild> 
     with AutomaticKeepAliveClientMixin {
   
-  Widget? _child;
-  bool _hasBuilt = false;
+  late final Widget _child;
   
   @override
-  bool get wantKeepAlive => true; // Keep state alive setelah di-build
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Build immediately so all tabs are ready when user switches
+    _child = widget.builder();
+  }
   
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
-    
-    // Build hanya saat tab pertama kali aktif
-    if (widget.isActive && !_hasBuilt) {
-      _child = widget.builder();
-      _hasBuilt = true;
-    }
-    
-    // Return empty widget jika belum pernah aktif
-    return _child ?? const SizedBox.shrink();
+    return _child;
   }
 }

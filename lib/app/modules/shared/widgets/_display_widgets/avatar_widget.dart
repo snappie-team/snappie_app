@@ -128,33 +128,46 @@ class AvatarWidget extends StatelessWidget {
 
   Widget _buildFrameWidget(double avatarSize) {
     final frameSize = avatarSize * 1.2;
+    final isLocalAsset = frameUrl!.startsWith('assets/');
+
+    Widget frameImage;
+    if (isLocalAsset) {
+      frameImage = Image.asset(
+        frameUrl!,
+        width: frameSize,
+        height: frameSize,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stack) => SizedBox(width: frameSize, height: frameSize),
+      );
+    } else {
+      frameImage = CachedNetworkImage(
+        imageUrl: frameUrl!,
+        width: frameSize,
+        height: frameSize,
+        fit: BoxFit.contain,
+        placeholder: (context, url) => SizedBox(width: frameSize, height: frameSize),
+        errorWidget: (context, url, error) {
+          final filename = RemoteAssets.getExactFilename(frameUrl!)
+              .toLowerCase()
+              .replaceAll('.png', '')
+              .replaceAll('.webp', '');
+          final localFramePath = _getLocalFramePath(filename);
+
+          if (localFramePath == null) return const SizedBox.shrink();
+
+          return Image.asset(
+            localFramePath,
+            width: frameSize,
+            height: frameSize,
+            fit: BoxFit.contain,
+          );
+        },
+      );
+    }
+
     return Positioned(
       bottom: 0,
-      child: IgnorePointer(
-        child: CachedNetworkImage(
-          imageUrl: frameUrl!,
-          width: frameSize,
-          height: frameSize,
-          fit: BoxFit.contain,
-          placeholder: (context, url) => SizedBox(width: frameSize, height: frameSize),
-          errorWidget: (context, url, error) {
-            final filename = RemoteAssets.getExactFilename(frameUrl!)
-                .toLowerCase()
-                .replaceAll('.png', '')
-                .replaceAll('.webp', '');
-            final localFramePath = _getLocalFramePath(filename);
-
-            if (localFramePath == null) return const SizedBox.shrink();
-
-            return Image.asset(
-              localFramePath,
-              width: frameSize,
-              height: frameSize,
-              fit: BoxFit.contain,
-            );
-          },
-        ),
-      ),
+      child: IgnorePointer(child: frameImage),
     );
   }
 

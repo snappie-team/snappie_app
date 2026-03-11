@@ -633,36 +633,6 @@ class _UserChallengesViewState extends State<UserChallengesView> {
                     ),
                   ],
 
-                  // Info hadiah (reward) untuk challenge yang selesai
-                  if (isCompleted &&
-                      ((challenge.rewardCoins ?? 0) > 0 ||
-                          (challenge.rewardXp ?? 0) > 0))
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if ((challenge.rewardCoins ?? 0) > 0)
-                            _buildSimpleRewardCard(
-                              icon: Icons.monetization_on,
-                              label: 'Koin',
-                              value: '+${challenge.rewardCoins}',
-                              color: AppColors.warning,
-                            ),
-                          if ((challenge.rewardCoins ?? 0) > 0 &&
-                              (challenge.rewardXp ?? 0) > 0)
-                            const SizedBox(width: 12),
-                          if ((challenge.rewardXp ?? 0) > 0)
-                            _buildSimpleRewardCard(
-                              icon: Icons.star,
-                              label: 'XP',
-                              value: '+${challenge.rewardXp}',
-                              color: AppColors.accent,
-                            ),
-                        ],
-                      ),
-                    ),
-
                   // Action button
                   Padding(
                     padding: const EdgeInsets.all(20),

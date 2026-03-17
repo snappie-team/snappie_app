@@ -289,12 +289,6 @@ class AuthController extends GetxController {
       if (result.success) {
         _isLoggedIn.value = true;
 
-        _showSnackbar(
-          'Success',
-          'User already created.',
-          Colors.green,
-        );
-
         // Navigate to main app
         Get.offAllNamed(AppPages.MAIN);
 

@@ -27,7 +27,8 @@ class _UserAchievementViewState extends State<UserAchievementView> {
   Map<String, dynamic>? get _args => Get.arguments as Map<String, dynamic>?;
   int? get _externalUserId => _args?['userId'] as int?;
   bool get _autoShowPopup => _args?['autoShowPopup'] == true;
-  Map<String, dynamic>? get _metadata => _args?['metadata'] as Map<String, dynamic>?;
+  Map<String, dynamic>? get _metadata =>
+      _args?['metadata'] as Map<String, dynamic>?;
 
   bool _hasAutoShownPopup = false;
 
@@ -44,7 +45,8 @@ class _UserAchievementViewState extends State<UserAchievementView> {
     setState(() => _isLoading = true);
 
     try {
-      final result = await _repository.getUserAchievements(userId: _externalUserId);
+      final result =
+          await _repository.getUserAchievements(userId: _externalUserId);
       setState(() {
         _achievements = result;
       });
@@ -97,12 +99,11 @@ class _UserAchievementViewState extends State<UserAchievementView> {
 
   Widget _buildCTASection() {
     // Ambil achievement terbaru yang sudah completed
-    final completedAchievements = _achievements
-        .where((a) => a.isCompleted == true)
-        .toList();
+    final completedAchievements =
+        _achievements.where((a) => a.isCompleted == true).toList();
     final hasCompleted = completedAchievements.isNotEmpty;
     final latestBadge = hasCompleted ? completedAchievements.first : null;
-    final badgeIconUrl = latestBadge?.iconUrl;
+    final badgeAssetPath = _assetForAction(latestBadge?.criteriaAction);
 
     // Cari achievement yang belum selesai dengan progress tertinggi
     final nextAchievement = !hasCompleted
@@ -159,9 +160,8 @@ class _UserAchievementViewState extends State<UserAchievementView> {
                   ],
                   const SizedBox(height: 8),
                   ElevatedButton.icon(
-                    onPressed: hasCompleted
-                        ? _shareAchievement
-                        : () => Get.back(),
+                    onPressed:
+                        hasCompleted ? _shareAchievement : () => Get.back(),
                     icon: Icon(ctaButtonIcon, size: 16),
                     label: Text(ctaButtonLabel),
                     style: ElevatedButton.styleFrom(
@@ -189,11 +189,11 @@ class _UserAchievementViewState extends State<UserAchievementView> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: (badgeIconUrl != null && badgeIconUrl.isNotEmpty)
+              child: badgeAssetPath != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.asset(
-                        'assets/images/achievement/$badgeIconUrl.png',
+                        badgeAssetPath,
                         fit: BoxFit.cover,
                       ),
                     )
@@ -258,16 +258,17 @@ class _UserAchievementViewState extends State<UserAchievementView> {
               child: GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   crossAxisSpacing: 8,
                   mainAxisSpacing: 8,
-                  childAspectRatio: 0.9,
+                  childAspectRatio: 0.72,
                 ),
-                itemCount: _achievements.length,
+                itemCount: _displayAchievements.length,
                 itemBuilder: (context, index) {
-                  return _buildAchievementItem(_achievements[index]);
+                  return _buildAchievementItem(_displayAchievements[index]);
                 },
               ),
             ),
@@ -284,37 +285,174 @@ class _UserAchievementViewState extends State<UserAchievementView> {
     );
   }
 
-  Widget _buildAchievementItem(UserAchievement userAchievement) {
-    final isUnlocked = userAchievement.isCompleted ?? false;
-    final iconUrl = userAchievement.iconUrl;
+  /// Mengelompokkan _achievements berdasarkan [criteriaAction], lalu:
+  /// - Jika ada yang completed → ambil level tertinggi yang completed
+  /// - Jika belum ada yang completed → ambil level terendah (tampil terkunci)
+  List<UserAchievement> get _displayAchievements {
+    final Map<String, List<UserAchievement>> groups = {};
+    for (final a in _achievements) {
+      final key = a.criteriaAction ?? 'unknown';
+      groups.putIfAbsent(key, () => []).add(a);
+    }
 
-    // Build the achievement image widget
-    final imageWidget = (iconUrl != null && iconUrl.isNotEmpty)
-        ? Image.asset(
-            'assets/images/achievement/$iconUrl.png',
-            fit: BoxFit.cover,
-            width: 100,
-          )
-        : Image.asset(
-            AppAssets.images.unlocked,
-            fit: BoxFit.cover,
-            width: 75,
-          );
+    final result = <UserAchievement>[];
+    for (final group in groups.values) {
+      // Sort ascending by level
+      final sorted = [
+        ...group
+      ]..sort((a, b) => _extractLevel(a.code).compareTo(_extractLevel(b.code)));
+
+      final completed = sorted.where((a) => a.isCompleted == true).toList();
+      if (completed.isNotEmpty) {
+        // Tampilkan level tertinggi yang sudah completed
+        result.add(completed.last);
+      } else {
+        // Belum ada yang completed — tampilkan level terendah sebagai terkunci
+        result.add(sorted.first);
+      }
+    }
+    return result;
+  }
+
+  /// Returns the local asset path based on [criteriaAction].
+  /// Mapping:
+  ///   checkin → love, review → streak, post → mvp,
+  ///   xp/exp  → xp,   coin   → coin
+  /// Falls back to null when no mapping is found.
+  String? _assetForAction(String? criteriaAction) {
+    final action = criteriaAction?.toLowerCase() ?? '';
+    if (action.contains('checkin')) {
+      return 'assets/images/achievement/achievement_love_m.png';
+    } else if (action.contains('review')) {
+      return 'assets/images/achievement/achievement_streak_m.png';
+    } else if (action.contains('post')) {
+      return 'assets/images/achievement/achievement_mvp_m.png';
+    } else if (action.contains('xp') || action.contains('exp')) {
+      return 'assets/images/achievement/achievement_xp_m.png';
+    } else if (action.contains('coin')) {
+      return 'assets/images/achievement/achievement_coin_m.png';
+    }
+    return null;
+  }
+
+  /// Extracts the numeric level from the achievement [code].
+  /// e.g. "checkin_2" → 2, "post_3" → 3, "checkin" → 1 (default).
+  int _extractLevel(String? code) {
+    if (code == null) return 1;
+    final match = RegExp(r'_(\d+)$').firstMatch(code);
+    if (match != null) return int.tryParse(match.group(1) ?? '1') ?? 1;
+    return 1;
+  }
+
+  /// Wraps [child] with a circular radial-gradient aura — same style as
+  /// [AchievementPopupWidget._buildAchievementIcon].
+  /// level 1 → no aura, level 2 → soft gold, level 3 → orange.
+  Widget _buildAuraWidget({required Widget child, required int level}) {
+    if (level <= 1) return child;
+
+    // Color per level
+    final List<Color> colors = switch (level) {
+      1 => [
+          const Color(0xFFFFD700).withOpacity(0.35), // soft gold center
+          const Color(0xFFFFC107).withOpacity(0.12), // fading gold
+          Colors.transparent,
+        ],
+      2 => [
+          const Color(0xFFFF8C00).withOpacity(0.55), // orange center
+          const Color(0xFFFFB300).withOpacity(0.22), // amber mid
+          Colors.transparent,
+        ],
+      _ => [
+          const Color(0xFFE65100).withOpacity(0.70), // deep orange center
+          const Color(0xFFFF6D00).withOpacity(0.35), // vivid orange mid
+          Colors.transparent,
+        ],
+    };
+
+    // Stack: gradient fills the same bounds as child via Positioned.fill
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: colors,
+                stops: const [0.0, 0.6, 1.0],
+              ),
+            ),
+          ),
+        ),
+        child,
+      ],
+    );
+  }
+
+  Widget _buildAchievementItem(UserAchievement userAchievement) {
+    final isCompleted = userAchievement.isCompleted ?? false;
+    final assetPath = _assetForAction(userAchievement.criteriaAction);
+    final level = _extractLevel(userAchievement.code);
+
+    // Jika belum completed: tampilkan ikon terkunci, tanpa aura
+    if (!isCompleted) {
+      return GestureDetector(
+        onTap: null,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                AppAssets.images.unlocked,
+                fit: BoxFit.contain,
+                width: 100,
+                height: 100,
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  '${userAchievement.name}',
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textTertiary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Completed: tampilkan badge asset dengan aura sesuai level
+    final badgeImage = assetPath != null
+        ? Image.asset(assetPath, fit: BoxFit.contain, width: 100, height: 100)
+        : Image.asset(AppAssets.images.achievement,
+            fit: BoxFit.contain, width: 100, height: 100);
+
+    final imageWidget = _buildAuraWidget(child: badgeImage, level: level);
 
     return GestureDetector(
-      onTap: isUnlocked ? () => _showAchievementDetail(userAchievement) : null,
+      onTap: () => _showAchievementDetail(userAchievement),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Achievement icon with locked/unlocked visual state
             imageWidget,
-
-            // Name
+            const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
@@ -325,8 +463,7 @@ class _UserAchievementViewState extends State<UserAchievementView> {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color:
-                      isUnlocked ? AppColors.textPrimary : AppColors.textTertiary,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ),

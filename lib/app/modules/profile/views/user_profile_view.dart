@@ -501,7 +501,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                 crossAxisCount: 3,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
-                childAspectRatio: 0.85,
+                childAspectRatio: 0.72,
               ),
               itemCount: _achievements.length > 3 ? 3 : _achievements.length,
               itemBuilder: (context, index) {
@@ -539,33 +539,92 @@ class _UserProfileViewState extends State<UserProfileView> {
     );
   }
 
-  Widget _buildAchievementBadge(UserAchievement achievement) {
-    final isUnlocked = achievement.isCompleted ?? false;
-    final iconUrl = achievement.iconUrl;
+  /// Returns the local asset path based on [criteriaAction].
+  static String? _assetForAction(String? criteriaAction) {
+    final action = criteriaAction?.toLowerCase() ?? '';
+    if (action.contains('checkin')) {
+      return 'assets/images/achievement/achievement_love_m.png';
+    } else if (action.contains('review')) {
+      return 'assets/images/achievement/achievement_streak_m.png';
+    } else if (action.contains('post')) {
+      return 'assets/images/achievement/achievement_mvp_m.png';
+    } else if (action.contains('xp') || action.contains('exp')) {
+      return 'assets/images/achievement/achievement_xp_m.png';
+    } else if (action.contains('coin')) {
+      return 'assets/images/achievement/achievement_coin_m.png';
+    }
+    return null;
+  }
 
-    final imageWidget = (iconUrl != null && iconUrl.isNotEmpty)
-        ? Image.asset(
-            'assets/images/achievement/$iconUrl.png',
-            fit: BoxFit.cover,
-            width: 100,
-          )
-        : Image.asset(
-            AppAssets.images.unlocked,
-            fit: BoxFit.cover,
-            width: 75,
-          );
+  /// Extracts numeric level from achievement [code], e.g. "checkin_2" → 2.
+  static int _extractLevel(String? code) {
+    if (code == null) return 1;
+    final match = RegExp(r'_(\d+)$').firstMatch(code);
+    if (match != null) return int.tryParse(match.group(1) ?? '1') ?? 1;
+    return 1;
+  }
+
+  /// Circular radial-gradient aura, same style as UserAchievementView.
+  Widget _buildAuraWidget({required Widget child, required int level}) {
+    if (level <= 1) return child;
+
+    final List<Color> colors = switch (level) {
+      2 => [
+          const Color(0xFFFFD700).withOpacity(0.35),
+          const Color(0xFFFFC107).withOpacity(0.12),
+          Colors.transparent,
+        ],
+      _ => [
+          const Color(0xFFFF8C00).withOpacity(0.55),
+          const Color(0xFFFFB300).withOpacity(0.22),
+          Colors.transparent,
+        ],
+    };
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: colors,
+                stops: const [0.0, 0.6, 1.0],
+              ),
+            ),
+          ),
+        ),
+        child,
+      ],
+    );
+  }
+
+  Widget _buildAchievementBadge(UserAchievement achievement) {
+    final isCompleted = achievement.isCompleted ?? false;
+    final assetPath = _assetForAction(achievement.criteriaAction);
+    final level = _extractLevel(achievement.code);
+
+    final badgeImage = assetPath != null
+        ? Image.asset(assetPath, fit: BoxFit.contain, width: 100, height: 100)
+        : Image.asset(AppAssets.images.achievement, fit: BoxFit.contain, width: 100, height: 100);
+
+    final imageWidget = isCompleted
+        ? _buildAuraWidget(child: badgeImage, level: level)
+        : Image.asset(AppAssets.images.unlocked, fit: BoxFit.contain, width: 100, height: 100);
 
     return GestureDetector(
-      onTap: isUnlocked ? () => _showAchievementDetail(achievement) : null,
+      onTap: isCompleted ? () => _showAchievementDetail(achievement) : null,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             imageWidget,
+            const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
@@ -576,9 +635,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: isUnlocked
-                      ? AppColors.textPrimary
-                      : AppColors.textTertiary,
+                  color: isCompleted ? AppColors.textPrimary : AppColors.textTertiary,
                 ),
               ),
             ),
@@ -587,6 +644,7 @@ class _UserProfileViewState extends State<UserProfileView> {
       ),
     );
   }
+
 
   void _showAchievementDetail(UserAchievement userAchievement) {
     final summary = AchievementSummary(

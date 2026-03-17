@@ -293,8 +293,26 @@ class _AchievementPopupWidgetState extends State<AchievementPopupWidget>
     );
   }
 
+  /// Returns the local asset path based on [criteriaAction].
+  /// Mapping identik dengan UserAchievementView.
+  static String? _assetForAction(String? criteriaAction) {
+    final action = criteriaAction?.toLowerCase() ?? '';
+    if (action.contains('checkin')) {
+      return 'assets/images/achievement/achievement_love_m.png';
+    } else if (action.contains('review')) {
+      return 'assets/images/achievement/achievement_streak_m.png';
+    } else if (action.contains('post')) {
+      return 'assets/images/achievement/achievement_mvp_m.png';
+    } else if (action.contains('xp') || action.contains('exp')) {
+      return 'assets/images/achievement/achievement_xp_m.png';
+    } else if (action.contains('coin')) {
+      return 'assets/images/achievement/achievement_coin_m.png';
+    }
+    return null;
+  }
+
   Widget _buildAchievementIcon() {
-    final iconUrl = widget.achievement.iconUrl;
+    final assetPath = _assetForAction(widget.achievement.criteriaAction);
 
     return Container(
       width: 280,
@@ -314,40 +332,19 @@ class _AchievementPopupWidgetState extends State<AchievementPopupWidget>
         child: SizedBox(
           width: 220,
           height: 220,
-          child: _buildIconImage(iconUrl),
+          child: assetPath != null
+              ? Image.asset(assetPath, fit: BoxFit.contain)
+              : _buildFallbackIcon(),
         ),
       ),
     );
   }
 
-  Widget _buildIconImage(String? iconUrl) {
-    if (iconUrl == null || iconUrl.isEmpty) {
-      return _buildFallbackIcon();
-    }
-
-    // If it looks like an asset name (not a URL), use Image.asset
-    if (!iconUrl.startsWith('http')) {
-      return Image.asset(
-        'assets/images/achievement/$iconUrl.png',
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => _buildFallbackIcon(),
-      );
-    }
-
-    // Network image
-    return CachedNetworkImage(
-      imageUrl: iconUrl,
-      fit: BoxFit.contain,
-      placeholder: (context, url) => _buildFallbackIcon(),
-      errorWidget: (context, url, error) => _buildFallbackIcon(),
-    );
-  }
-
   Widget _buildFallbackIcon() {
-    return Icon(
-      Icons.emoji_events,
-      size: 100,
-      color: AppColors.primary,
+    return Image.asset(
+      AppAssets.images.achievement,
+      fit: BoxFit.contain,
     );
   }
+
 }

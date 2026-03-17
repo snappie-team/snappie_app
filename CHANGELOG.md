@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2026-03-17
+### Changed
+- Tampilan badge achievement pada profil, profil pengguna lain, dan popup achievement kini menggunakan asset lokal berdasarkan `criteriaAction` (checkin → love, review → streak, post → mvp, xp → xp, coin → coin) — menggantikan pendekatan `iconUrl` sebelumnya
+- Daftar achievement dikelompokkan per tipe; hanya menampilkan level tertinggi yang sudah selesai, atau level terendah (terkunci) jika belum ada yang completed
+- Efek aura radial-gradient pada badge achievement: level 2 → gold, level 3 → orange, seragam di semua tampilan
+- Fallback icon achievement berubah dari `Icons.emoji_events` menjadi asset `AppAssets.images.achievement`
+- Grid badge achievement: `childAspectRatio` diubah ke `0.72` dan layout item dari `spaceEvenly` ke `center` untuk tampilan yang lebih proporsional
+- Semua method `AppSnackbar` kini dibungkus `_runSafely()` dengan pengecekan overlay — mencegah crash saat snackbar dipanggil sebelum navigasi siap
+- `AppColors.primary.withOpacity()` yang deprecated diganti ke `withValues(alpha:)` pada warna snackbar
+
+### Fixed
+- Snackbar tidak lagi crash saat dipanggil di awal lifecycle sebelum overlay Flutter tersedia
+- Snackbar redundan "User already created" pada flow auth dihapus
+
+### Security / Config
+- Fallback URL API dinonaktifkan secara permanen (`_fallbackEnabled = false`) untuk menghindari retry lintas environment secara tidak sengaja
+
 ## [1.3.1] - 2026-03-07
 ### Added
 - Validasi ketersediaan username secara real-time saat registrasi

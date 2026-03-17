@@ -584,6 +584,8 @@ class PlaceDetailView extends GetView<ExploreController> {
                             color: AppColors.surfaceContainer,
                             child: AppIcon(
                               AppAssets.icons.camera,
+                              size: 10,
+                              color: AppColors.textTertiary,
                             ),
                           ),
                   ),

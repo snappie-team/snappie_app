@@ -2,9 +2,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../services/logger_service.dart';
 
 class EnvironmentConfig {
+  // Fallback API dimatikan permanen untuk menghindari retry lintas environment.
+  static const bool _fallbackEnabled = false;
+
   // Fallback flag - when true, use local URL instead of production
   static bool _useFallbackUrl = false;
-  
+
   // Helper method to get environment variables (no default values)
   static String _getEnv(String key) {
     try {
@@ -27,17 +30,17 @@ class EnvironmentConfig {
 
   static String get appVersion => _getEnv('APP_VERSION');
   static int get appVersionCode => int.parse(_getEnv('APP_VERSION_CODE'));
-  
+
   // Registration API Key
   static String get registrationApiKey => _getEnv('REGISTRATION_API_KEY');
-  
+
   // Select Environment Type
   static String get baseUrl {
     // If fallback is enabled, always use local URL
     if (_useFallbackUrl) {
       return _getEnv('LOCAL_BASE_URL');
     }
-    
+
     switch (environmentType) {
       case 'development':
         return _getEnv('LOCAL_BASE_URL');
@@ -51,23 +54,30 @@ class EnvironmentConfig {
   static String get fullApiUrl => '$baseUrl$apiVersion';
   static String get localUrl => '${_getEnv('LOCAL_BASE_URL')}$apiVersion';
   static String get productionUrl => '${_getEnv('HOST_BASE_URL')}$apiVersion';
-  
+
   // Fallback management
   static bool get isUsingFallback => _useFallbackUrl;
-  
+
   static void enableFallback() {
+    if (!_fallbackEnabled) {
+      Logger.warning('Fallback dinonaktifkan oleh konfigurasi aplikasi',
+          'EnvironmentConfig');
+      return;
+    }
     _useFallbackUrl = true;
     Logger.info('Fallback enabled: Now using local URL', 'EnvironmentConfig');
   }
-  
+
   static void disableFallback() {
     _useFallbackUrl = false;
-    Logger.info('Fallback disabled: Using configured environment URL', 'EnvironmentConfig');
+    Logger.info('Fallback disabled: Using configured environment URL',
+        'EnvironmentConfig');
   }
-  
+
   static bool get isProduction => environmentType == 'production';
-  static bool get canUseFallback => isProduction && !_useFallbackUrl;
-  
+  static bool get canUseFallback =>
+      _fallbackEnabled && isProduction && !_useFallbackUrl;
+
   // Logging configuration
   static const bool enableLogging = true;
   static const bool enableVerboseLogging = true;

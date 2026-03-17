@@ -76,7 +76,8 @@ class PlaceRemoteDataSourceImpl implements PlaceRemoteDataSource {
         response,
         (json) {
           final raw = Map<String, dynamic>.from(json as Map<String, dynamic>);
-          final placeJson = flattenAdditionalInfoForPlace(raw, removeContainer: false);
+          final placeJson =
+              flattenAdditionalInfoForPlace(raw, removeContainer: false);
           return PlaceModel.fromJson(placeJson);
         },
       );

@@ -15,23 +15,136 @@ class AppSnackbar {
   AppSnackbar._();
 
   static const Duration _defaultDuration = Duration(seconds: 3);
+  static const Duration _retryDelay = Duration(milliseconds: 80);
+  static const int _maxOverlayRetries = 5;
+  static final GlobalKey<ScaffoldMessengerState> messengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
-  static bool _hasOverlay() {
-    final overlayState = Get.key.currentState?.overlay;
-    return overlayState != null && overlayState.mounted;
+  static bool _isMessengerReady() {
+    final state = messengerKey.currentState;
+    final context = messengerKey.currentContext;
+    return state != null && context != null;
   }
 
-  static void _runSafely(VoidCallback showAction) {
-    if (!_hasOverlay()) {
-      debugPrint('AppSnackbar: Overlay belum tersedia, snackbar dilewati.');
+  static void _runSafely(
+    VoidCallback showAction, {
+    int attempt = 0,
+  }) {
+    if (!_isMessengerReady()) {
+      if (attempt < _maxOverlayRetries) {
+        Future<void>.delayed(_retryDelay, () {
+          _runSafely(showAction, attempt: attempt + 1);
+        });
+        return;
+      }
+
+      debugPrint(
+          'AppSnackbar: ScaffoldMessenger belum tersedia, snackbar dilewati.');
       return;
     }
 
     try {
       showAction();
     } catch (e) {
+      if (attempt < _maxOverlayRetries) {
+        Future<void>.delayed(_retryDelay, () {
+          _runSafely(showAction, attempt: attempt + 1);
+        });
+        return;
+      }
+
       debugPrint('AppSnackbar: gagal menampilkan snackbar: $e');
     }
+  }
+
+  static void _showMaterialSnackBar({
+    required String title,
+    required String message,
+    required Color backgroundColor,
+    required Widget icon,
+    required Duration duration,
+    required SnackPosition position,
+    TextButton? mainButton,
+    bool showProgressIndicator = false,
+    Color textColor = Colors.white,
+  }) {
+    final messengerState = messengerKey.currentState;
+    final context = messengerKey.currentContext;
+
+    if (messengerState == null || context == null) {
+      return;
+    }
+
+    final mediaQuery = MediaQuery.maybeOf(context);
+    final screenHeight = mediaQuery?.size.height ?? 812;
+    final topInset = mediaQuery?.padding.top ?? 0;
+
+    final margin = position == SnackPosition.TOP
+        ? EdgeInsets.fromLTRB(12, topInset + 8, 12, screenHeight - 140)
+        : const EdgeInsets.all(12);
+
+    final content = Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        icon,
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                message,
+                style: TextStyle(color: textColor),
+              ),
+            ],
+          ),
+        ),
+        if (showProgressIndicator) ...[
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(textColor),
+            ),
+          ),
+        ],
+      ],
+    );
+
+    messengerState
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: content,
+          duration: duration,
+          backgroundColor: backgroundColor,
+          behavior: SnackBarBehavior.floating,
+          margin: margin,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          action: mainButton != null
+              ? SnackBarAction(
+                  label: (mainButton.child is Text)
+                      ? ((mainButton.child as Text).data ?? 'OK')
+                      : 'OK',
+                  textColor: textColor,
+                  onPressed: mainButton.onPressed ?? () {},
+                )
+              : null,
+        ),
+      );
   }
 
   // ─── Success ───────────────────────────────────────────────
@@ -44,17 +157,13 @@ class AppSnackbar {
     Duration? duration,
   }) {
     _runSafely(() {
-      Get.snackbar(
-        title,
-        message,
-        snackPosition: position,
+      _showMaterialSnackBar(
+        title: title,
+        message: message,
+        position: position,
         backgroundColor: AppColors.success,
-        colorText: Colors.white,
         icon: const Icon(Icons.check_circle, color: Colors.white, size: 24),
         duration: duration ?? _defaultDuration,
-        margin: const EdgeInsets.all(12),
-        borderRadius: 10,
-        isDismissible: true,
       );
     });
   }
@@ -69,17 +178,13 @@ class AppSnackbar {
     Duration? duration,
   }) {
     _runSafely(() {
-      Get.snackbar(
-        title,
-        message,
-        snackPosition: position,
+      _showMaterialSnackBar(
+        title: title,
+        message: message,
+        position: position,
         backgroundColor: AppColors.error,
-        colorText: Colors.white,
         icon: const Icon(Icons.error_outline, color: Colors.white, size: 24),
         duration: duration ?? _defaultDuration,
-        margin: const EdgeInsets.all(12),
-        borderRadius: 10,
-        isDismissible: true,
       );
     });
   }
@@ -95,18 +200,14 @@ class AppSnackbar {
     TextButton? mainButton,
   }) {
     _runSafely(() {
-      Get.snackbar(
-        title,
-        message,
-        snackPosition: position,
+      _showMaterialSnackBar(
+        title: title,
+        message: message,
+        position: position,
         backgroundColor: AppColors.warning,
-        colorText: Colors.white,
         icon: const Icon(Icons.warning_amber_rounded,
             color: Colors.white, size: 24),
         duration: duration ?? _defaultDuration,
-        margin: const EdgeInsets.all(12),
-        borderRadius: 10,
-        isDismissible: true,
         mainButton: mainButton,
       );
     });
@@ -123,17 +224,13 @@ class AppSnackbar {
     bool showProgressIndicator = false,
   }) {
     _runSafely(() {
-      Get.snackbar(
-        title,
-        message,
-        snackPosition: position,
+      _showMaterialSnackBar(
+        title: title,
+        message: message,
+        position: position,
         backgroundColor: AppColors.primary.withValues(alpha: 0.95),
-        colorText: Colors.white,
         icon: const Icon(Icons.info_outline, color: Colors.white, size: 24),
         duration: duration ?? _defaultDuration,
-        margin: const EdgeInsets.all(12),
-        borderRadius: 10,
-        isDismissible: true,
         showProgressIndicator: showProgressIndicator,
       );
     });
@@ -147,18 +244,13 @@ class AppSnackbar {
     String? rewardText,
   }) {
     _runSafely(() {
-      Get.snackbar(
-        '🎯 Challenge Selesai!',
-        '$challengeName — ${rewardText ?? "Tantangan selesai!"}',
-        snackPosition: SnackPosition.TOP,
+      _showMaterialSnackBar(
+        title: 'Challenge Selesai!',
+        message: '$challengeName - ${rewardText ?? "Tantangan selesai!"}',
+        position: SnackPosition.TOP,
         backgroundColor: AppColors.primary.withValues(alpha: 0.95),
-        colorText: Colors.white,
         icon: const Icon(Icons.emoji_events, color: Colors.amber, size: 28),
         duration: const Duration(seconds: 4),
-        margin: const EdgeInsets.all(12),
-        borderRadius: 12,
-        isDismissible: true,
-        forwardAnimationCurve: Curves.easeOutBack,
       );
     });
   }
@@ -179,19 +271,17 @@ class AppSnackbar {
     bool showProgressIndicator = false,
   }) {
     _runSafely(() {
-      Get.snackbar(
-        title,
-        message,
-        snackPosition: position,
-        backgroundColor: backgroundColor,
-        colorText: colorText,
-        icon: icon,
-        mainButton: mainButton,
+      _showMaterialSnackBar(
+        title: title,
+        message: message,
+        position: position,
+        backgroundColor: backgroundColor ?? AppColors.primary,
+        icon: icon ??
+            const Icon(Icons.info_outline, color: Colors.white, size: 24),
         duration: duration ?? _defaultDuration,
-        margin: const EdgeInsets.all(12),
-        borderRadius: 10,
-        isDismissible: true,
+        mainButton: mainButton,
         showProgressIndicator: showProgressIndicator,
+        textColor: colorText ?? Colors.white,
       );
     });
   }

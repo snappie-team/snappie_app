@@ -12,6 +12,7 @@ import 'app/routes/app_pages.dart';
 import 'app/core/services/auth_service.dart';
 import 'app/core/constants/app_theme.dart';
 import 'app/core/services/deep_link_service.dart';
+import 'app/core/helpers/app_snackbar.dart';
 
 Future<String> initAuthService() async {
   try {
@@ -51,8 +52,9 @@ void main() async {
 
   runApp(
     EasyLocalization(
-      supportedLocales: const [Locale('id')],
+      supportedLocales: const [Locale('id'), Locale('en')],
       path: 'assets/translations',
+      startLocale: const Locale('id'),
       fallbackLocale: const Locale('id'),
       useOnlyLangCode: true,
       child: MainApp(route: await initAuthService()),
@@ -83,6 +85,7 @@ class MainApp extends StatelessWidget {
           title: "Snappie App",
           initialRoute: route,
           getPages: AppPages.routes,
+          scaffoldMessengerKey: AppSnackbar.messengerKey,
           unknownRoute: GetPage(
             name: '/not-found',
             page: () => const SizedBox.shrink(),

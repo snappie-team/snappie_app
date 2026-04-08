@@ -323,8 +323,10 @@ class _EditProfileViewState extends State<EditProfileView> {
         username: username.isNotEmpty ? username : null,
       );
       await _profileController.loadUserProfile();
-      AppSnackbar.success('Profil diperbarui');
-      Get.back();
+      Get.back(closeOverlays: false);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        AppSnackbar.success('Profil diperbarui');
+      });
     } catch (e) {
       AppSnackbar.error(
           ErrorHandler.getReadableMessage(e, tag: 'EditProfileView'));

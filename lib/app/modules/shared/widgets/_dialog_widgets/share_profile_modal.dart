@@ -177,8 +177,13 @@ class ShareProfileModal extends StatelessWidget {
                 label: 'Simpan',
                 onTap: onSave ??
                     () {
-                      Get.back();
-                      AppSnackbar.info('Fitur simpan QR akan segera hadir', title: 'Segera');
+                      Get.back(closeOverlays: false);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        AppSnackbar.info(
+                          'Fitur simpan QR akan segera hadir',
+                          title: 'Segera',
+                        );
+                      });
                     },
               ),
               const SizedBox(width: 24),

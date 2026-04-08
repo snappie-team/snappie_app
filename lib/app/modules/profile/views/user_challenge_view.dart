@@ -522,11 +522,13 @@ class _UserChallengesViewState extends State<UserChallengesView> {
       // Reload daftar challenge
       await _loadChallenges();
     } on ConflictException catch (_) {
-      if (Get.isBottomSheetOpen == true) Get.back();
-      AppSnackbar.warning(
-        'Hadiah tantangan ini sudah pernah diklaim',
-        title: 'Sudah Diklaim',
-      );
+      if (Get.isBottomSheetOpen == true) Get.back(closeOverlays: false);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        AppSnackbar.warning(
+          'Hadiah tantangan ini sudah pernah diklaim',
+          title: 'Sudah Diklaim',
+        );
+      });
       await _loadChallenges();
     } catch (e) {
       Logger.error('Error claiming challenge', e, null, 'UserChallengesView');

@@ -282,7 +282,7 @@ class SettingsView extends StatelessWidget {
 
     Get.bottomSheet(
       StatefulBuilder(
-        builder: (context, setSheetState) {
+        builder: (sheetContext, setSheetState) {
           return Container(
             padding: const EdgeInsets.all(24),
             decoration: const BoxDecoration(
@@ -369,8 +369,10 @@ class SettingsView extends StatelessWidget {
                                     'https://res.cloudinary.com/deqnkuhbv/image/upload/v1761044273/snappie/assets/avatar/$pendingAvatar',
                               );
                               await controller.loadUserProfile();
-                              Get.back();
-                              AppSnackbar.success('Avatar berhasil diubah');
+                              Navigator.of(context, rootNavigator: true).pop();
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                AppSnackbar.success('Avatar berhasil diubah');
+                              });
                             } catch (e) {
                               setSheetState(() => isSaving = false);
                               AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'SettingsView'));
@@ -569,11 +571,9 @@ class SettingsView extends StatelessWidget {
                                 pendingFrameId == 'none' ? null : frameAsset,
                               );
 
-                              Get.back();
-                              AppSnackbar.success('Bingkai berhasil diubah');
+                              Navigator.of(context, rootNavigator: true).pop();
                             } catch (e) {
                               setSheetState(() => isSaving = false);
-                              AppSnackbar.error('Tidak dapat mengubah bingkai');
                             }
                           }
                         : null,

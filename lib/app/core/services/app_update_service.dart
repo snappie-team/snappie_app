@@ -233,11 +233,13 @@ class AppUpdateService extends GetxService {
         barrierDismissible: false,
       );
     } catch (e) {
-      if (Get.isDialogOpen == true) Get.back();
-      AppSnackbar.error(
-        e.toString(),
-        title: 'Gagal Mengunduh',
-      );
+      if (Get.isDialogOpen == true) Get.back(closeOverlays: false);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        AppSnackbar.error(
+          e.toString(),
+          title: 'Gagal Mengunduh',
+        );
+      });
     }
   }
 }

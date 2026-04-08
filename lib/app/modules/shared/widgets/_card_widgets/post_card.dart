@@ -1186,15 +1186,17 @@ class _PostCardState extends State<PostCard> {
       final place = await placeRepository.getPlaceById(placeId);
 
       // Close loading
-      Get.back();
+      Get.back(closeOverlays: false);
 
       // Navigate to place detail
       Get.toNamed(AppPages.PLACE_DETAIL, arguments: place);
     } catch (e) {
       // Close loading if open
-      if (Get.isDialogOpen == true) Get.back();
+      if (Get.isDialogOpen == true) Get.back(closeOverlays: false);
 
-      AppSnackbar.error('Gagal memuat detail tempat');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        AppSnackbar.error('Gagal memuat detail tempat');
+      });
     }
   }
 }

@@ -18,9 +18,8 @@ class PostRepository {
   /// Get all posts
   /// Throws: [NetworkException], [ServerException]
   Future<List<PostModel>> getPosts({
-    int page = 1,
-    bool trending = false,
-    bool following = false,
+      int page = 1,
+      int perPage = 20,
   }) async {
     if (!(await networkInfo.isConnected)) {
       throw NetworkException('No internet connection');
@@ -28,8 +27,7 @@ class PostRepository {
 
     final posts = await remoteDataSource.getPosts(
       page: page,
-      trending: trending,
-      following: following,
+      perPage: perPage,
     );
     return posts;
   }

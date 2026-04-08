@@ -123,7 +123,10 @@ class HomeController extends GetxController {
       }
 
       // Load posts from API
-      final loadedPostsFuture = postRepository.getPosts();
+      final loadedPostsFuture = postRepository.getPosts(
+        page: 1,
+        perPage: 20,
+      );
       final followDataFuture = socialRepository.getFollowData();
       final savedFuture = userRepository.getUserSaved();
 

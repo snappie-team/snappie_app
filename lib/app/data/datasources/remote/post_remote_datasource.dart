@@ -11,6 +11,7 @@ import '../../models/comment_model.dart';
 abstract class PostRemoteDataSource {
   Future<List<PostModel>> getPosts({
     int? page,
+    int? perPage,
     bool? trending,
     bool? following,
   });
@@ -46,15 +47,13 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   Future<List<PostModel>> getPosts({
     int? perPage = 10,
     int? page = 1,
-    bool? trending = false,
-    bool? following = false,
+    bool? trending,
+    bool? following,
   }) async {
     try {
       final queryParams = <String, dynamic>{
         'per_page': perPage,
         'page': page,
-        'trending': trending,
-        'following': following,
       };
 
       final response = await dioClient.dio.get(

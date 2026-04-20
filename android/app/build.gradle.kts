@@ -13,6 +13,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
 
     implementation("com.google.firebase:firebase-analytics")
+    androidTestUtil("androidx.test:orchestrator:1.5.1")
 }
 
 android {
@@ -41,11 +42,18 @@ android {
         targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        testInstrumentationRunner = "pl.leancode.patrol.PatrolJUnitRunner"
+        testInstrumentationRunnerArguments["clearPackageData"] = "true"
+    }
+
+    testOptions {
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
     }
 
     buildTypes {
         getByName("debug") {
             isMinifyEnabled = false
+            isShrinkResources = false
         }
         getByName("release") {
             isMinifyEnabled = true

@@ -146,6 +146,7 @@ class HomeView extends GetView<HomeController> {
           // const SizedBox(height: 12),
           // ── Original Create Post FAB ──
           FloatingActionButton(
+            key: const Key('home_create_post_fab'),
             heroTag: 'create_post',
             onPressed: () => Get.toNamed(AppPages.CREATE_POST),
             backgroundColor: AppColors.primary,

@@ -41,6 +41,18 @@ class MissionPhotoPreviewView extends GetView<MissionController> {
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: double.infinity,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[800],
+                            child: const Center(
+                              child: Icon(
+                                Icons.broken_image,
+                                size: 64,
+                                color: Colors.white54,
+                              ),
+                            ),
+                          );
+                        },
                       );
                     }
                     return Container(
@@ -114,6 +126,7 @@ class MissionPhotoPreviewView extends GetView<MissionController> {
       child: Obx(() => SizedBox(
             width: double.infinity,
             child: ElevatedButton(
+              key: const Key('mission_preview_submit_button'),
               onPressed:
                   controller.isSubmitting.value ? null : () => _submitPhoto(),
               style: ElevatedButton.styleFrom(

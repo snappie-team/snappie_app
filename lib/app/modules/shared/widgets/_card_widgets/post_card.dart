@@ -231,9 +231,9 @@ class _PostCardState extends State<PostCard> {
         },
         itemBuilder: (context) => [
           menuItem(value: 'profile', text: 'Lihat Profil'),
-          if (isOwner) ...[          
+          if (isOwner) ...[
             const PopupMenuDivider(height: 8),
-            menuItem(value: 'edit', text: 'Edit'),          
+            menuItem(value: 'edit', text: 'Edit'),
             const PopupMenuDivider(height: 8),
             menuItem(value: 'delete', text: 'Hapus'),
           ] else if (canShowUnfollow) ...[
@@ -654,6 +654,7 @@ class _PostCardState extends State<PostCard> {
       final likesCount = _likesCount.value;
 
       return GestureDetector(
+        key: Key('post_like_button_$postId'),
         onTap: _handleLike,
         child: Row(
           children: [
@@ -667,6 +668,7 @@ class _PostCardState extends State<PostCard> {
             const SizedBox(width: 4),
             Text(
               '$likesCount',
+              key: Key('post_like_count_$postId'),
               style: TextStyle(
                 color: AppColors.accent,
                 fontSize: FontSize.getSize(FontSizeOption.regular),
@@ -679,10 +681,14 @@ class _PostCardState extends State<PostCard> {
   }
 
   Widget _buildCommentButton() {
+    final postId = post.id;
+    if (postId == null) return const SizedBox.shrink();
+
     return Obx(() {
       final commentsCount = _commentsCount.value;
 
       return GestureDetector(
+        key: Key('post_comment_button_$postId'),
         onTap: _showComments,
         child: Row(
           children: [
@@ -783,6 +789,7 @@ class _PostCardState extends State<PostCard> {
         }
 
         return GestureDetector(
+          key: Key('post_save_button_$postId'),
           onTap: _savePost,
           child: AppIcon(
             isSaved ? AppAssets.icons.saveActive : AppAssets.icons.saveInactive,
@@ -794,6 +801,7 @@ class _PostCardState extends State<PostCard> {
     } catch (e) {
       // HomeController not available, show default bookmark
       return GestureDetector(
+        key: Key('post_save_button_$postId'),
         onTap: _savePost,
         child: AppIcon(
           AppAssets.icons.saveInactive,
@@ -917,61 +925,63 @@ class _PostCardState extends State<PostCard> {
                               return Opacity(
                                 opacity: isPending ? 0.5 : 1.0,
                                 child: Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    AvatarWidget(
-                                      imageUrl: comment.user?.imageUrl,
-                                      size: AvatarSize.small,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Text(
-                                                comment.user?.name ?? 'Unknown',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: FontSize.getSize(
-                                                      FontSizeOption.regular),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                comment.createdAt != null
-                                                    ? TimeFormatter
-                                                        .formatTimeAgo(
-                                                            comment.createdAt!)
-                                                    : '',
-                                                style: TextStyle(
-                                                  color:
-                                                      AppColors.textSecondary,
-                                                  fontSize: FontSize.getSize(
-                                                      FontSizeOption.small),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            comment.comment ?? '',
-                                            style: TextStyle(
-                                              fontSize: FontSize.getSize(
-                                                  FontSizeOption.regular),
-                                              height: 1.4,
-                                            ),
-                                          ),
-                                        ],
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      AvatarWidget(
+                                        imageUrl: comment.user?.imageUrl,
+                                        size: AvatarSize.small,
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  comment.user?.name ??
+                                                      'Unknown',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: FontSize.getSize(
+                                                        FontSizeOption.regular),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  comment.createdAt != null
+                                                      ? TimeFormatter
+                                                          .formatTimeAgo(comment
+                                                              .createdAt!)
+                                                      : '',
+                                                  style: TextStyle(
+                                                    color:
+                                                        AppColors.textSecondary,
+                                                    fontSize: FontSize.getSize(
+                                                        FontSizeOption.small),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              comment.comment ?? '',
+                                              style: TextStyle(
+                                                fontSize: FontSize.getSize(
+                                                    FontSizeOption.regular),
+                                                height: 1.4,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
                               );
                             },
                           ),
@@ -1066,7 +1076,8 @@ class _PostCardState extends State<PostCard> {
       shareText += '\n📍 Lokasi: $placeName';
     }
     if (postId != null) {
-      shareText += '\n\nLihat selengkapnya:\n${DeepLinkService.postUrl(postId)}';
+      shareText +=
+          '\n\nLihat selengkapnya:\n${DeepLinkService.postUrl(postId)}';
     }
     shareText += '\n\nTemukan di Snappie App! 📱';
 

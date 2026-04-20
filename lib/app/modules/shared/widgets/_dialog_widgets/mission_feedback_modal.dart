@@ -205,7 +205,8 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
                     return Expanded(
                       child: Container(
                         height: 4,
-                        margin: EdgeInsets.only(right: index < _totalSteps - 1 ? 4 : 0),
+                        margin: EdgeInsets.only(
+                            right: index < _totalSteps - 1 ? 4 : 0),
                         decoration: BoxDecoration(
                           color: isCompleted || isCurrent
                               ? AppColors.accent
@@ -308,6 +309,7 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
                 // Image 1
                 Expanded(
                   child: GestureDetector(
+                    key: const Key('mission_feedback_image_0'),
                     onTap: () {
                       setState(() {
                         _selectedPhotoIndex = 0;
@@ -362,6 +364,7 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
                 // Image 2
                 Expanded(
                   child: GestureDetector(
+                    key: const Key('mission_feedback_image_1'),
                     onTap: () {
                       setState(() {
                         _selectedPhotoIndex = 1;
@@ -428,7 +431,6 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
                 ),
               ),
             ),
-          
         ],
       ),
     );
@@ -451,7 +453,8 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
                 color: AppColors.textPrimary,
               ),
               children: [
-                const TextSpan(text: 'Apakah kamu setuju jika tempat ini disebut '),
+                const TextSpan(
+                    text: 'Apakah kamu setuju jika tempat ini disebut '),
                 TextSpan(
                   text: 'hidden gems',
                   style: TextStyle(
@@ -492,6 +495,8 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
         return _buildYesNoButtons(
           yesLabel: 'Iya sesuai',
           noLabel: 'Tidak, ada yang berubah',
+          yesKey: const Key('mission_feedback_yes_button'),
+          noKey: const Key('mission_feedback_no_button'),
           onYes: () {
             _answers['info_accurate'] = true;
             _goToNextStep();
@@ -504,10 +509,12 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
       case 1:
         return _buildSingleButton(
           label: 'Lanjut',
+          buttonKey: const Key('mission_feedback_continue_button'),
           onPressed: _selectedPhotoIndex >= 0
               ? () {
                   _answers['best_photo_index'] = _selectedPhotoIndex;
-                  _answers['best_photo_url'] = _comparisonImages[_selectedPhotoIndex];
+                  _answers['best_photo_url'] =
+                      _comparisonImages[_selectedPhotoIndex];
                   _goToNextStep();
                 }
               : null,
@@ -516,6 +523,8 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
         return _buildYesNoButtons(
           yesLabel: 'Iya setuju',
           noLabel: 'Tidak setuju',
+          yesKey: const Key('mission_feedback_yes_button'),
+          noKey: const Key('mission_feedback_no_button'),
           onYes: () {
             _answers['is_hidden_gem'] = true;
             _goToNextStep();
@@ -528,6 +537,7 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
       case 3:
         return _buildSingleButton(
           label: 'Kirim',
+          buttonKey: const Key('mission_feedback_submit_button'),
           onPressed: _submitFeedback,
         );
       default:
@@ -540,6 +550,8 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
     required String noLabel,
     required VoidCallback onYes,
     required VoidCallback onNo,
+    Key? yesKey,
+    Key? noKey,
   }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -547,6 +559,7 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
+            key: yesKey,
             onPressed: onYes,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.accent,
@@ -569,6 +582,7 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
         SizedBox(
           width: double.infinity,
           child: OutlinedButton(
+            key: noKey,
             onPressed: onNo,
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.accent,
@@ -594,10 +608,12 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
   Widget _buildSingleButton({
     required String label,
     required VoidCallback? onPressed,
+    Key? buttonKey,
   }) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
+        key: buttonKey,
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.accent,
@@ -653,9 +669,7 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Icon(
-                    index < _recommendRating
-                        ? Icons.star
-                        : Icons.star_border,
+                    index < _recommendRating ? Icons.star : Icons.star_border,
                     color: index < _recommendRating
                         ? AppColors.warning
                         : AppColors.textTertiary,
@@ -708,9 +722,7 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
                         : AppColors.surfaceContainer,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: isSelected
-                          ? AppColors.accent
-                          : AppColors.border,
+                      color: isSelected ? AppColors.accent : AppColors.border,
                       width: 1,
                     ),
                   ),
@@ -768,7 +780,6 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
               ),
             ),
           ),
-          
         ],
       ),
     );

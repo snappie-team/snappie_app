@@ -273,6 +273,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(5, (index) {
                 return GestureDetector(
+                  key: Key('mission_review_rating_star_${index + 1}'),
                   onTap: () {
                     setState(() {
                       _rating = index + 1;
@@ -528,6 +529,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
               final foodType = FoodType.values[index];
               final isSelected = _selectedFoodTypes.contains(foodType);
               return _buildSelectableChip(
+                key: Key('mission_review_food_type_$index'),
                 label: foodType.label,
                 isSelected: isSelected,
                 onTap: () {
@@ -587,6 +589,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
               final placeValue = PlaceValue.values[index];
               final isSelected = _selectedPlaceValues.contains(placeValue);
               return _buildSelectableChip(
+                key: Key('mission_review_place_value_$index'),
                 label: placeValue.label,
                 isSelected: isSelected,
                 onTap: () {
@@ -608,11 +611,13 @@ class _MissionReviewViewState extends State<MissionReviewView> {
   }
 
   Widget _buildSelectableChip({
+    Key? key,
     required String label,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
     return InkWell(
+      key: key,
       onTap: onTap,
       borderRadius: BorderRadius.circular(4),
       child: Container(
@@ -661,6 +666,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
           ),
           const SizedBox(height: 12),
           TextField(
+            key: const Key('mission_review_text_field'),
             controller: _reviewController,
             maxLines: 4,
             style: TextStyle(color: AppColors.textPrimary),
@@ -753,6 +759,7 @@ class _MissionReviewViewState extends State<MissionReviewView> {
         child: SizedBox(
           width: double.infinity,
           child: Obx(() => ElevatedButton(
+              key: const Key('mission_review_submit_button'),
                 onPressed: controller.isSubmitting.value
                     ? null
                     : () => _submitReview(),

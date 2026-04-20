@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,10 @@ class CreatePostView extends StatefulWidget {
 }
 
 class _CreatePostViewState extends State<CreatePostView> {
+  static final List<int> _testTinyPngBytes = base64Decode(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7Z4QAAAABJRU5ErkJggg==',
+  );
+
   final _contentController = TextEditingController();
   PlaceModel? _selectedPlace;
   final List<File> _imageFiles = [];
@@ -39,6 +44,15 @@ class _CreatePostViewState extends State<CreatePostView> {
   int _currentImageIndex = 0;
   static const int _maxImages = 5;
   bool _hasForcedPlaceSelection = false;
+
+  bool get _isDebugBuild {
+    var isDebug = false;
+    assert(() {
+      isDebug = true;
+      return true;
+    }());
+    return isDebug;
+  }
 
   // Edit mode
   PostModel? _existingPost;
@@ -186,6 +200,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                                 // Content input
                                 Expanded(
                                   child: TextField(
+                                    key: const Key('create_post_content_field'),
                                     controller: _contentController,
                                     maxLines: null,
                                     decoration: InputDecoration(
@@ -248,6 +263,16 @@ class _CreatePostViewState extends State<CreatePostView> {
                                           _imageFiles[fileIndex],
                                           width: double.infinity,
                                           fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) {
+                                            return Container(
+                                              color: AppColors.surface,
+                                              child: Icon(
+                                                Icons.broken_image,
+                                                color: AppColors.textTertiary,
+                                                size: 64,
+                                              ),
+                                            );
+                                          },
                                         );
                                       }
                                     },
@@ -301,6 +326,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 12),
                             child: Chip(
+                              key: const Key('create_post_selected_place_chip'),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(99),
                               ),
@@ -360,6 +386,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                           ],
                         ),
                         child: ListTile(
+                          key: const Key('create_post_media_tile'),
                           leading: AppIcon(
                             AppAssets.icons.video,
                             color: AppColors.primary,
@@ -394,6 +421,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                           ],
                         ),
                         child: ListTile(
+                          key: const Key('create_post_location_tile'),
                           leading: AppIcon(
                             AppAssets.icons.location,
                             color: AppColors.error,
@@ -418,6 +446,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                         child: SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
+                            key: const Key('create_post_submit_button'),
                             onPressed: (_isLoading || !_isFormValid)
                                 ? null
                                 : _isEditMode
@@ -454,6 +483,18 @@ class _CreatePostViewState extends State<CreatePostView> {
                           ),
                         ),
                       ),
+                      if (_isDebugBuild)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: TextButton(
+                              key: const Key('create_post_test_add_image_button'),
+                              onPressed: _addDummyImageForTest,
+                              child: const Text('Tambah Gambar Dummy (Test)'),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -581,6 +622,7 @@ class _CreatePostViewState extends State<CreatePostView> {
                                 itemBuilder: (context, index) {
                                   final place = filteredPlaces[index];
                                   return ListTile(
+                                    key: Key('create_post_place_option_${place.id ?? index}'),
                                     title: Text(
                                       place.name ?? 'Unknown',
                                       style: TextStyle(
@@ -661,6 +703,22 @@ class _CreatePostViewState extends State<CreatePostView> {
     } catch (e) {
       AppSnackbar.error(ErrorHandler.getReadableMessage(e, tag: 'CreatePostView'));
     }
+  }
+
+  Future<void> _addDummyImageForTest() async {
+    if (_totalImages >= _maxImages) {
+      AppSnackbar.warning('Maksimal $_maxImages gambar', title: 'Batas Maksimal');
+      return;
+    }
+
+    final tempDir = await Directory.systemTemp.createTemp('snappie_create_post_');
+    final imageFile = File('${tempDir.path}/dummy.png');
+    await imageFile.writeAsBytes(_testTinyPngBytes, flush: true);
+
+    if (!mounted) return;
+    setState(() {
+      _imageFiles.add(imageFile);
+    });
   }
 
   Future<void> _submitPost() async {

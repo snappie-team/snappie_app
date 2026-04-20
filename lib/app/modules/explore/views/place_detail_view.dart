@@ -58,6 +58,7 @@ class PlaceDetailView extends GetView<ExploreController> {
                   place.id != null && controller.isPlaceSaved(place.id!);
               final isLoading = controller.isTogglingFavorite;
               return IconButton(
+                key: const Key('place_detail_save_button'),
                 icon: isLoading
                     ? SizedBox(
                         width: 20,
@@ -503,17 +504,9 @@ class PlaceDetailView extends GetView<ExploreController> {
           const SizedBox(height: 12),
           _buildInfoRow(
             title: 'Jam Buka',
-            trailing: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  openingDaysText ?? 'Jam operasional belum tersedia',
-                ),
-                Text(': '),
-                Text(
-                  openingHoursText ?? 'Jam operasional belum tersedia',
-                ),
-              ],
+            trailing: Text(
+              '${openingDaysText ?? 'Jam operasional belum tersedia'}: '
+              '${openingHoursText ?? 'Jam operasional belum tersedia'}',
             ),
             content: Text(
               isOpen == null
@@ -753,7 +746,8 @@ class PlaceDetailView extends GetView<ExploreController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSectionHeader('Ulasan',
-                onSeeAll: () => _showReviewsPage(place)),
+                onSeeAll: () => _showReviewsPage(place),
+                seeAllKey: const Key('place_detail_review_see_all')),
             const SizedBox(height: 12),
             if (isLoading)
               const Center(child: LoadingStateWidget())
@@ -1354,6 +1348,7 @@ class PlaceDetailView extends GetView<ExploreController> {
               return SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
+                  key: const Key('place_detail_start_mission_button'),
                   onPressed: missionCompleted
                       ? null
                       : () => _startMission(place),
@@ -1418,7 +1413,7 @@ class PlaceDetailView extends GetView<ExploreController> {
   }
 
   Widget _buildSectionHeader(String title,
-      {VoidCallback? onSeeAll, Widget? child}) {
+      {VoidCallback? onSeeAll, Widget? child, Key? seeAllKey}) {
     return Row(
       children: [
         Expanded(
@@ -1434,6 +1429,7 @@ class PlaceDetailView extends GetView<ExploreController> {
         if (child != null) child,
         if (child == null && onSeeAll != null)
           TextButton(
+            key: seeAllKey,
             onPressed: onSeeAll,
             child: Text(
               'Lihat Selengkapnya',

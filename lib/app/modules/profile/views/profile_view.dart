@@ -401,6 +401,7 @@ class ProfileView extends GetView<ProfileController> {
                     value: controller.weeklyUserRank != null
                         ? '${controller.weeklyUserRank}'
                         : '-',
+                    sectionKey: const Key('profile_leaderboard_section'),
                     onTap: () {
                       Get.toNamed(Routes.LEADERBOARD);
                     },
@@ -449,6 +450,7 @@ class ProfileView extends GetView<ProfileController> {
                   _buildAchievementSection(
                     title: 'Penghargaan Saya',
                     value: '${controller.totalAchievements}',
+                    sectionKey: const Key('profile_achievement_section'),
                     onTap: () {
                       Get.toNamed(Routes.ACHIEVEMENTS);
                     },
@@ -461,6 +463,7 @@ class ProfileView extends GetView<ProfileController> {
                   _buildAchievementSection(
                     title: 'Tantangan',
                     value: '${controller.totalChallenges}',
+                    sectionKey: const Key('profile_challenge_section'),
                     onTap: () {
                       Get.toNamed(Routes.CHALLENGES);
                     },
@@ -604,11 +607,13 @@ class ProfileView extends GetView<ProfileController> {
 
     final badgeImage = assetPath != null
         ? Image.asset(assetPath, fit: BoxFit.contain, width: 100, height: 100)
-        : Image.asset(AppAssets.images.achievement, fit: BoxFit.contain, width: 100, height: 100);
+        : Image.asset(AppAssets.images.achievement,
+            fit: BoxFit.contain, width: 100, height: 100);
 
     final imageWidget = isCompleted
         ? _buildAuraWidget(child: badgeImage, level: level)
-        : Image.asset(AppAssets.images.unlocked, fit: BoxFit.contain, width: 100, height: 100);
+        : Image.asset(AppAssets.images.unlocked,
+            fit: BoxFit.contain, width: 100, height: 100);
 
     return Container(
       decoration: BoxDecoration(
@@ -630,7 +635,9 @@ class ProfileView extends GetView<ProfileController> {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: isCompleted ? AppColors.textPrimary : AppColors.textTertiary,
+                color: isCompleted
+                    ? AppColors.textPrimary
+                    : AppColors.textTertiary,
               ),
             ),
           ),
@@ -638,7 +645,6 @@ class ProfileView extends GetView<ProfileController> {
       ),
     );
   }
-
 
   Widget _buildSavedSection({
     required String title,
@@ -689,12 +695,14 @@ class ProfileView extends GetView<ProfileController> {
   }
 
   Widget _buildAchievementSection({
+    Key? sectionKey,
     required String title,
     required String value,
     required VoidCallback onTap,
     Widget? assetWidget,
   }) {
     return GestureDetector(
+      key: sectionKey,
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),

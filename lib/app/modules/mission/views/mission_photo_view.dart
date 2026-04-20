@@ -399,6 +399,7 @@ class _MissionPhotoViewStatefulState extends State<_MissionPhotoViewStateful>
           // ),
 
           GestureDetector(
+            key: const Key('mission_photo_capture_button'),
             onTap: _isCapturing ? null : _capturePhoto,
             child: Container(
               width: 72,

@@ -93,7 +93,9 @@ class ExploreView extends GetView<ExploreController> {
   }
 
   Widget _buildFilterChip(String label, bool isSelected) {
+    final normalizedLabel = label.toLowerCase().replaceAll(' ', '_');
     return GestureDetector(
+      key: Key('explore_filter_$normalizedLabel'),
       onTap: () => _onFilterChipTapped(label),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -324,6 +326,7 @@ class ExploreView extends GetView<ExploreController> {
                         controller.selectedFoodTypes.contains(foodType);
                     
                     return GestureDetector(
+                      key: Key('food_type_filter_$index'),
                       onTap: () {
                         controller.toggleFoodTypeSelection(foodType);
                       },

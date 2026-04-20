@@ -12,6 +12,7 @@ import 'app/routes/app_pages.dart';
 import 'app/core/services/auth_service.dart';
 import 'app/core/constants/app_theme.dart';
 import 'app/core/services/deep_link_service.dart';
+import 'app/core/services/analytics_service.dart';
 
 Future<String> initAuthService() async {
   try {
@@ -88,6 +89,11 @@ class MainApp extends StatelessWidget {
             page: () => const SizedBox.shrink(),
           ),
           debugShowCheckedModeBanner: false,
+
+          // Firebase Analytics screen-tracking observer
+          navigatorObservers: [
+            Get.find<AnalyticsService>().observer,
+          ],
           
           // Apply custom theme with Material Design color system
           theme: AppTheme.lightTheme,

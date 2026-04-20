@@ -17,6 +17,12 @@
         android:label="Snappie"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- Disable automatic screen reporting so Activity class names
+             (MainActivity, SignInHubActivity) don't overwrite our custom screen names.
+             We log screen_view manually via AnalyticsService.logScreenView(). -->
+        <meta-data
+            android:name="google_analytics_automatic_screen_reporting_enabled"
+            android:value="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

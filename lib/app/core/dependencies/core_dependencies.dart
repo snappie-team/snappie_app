@@ -3,6 +3,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../network/dio_client.dart';
 import '../network/network_info.dart';
 import '../services/auth_service.dart';
+import '../services/analytics_service.dart';
 import '../services/app_update_service.dart';
 import '../services/cloudinary_service.dart';
 import '../services/google_auth_service.dart';
@@ -21,6 +22,9 @@ class CoreDependencies {
     // Auth Services - Permanent karena dipakai di banyak tempat
     Get.put<AuthService>(AuthService(), permanent: true);
     Get.put<GoogleAuthService>(GoogleAuthService(), permanent: true);
+
+    // Analytics Service — Firebase Analytics wrapper
+    Get.put<AnalyticsService>(AnalyticsService(), permanent: true);
 
     // Location Service - Permanent untuk akses lokasi di seluruh app
     Get.put<LocationService>(LocationService(), permanent: true);

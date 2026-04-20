@@ -15,6 +15,7 @@ import '../../../data/repositories/achievement_repository_impl.dart';
 import '../../shared/layout/controllers/main_controller.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/profile_controller.dart';
+import '../../../core/services/analytics_service.dart';
 
 /// Full page view for user challenges
 class UserChallengesView extends StatefulWidget {
@@ -41,6 +42,7 @@ class _UserChallengesViewState extends State<UserChallengesView> {
   @override
   void initState() {
     super.initState();
+    Get.find<AnalyticsService>().logScreenView(screenName: 'challenge_page');
     _profileController.initializeIfNeeded();
     _loadChallenges();
   }
@@ -512,6 +514,13 @@ class _UserChallengesViewState extends State<UserChallengesView> {
 
       // Tutup bottom sheet
       if (Get.isBottomSheetOpen == true) Get.back();
+
+      // Log coupon_redeemed event
+      Get.find<AnalyticsService>().logCouponRedeemed(
+        rewardId: challengeId.toString(),
+        rewardName: challenge.name ?? '',
+        coinCost: coins,
+      );
 
       // Tampilkan snackbar sukses
       AppSnackbar.success(

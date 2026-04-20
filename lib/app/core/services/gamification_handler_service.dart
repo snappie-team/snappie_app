@@ -4,6 +4,7 @@ import '../../modules/profile/controllers/profile_controller.dart';
 import '../../data/models/gamification_response_model.dart';
 import '../../modules/shared/widgets/index.dart';
 import '../helpers/app_snackbar.dart';
+import 'analytics_service.dart';
 
 /// Centralized service for handling gamification results
 /// Manages achievement popups and challenge updates
@@ -52,7 +53,6 @@ class GamificationHandlerService {
       Logger.debug(
           'Showing achievement: ${achievement.name}', 'GamificationHandler');
 
-      // Show popup as full-screen modal with auto-close
       await Get.dialog(
         AchievementPopupWidget(
           achievement: achievement,
@@ -60,6 +60,12 @@ class GamificationHandlerService {
         ),
         barrierDismissible: true,
         useSafeArea: false,
+      );
+
+      // Log achievement_unlocked event
+      Get.find<AnalyticsService>().logAchievementUnlocked(
+        achievementId: achievement.id?.toString() ?? '',
+        achievementName: achievement.name ?? '',
       );
 
       // Delay between popups (except after last one)
@@ -99,6 +105,12 @@ class GamificationHandlerService {
             challenge.name ?? 'Challenge',
             rewardText: rewardParts.isNotEmpty ? rewardParts.join(' | ') : null,
           );
+
+          // Log challenge_completed event
+          Get.find<AnalyticsService>().logChallengeCompleted(
+            challengeId: challenge.id?.toString() ?? '',
+            challengeName: challenge.name ?? '',
+          );
         }
       } catch (e) {
         Logger.error(
@@ -115,15 +127,18 @@ class GamificationHandlerService {
 
     try {
       final profileController = Get.find<ProfileController>();
+      final analytics = Get.find<AnalyticsService>();
 
       if (rewards.coins != null && rewards.coins! > 0) {
         Logger.debug('Adding ${rewards.coins} coins', 'GamificationHandler');
         await profileController.addCoins(rewards.coins!);
+        analytics.logRewardReceived(type: 'coins', amount: rewards.coins!);
       }
 
       if (rewards.xp != null && rewards.xp! > 0) {
         Logger.debug('Adding ${rewards.xp} XP', 'GamificationHandler');
         await profileController.addExp(rewards.xp!);
+        analytics.logRewardReceived(type: 'xp', amount: rewards.xp!);
       }
     } catch (e) {
       Logger.error('Error updating user stats', e, null, 'GamificationHandler');

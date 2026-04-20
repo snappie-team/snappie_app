@@ -11,6 +11,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/models/achievement_model.dart';
 import '../../shared/widgets/index.dart';
+import '../../../core/services/analytics_service.dart';
 
 // Route aliases for cleaner navigation
 typedef Routes = AppPages;
@@ -23,6 +24,7 @@ class ProfileView extends GetView<ProfileController> {
     // Trigger lazy initialization saat view pertama kali dibuka
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.initializeIfNeeded();
+      Get.find<AnalyticsService>().logScreenView(screenName: 'user_profile');
     });
 
     return ScaffoldFrame(

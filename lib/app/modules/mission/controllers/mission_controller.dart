@@ -18,6 +18,7 @@ import '../../../core/errors/exceptions.dart';
 import '../../../core/constants/food_type.dart';
 import '../../../core/constants/place_value.dart';
 import '../../profile/controllers/profile_controller.dart';
+import '../../../core/services/analytics_service.dart';
 
 /// Mission Step Enum
 enum MissionStep {
@@ -111,6 +112,12 @@ class MissionController extends GetxController {
     isConflictError.value = false;
     checkinResult.value = null;
     reviewResult.value = null;
+
+    // Log mission_started event
+    Get.find<AnalyticsService>().logMissionStarted(
+      placeId: place.id?.toString() ?? '',
+      placeName: place.name ?? '',
+    );
   }
 
   /// Set captured image path
@@ -234,6 +241,14 @@ class MissionController extends GetxController {
       }
 
       isConflictError.value = false;
+
+      // Log mission_completed for photo step
+      Get.find<AnalyticsService>().logMissionCompleted(
+        placeId: currentPlace!.id?.toString() ?? '',
+        placeName: currentPlace!.name ?? '',
+        step: 'photo',
+      );
+
       return true;
     } on NetworkException catch (e) {
       errorMessage.value = e.message;
@@ -374,6 +389,14 @@ class MissionController extends GetxController {
       }
 
       isConflictError.value = false;
+
+      // Log mission_completed for review step
+      Get.find<AnalyticsService>().logMissionCompleted(
+        placeId: currentPlace!.id?.toString() ?? '',
+        placeName: currentPlace!.name ?? '',
+        step: 'review',
+      );
+
       return true;
     } on NetworkException catch (e) {
       Logger.error('Submit review network error', e, null, 'MissionController');

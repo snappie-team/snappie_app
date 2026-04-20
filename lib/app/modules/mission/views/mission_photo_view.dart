@@ -10,6 +10,7 @@ import '../../../core/helpers/error_handler.dart';
 import '../../../core/services/location_service.dart';
 import 'package:geolocator/geolocator.dart';
 import '../controllers/mission_controller.dart';
+import '../../../core/services/analytics_service.dart';
 
 /// Halaman untuk mengambil foto misi
 class MissionPhotoView extends GetView<MissionController> {
@@ -45,6 +46,7 @@ class _MissionPhotoViewStatefulState extends State<_MissionPhotoViewStateful>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    Get.find<AnalyticsService>().logScreenView(screenName: 'quest_detail');
     _initializeCamera();
   }
 

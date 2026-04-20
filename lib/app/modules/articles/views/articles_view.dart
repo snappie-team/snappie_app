@@ -5,6 +5,7 @@ import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart'
 import '../../../core/constants/app_colors.dart';
 import '../controllers/articles_controller.dart';
 import '../../shared/widgets/index.dart';
+import '../../../core/services/analytics_service.dart';
 
 class ArticlesView extends GetView<ArticlesController> {
   const ArticlesView({super.key});
@@ -14,6 +15,7 @@ class ArticlesView extends GetView<ArticlesController> {
     // Trigger lazy initialization saat view pertama kali di-build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.initializeIfNeeded();
+      Get.find<AnalyticsService>().logScreenView(screenName: 'article_page');
     });
 
     return ScaffoldFrame(

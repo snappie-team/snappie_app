@@ -17,6 +17,7 @@ import '../../../data/repositories/gamification_repository_impl.dart';
 import '../../../data/repositories/achievement_repository_impl.dart';
 import '../controllers/profile_controller.dart';
 import '../../shared/widgets/index.dart';
+import '../../../core/services/analytics_service.dart';
 
 /// Coins page with Kupon and Riwayat tabs
 class CoinsHistoryView extends StatefulWidget {
@@ -43,6 +44,7 @@ class _CoinsHistoryViewState extends State<CoinsHistoryView> {
   @override
   void initState() {
     super.initState();
+    Get.find<AnalyticsService>().logScreenView(screenName: 'coupon_page');
     // Ensure Indonesian locale data is loaded for DateFormat with 'id'
     initializeDateFormatting('id');
     _loadData();

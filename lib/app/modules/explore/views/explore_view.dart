@@ -8,6 +8,7 @@ import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/logger_service.dart';
 import '../../shared/widgets/index.dart';
+import '../../../core/services/analytics_service.dart';
 
 class ExploreView extends GetView<ExploreController> {
   const ExploreView({super.key});
@@ -17,6 +18,7 @@ class ExploreView extends GetView<ExploreController> {
     // Trigger lazy initialization saat view pertama kali di-build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.initializeIfNeeded();
+      Get.find<AnalyticsService>().logScreenView(screenName: 'catalog_home');
     });
 
     return ScaffoldFrame(

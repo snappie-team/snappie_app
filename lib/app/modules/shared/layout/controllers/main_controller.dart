@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../../core/services/app_update_service.dart';
 import '../../../../core/services/logger_service.dart';
 import '../../../../core/services/onboarding_service.dart';
+import '../../../../core/services/analytics_service.dart';
 import '../../../home/controllers/home_controller.dart';
 import '../../../explore/controllers/explore_controller.dart';
 import '../../../articles/controllers/articles_controller.dart';
@@ -12,6 +13,14 @@ import '../../widgets/index.dart'; // To use TreasureChestModal
 class MainController extends GetxController {
   final _currentIndex = 0.obs;
   int _previousIndex = 0;
+
+  /// Maps tab index to the analytics screen name.
+  static const _tabScreenNames = <int, String>{
+    0: 'forum',
+    1: 'catalog_home',
+    2: 'article_page',
+    3: 'user_profile',
+  };
 
   // ─── Tab Tour State ─────────────────────────────────
   final showTabTour = false.obs;
@@ -24,6 +33,14 @@ class MainController extends GetxController {
     final wasDifferentTab = _previousIndex != index;
     _previousIndex = _currentIndex.value;
     _currentIndex.value = index;
+
+    // Log screen_view for the newly selected tab
+    final screenName = _tabScreenNames[index];
+    if (screenName != null) {
+      try {
+        Get.find<AnalyticsService>().logScreenView(screenName: screenName);
+      } catch (_) {}
+    }
 
     // Refresh data saat switch ke Home atau Profile dari tab lain
     if (wasDifferentTab) {

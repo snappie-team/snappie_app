@@ -7,6 +7,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/services/logger_service.dart';
 import '../controllers/profile_controller.dart';
 import '../../shared/widgets/index.dart';
+import '../../../core/services/analytics_service.dart';
 
 /// Leaderboard page with weekly/monthly tabs
 class LeaderboardFullView extends StatefulWidget {
@@ -26,6 +27,7 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
   @override
   void initState() {
     super.initState();
+    Get.find<AnalyticsService>().logScreenView(screenName: 'leaderboard');
     WidgetsBinding.instance.addPostFrameCallback((_) => _init());
   }
 
@@ -69,6 +71,11 @@ class _LeaderboardFullViewState extends State<LeaderboardFullView> {
     if (_selectedTab != index) {
       setState(() => _selectedTab = index);
       _loadLeaderboard();
+
+      // Log leaderboard_viewed event with period
+      Get.find<AnalyticsService>().logLeaderboardViewed(
+        period: index == 0 ? 'weekly' : 'monthly',
+      );
     }
   }
 

@@ -12,6 +12,7 @@ import '../../../data/repositories/notification_repository_impl.dart';
 import '../../../data/repositories/social_repository_impl.dart';
 import '../../shared/widgets/index.dart';
 import '../../shared/layout/controllers/main_controller.dart';
+import '../../../core/services/analytics_service.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -21,6 +22,7 @@ class HomeView extends GetView<HomeController> {
     // Trigger lazy initialization saat view pertama kali di-build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.initializeIfNeeded();
+      Get.find<AnalyticsService>().logScreenView(screenName: 'forum');
     });
 
     return ScaffoldFrame(

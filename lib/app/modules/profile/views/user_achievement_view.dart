@@ -10,6 +10,7 @@ import '../../../data/models/achievement_model.dart';
 import '../../../data/models/gamification_response_model.dart';
 import '../../../data/repositories/achievement_repository_impl.dart';
 import '../controllers/profile_controller.dart';
+import '../../../core/services/analytics_service.dart';
 
 /// Full page view for user achievements
 class UserAchievementView extends StatefulWidget {
@@ -38,6 +39,7 @@ class _UserAchievementViewState extends State<UserAchievementView> {
   @override
   void initState() {
     super.initState();
+    Get.find<AnalyticsService>().logScreenView(screenName: 'badge_achievement');
     _loadAchievements();
   }
 

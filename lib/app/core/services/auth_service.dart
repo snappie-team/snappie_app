@@ -14,6 +14,7 @@ import '../constants/environment_config.dart';
 import '../../routes/api_endpoints.dart';
 import '../helpers/json_mapping_helper.dart';
 import 'google_auth_service.dart';
+import 'analytics_service.dart';
 
 class AuthService extends GetxService {
   static const String _tokenKey = 'auth_token';
@@ -568,6 +569,11 @@ class AuthService extends GetxService {
       } catch (e) {
         Logger.error('Error clearing local cache', e, null, 'Auth');
       }
+
+      // Clear analytics user ID
+      try {
+        Get.find<AnalyticsService>().clearUserId();
+      } catch (_) {}
     }
   }
 
@@ -633,6 +639,15 @@ class AuthService extends GetxService {
 
     await _persistDateTime(prefs, _tokenExpiryKey, tokenExpiry);
     await _persistDateTime(prefs, _refreshTokenExpiryKey, refreshTokenExpiry);
+
+    // Set analytics user ID
+    if (_userData?.id != null) {
+      try {
+        Get.find<AnalyticsService>().setUserId(_userData!.id!.toString());
+      } catch (_) {
+        // AnalyticsService may not be registered yet during early init
+      }
+    }
   }
 
   Future<void> _persistDateTime(

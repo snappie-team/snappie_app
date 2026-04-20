@@ -19,6 +19,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/helpers/app_snackbar.dart';
 import '../../mission/controllers/mission_controller.dart';
 import '../../profile/controllers/profile_controller.dart';
+import '../../../core/services/analytics_service.dart';
 
 class PlaceDetailView extends GetView<ExploreController> {
   const PlaceDetailView({super.key});
@@ -36,6 +37,7 @@ class PlaceDetailView extends GetView<ExploreController> {
         controller.loadPlaceReviews(place.id!);
         controller.loadSavedPlaces();
         controller.loadPlaceGamificationStatus(place.id!);
+        Get.find<AnalyticsService>().logScreenView(screenName: 'place_detail');
       }
     });
 
@@ -1479,6 +1481,13 @@ class PlaceDetailView extends GetView<ExploreController> {
 
     try {
       final isNowSaved = await controller.toggleSavedPlace(place.id!);
+
+      // Log place_favorited event
+      Get.find<AnalyticsService>().logPlaceFavorited(
+        placeId: place.id.toString(),
+        placeName: place.name ?? '',
+        isSaved: isNowSaved,
+      );
 
       if (isNowSaved) {
         AppSnackbar.success('${place.name} ditambahkan ke favorit', title: 'Disimpan');

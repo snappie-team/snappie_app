@@ -19,6 +19,7 @@ import 'package:snappie_app/app/data/repositories/user_repository_impl.dart';
 import 'package:snappie_app/app/modules/home/controllers/home_controller.dart';
 import 'package:snappie_app/app/modules/shared/layout/views/scaffold_frame.dart';
 import 'package:snappie_app/app/modules/shared/widgets/index.dart';
+import 'package:snappie_app/app/core/services/analytics_service.dart';
 
 class CreatePostView extends StatefulWidget {
   const CreatePostView({super.key});
@@ -747,6 +748,12 @@ class _CreatePostViewState extends State<CreatePostView> {
       await homeController.refreshData();
 
       Get.back(); // Close create post view
+
+      // Log forum_post_created event
+      Get.find<AnalyticsService>().logForumPostCreated(
+        postId: '', // Post ID not returned from createPost
+        placeId: _selectedPlace!.id?.toString() ?? '',
+      );
 
       AppSnackbar.success('Postingan berhasil dibuat');
     } catch (e) {

@@ -25,6 +25,10 @@ class PlaceDetailView extends GetView<ExploreController> {
 
   @override
   Widget build(BuildContext context) {
+    // Toggle to enable/disable in-flow feedback CTA and calls.
+    // Set to false to keep feedback code present but inactive in the UI flow.
+    const bool _feedbackEnabled = false;
+
     // Get place from arguments if passed
     final PlaceModel? place = Get.arguments as PlaceModel?;
 
@@ -36,6 +40,9 @@ class PlaceDetailView extends GetView<ExploreController> {
         controller.loadPlaceReviews(place.id!);
         controller.loadSavedPlaces();
         controller.loadPlaceGamificationStatus(place.id!);
+        if (_feedbackEnabled) {
+          controller.updatePlaceFeedbackStatus(place.id!);
+        }
       }
     });
 
@@ -84,10 +91,13 @@ class PlaceDetailView extends GetView<ExploreController> {
             ),
           ],
           onRefresh: () async {
-            if (place.id != null) {
+              if (place.id != null) {
               await controller.loadPlaceReviews(place.id!);
               await controller.loadSavedPlaces();
               await controller.loadPlaceGamificationStatus(place.id!);
+              if (_feedbackEnabled) {
+                await controller.updatePlaceFeedbackStatus(place.id!);
+              }
             }
           },
           slivers: [
@@ -137,15 +147,67 @@ class PlaceDetailView extends GetView<ExploreController> {
             child: _buildMissionCtaCard(place),
           );
         }),
-        // Floating feedback button - shown when checkin + review done but feedback not yet submitted
+        // Right-side feedback CTA when user already checked-in but hasn't submitted review
         Obx(() {
-          final showFeedback = controller.hasReviewThisMonth &&
-              controller.canSubmitAppReview;
-          if (!showFeedback) return const SizedBox.shrink();
+          final showFeedbackAside = _feedbackEnabled && controller.hasCheckinThisMonth && controller.hasReviewThisMonth && !controller.hasFeedbackForPlace(place.id!);
+          if (!showFeedbackAside) return const SizedBox.shrink();
+          final topPos = MediaQuery.of(context).size.height * 0.65;
+
           return Positioned(
             right: 0,
-            bottom: controller.showMissionCta ? 200 : 120,
-            child: _buildFeedbackFab(place),
+            top: topPos,
+            child: GestureDetector(
+              onTap: () async {
+                final result = await MissionFeedbackModal.show(
+                  placeName: place.name ?? 'Tempat',
+                  coinReward: place.coinReward ?? 25,
+                  placeImages: place.imageUrls
+                          ?.where((e) => e.url != null)
+                          .map((e) => e.url!)
+                          .toList() ??
+                      [],
+                );
+
+                if (result != null && result.completed) {
+                  AppSnackbar.success('Terima kasih atas masukanmu!');
+                  // Refresh status and reviews to update CTAs
+                  await controller.loadPlaceGamificationStatus(place.id!);
+                  await controller.loadPlaceReviews(place.id!);
+                }
+              },
+              child: Material(
+                color: AppColors.accent,
+                elevation: 10,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  bottomLeft: Radius.circular(24),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      bottomLeft: Radius.circular(24),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.feedback, color: Colors.white, size: 20),
+                      SizedBox(height: 6),
+                      RotatedBox(
+                        quarterTurns: 3,
+                        child: Text(
+                          'Feedback',
+                          style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           );
         }),
       ],
@@ -977,8 +1039,20 @@ class PlaceDetailView extends GetView<ExploreController> {
   void _startMission(PlaceModel place) async {
     // Re-check status terbaru sebelum mulai misi
     await controller.loadPlaceGamificationStatus(place.id!);
-    if (!controller.canCheckin || !controller.canReview) {
-      // Status berubah setelah refresh — button akan otomatis disable via Obx
+    
+    if (!controller.canCheckin && !controller.canReview) {
+      // Status berubah setelah refresh — button otomatis disable
+      return;
+    }
+
+    if (!controller.canCheckin && controller.canReview) {
+      // Sudah check-in, tinggal review
+      if (!Get.isRegistered<MissionController>()) {
+        Get.put(MissionController());
+      }
+      final missionController = Get.find<MissionController>();
+      missionController.initMission(place);
+      Get.toNamed(AppPages.MISSION_REVIEW, arguments: place);
       return;
     }
 
@@ -1349,19 +1423,29 @@ class PlaceDetailView extends GetView<ExploreController> {
             ),
             const SizedBox(height: 12),
             Obx(() {
-              final missionCompleted =
-                  !controller.canCheckin || !controller.canReview;
+              final fullyCompleted =
+                  !controller.canCheckin && !controller.canReview;
+              final canCheckin = controller.canCheckin;
+              final canReviewOnly = !controller.canCheckin && controller.canReview;
+
+              String buttonText = 'Mulai Misi';
+              if (fullyCompleted) {
+                buttonText = 'Anda sudah memainkan misi ini';
+              } else if (canReviewOnly) {
+                buttonText = 'Selesaikan Misi (Tulis Ulasan)';
+              }
+
               return SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: missionCompleted
+                  onPressed: fullyCompleted
                       ? null
                       : () => _startMission(place),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: missionCompleted
+                    backgroundColor: fullyCompleted
                         ? AppColors.border
                         : AppColors.accent,
-                    foregroundColor: missionCompleted
+                    foregroundColor: fullyCompleted
                         ? AppColors.textSecondary
                         : AppColors.textOnPrimary,
                     disabledBackgroundColor: AppColors.border,
@@ -1371,11 +1455,7 @@ class PlaceDetailView extends GetView<ExploreController> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Text(
-                    missionCompleted
-                        ? 'Anda sudah memainkan misi ini'
-                        : 'Mulai Misi',
-                  ),
+                  child: Text(buttonText),
                 ),
               );
             }),

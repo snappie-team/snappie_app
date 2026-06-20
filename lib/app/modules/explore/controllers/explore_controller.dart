@@ -89,6 +89,9 @@ class ExploreController extends GetxController {
   final _showBanner = true.obs;
   final _showMissionCta = true.obs;
 
+  // Track whether the current user submitted feedback for a place
+  final RxMap<int, bool> _placeHasFeedback = <int, bool>{}.obs;
+
   Timer? _searchDebounce;
 
   // Search text controller
@@ -160,6 +163,44 @@ class ExploreController extends GetxController {
   bool get canCheckin => _placeStatus.value?.canCheckin ?? true;
   bool get canReview => _placeStatus.value?.canReview ?? true;
   bool get canSubmitAppReview => _placeStatus.value?.canSubmitAppReview ?? true;
+
+  bool hasFeedbackForPlace(int placeId) => _placeHasFeedback[placeId] ?? false;
+
+  /// Check recent checkins for current user at [placeId] to determine if feedback exists.
+  Future<void> updatePlaceFeedbackStatus(int placeId) async {
+    try {
+      final checkins = await checkinRepository.getCheckinsByPlaceId(placeId, page: 1, perPage: 50);
+      final currentUserId = authService.userData?.id;
+      if (currentUserId == null) {
+        _placeHasFeedback[placeId] = false;
+        return;
+      }
+
+      // Find latest checkin by current user
+      final userCheckins = checkins.where((c) => c.userId == currentUserId).toList();
+      if (userCheckins.isEmpty) {
+        _placeHasFeedback[placeId] = false;
+        return;
+      }
+
+      userCheckins.sort((a, b) => (b.createdAt ?? DateTime.now()).compareTo(a.createdAt ?? DateTime.now()));
+      final latest = userCheckins.first;
+
+      final additional = latest.additionalInfo;
+      if (additional != null) {
+        // Heuristic: backend stores feedback under 'feedback' key inside additional_info
+        if (additional.containsKey('feedback')) {
+          _placeHasFeedback[placeId] = true;
+          return;
+        }
+      }
+
+      _placeHasFeedback[placeId] = false;
+    } catch (e) {
+      Logger.error('Failed to update feedback status for place $placeId', e, null, 'ExploreController');
+      _placeHasFeedback[placeId] = false;
+    }
+  }
 
   void hideBanner() => _showBanner.value = false;
   void hideMissionCta() => _showMissionCta.value = false;

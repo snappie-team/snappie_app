@@ -53,15 +53,9 @@ class MissionFeedbackModal extends StatefulWidget {
 }
 
 class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
-  int _currentStep = 0;
-  final int _totalSteps = 4;
   final Map<String, dynamic> _answers = {};
 
-  // For step 2 - photo selection (2 random images from place)
-  int _selectedPhotoIndex = -1; // -1 = none selected
-  late List<String> _comparisonImages;
-
-  // For step 4
+  // Feedback form data
   int _recommendRating = 0;
   final Set<String> _selectedTags = {};
   final TextEditingController _feedbackController = TextEditingController();
@@ -78,14 +72,6 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
   @override
   void initState() {
     super.initState();
-    _initComparisonImages();
-  }
-
-  void _initComparisonImages() {
-    // Only use place images (not checkin image), pick 2 random
-    final placeImages = List<String>.from(widget.placeImages);
-    placeImages.shuffle();
-    _comparisonImages = placeImages.take(2).toList();
   }
 
   @override
@@ -94,24 +80,13 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
     super.dispose();
   }
 
-  void _goToNextStep() {
-    if (_currentStep < _totalSteps - 1) {
-      setState(() {
-        _currentStep++;
-      });
-    }
-  }
-
-  void _close() {
-    Get.back(
-      result: FeedbackResult(
-        completed: false,
-        answers: Map.from(_answers),
-      ),
-    );
-  }
-
   Future<void> _submitFeedback() async {
+    // Validate at least one tag is selected
+    if (_recommendRating == 0 || _selectedTags.isEmpty) {
+      // You can show a snackbar or validation message
+      return;
+    }
+
     // Gather all answers
     _answers['recommend_rating'] = _recommendRating;
     _answers['liked_features'] = _selectedTags.toList();
@@ -134,24 +109,26 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
-        height: screenHeight * 0.8, // Fixed 70% height
+        height: screenHeight * 0.8, // 80% of screen height
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: AppColors.background,
           borderRadius: BorderRadius.circular(24),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Header with progress bar
+            // Header
             _buildHeader(),
 
-            // Content based on current step
+            // Content - All questions in one page
             Expanded(
               child: SingleChildScrollView(
-                child: _buildStepContent(),
+                child: _buildFeedbackContent(),
               ),
             ),
 
-            _buildSubmitButton()
+            // Submit Button
+            _buildSubmitButton(),
           ],
         ),
       ),
@@ -160,307 +137,38 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 12, 16),
-      child: Column(
+      padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
+      child: Stack(
         children: [
-          // Place name and close button row
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  widget.placeName,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              GestureDetector(
-                onTap: _close,
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Icon(
-                    Icons.close,
-                    color: AppColors.textSecondary,
-                    size: 24,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          // Progress bar with coin reward
-          Row(
-            children: [
-              // Progress segments
-              Expanded(
-                child: Row(
-                  children: List.generate(_totalSteps, (index) {
-                    final isCompleted = index < _currentStep;
-                    final isCurrent = index == _currentStep;
-                    return Expanded(
-                      child: Container(
-                        height: 4,
-                        margin: EdgeInsets.only(right: index < _totalSteps - 1 ? 4 : 0),
-                        decoration: BoxDecoration(
-                          color: isCompleted || isCurrent
-                              ? AppColors.accent
-                              : AppColors.border,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-              const SizedBox(width: 12),
-
-              // Coin reward badge
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.asset(
-                    AppAssets.images.coin,
-                    width: 28,
-                    height: 28,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${widget.coinReward} Koin',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.accent,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStepContent() {
-    switch (_currentStep) {
-      case 0:
-        return _buildStep1();
-      case 1:
-        return _buildStep2();
-      case 2:
-        return _buildStep3();
-      case 3:
-        return _buildStep4();
-      default:
-        return _buildStep1();
-    }
-  }
-
-  /// Step 1: Apakah informasi yang disajikan sudah sesuai?
-  Widget _buildStep1() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Apakah informasi yang disajikan sudah sesuai?',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Step 2: Foto mana yang paling cocok untuk profil tempat?
-  Widget _buildStep2() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Foto manakah yang paling cocok menjadi gambar profil tempat ini?',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-
-          // Two images side by side for comparison
-          if (_comparisonImages.length >= 2)
-            Row(
-              children: [
-                // Image 1
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedPhotoIndex = 0;
-                      });
-                    },
-                    child: Container(
-                      height: 160,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: _selectedPhotoIndex == 0
-                              ? AppColors.accent
-                              : Colors.transparent,
-                          width: 3,
-                        ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(9),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            CachedNetworkImage(
-                              imageUrl: _comparisonImages[0],
-                              fit: BoxFit.cover,
-                              errorWidget: (_, __, ___) => Container(
-                                color: AppColors.surfaceContainer,
-                                child: Icon(
-                                  Icons.image,
-                                  color: AppColors.textTertiary,
-                                  size: 48,
-                                ),
-                              ),
-                            ),
-                            if (_selectedPhotoIndex == 0)
-                              Container(
-                                color: AppColors.accent.withValues(alpha: 0.2),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.check_circle,
-                                    color: AppColors.accent,
-                                    size: 40,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // Image 2
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedPhotoIndex = 1;
-                      });
-                    },
-                    child: Container(
-                      height: 160,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: _selectedPhotoIndex == 1
-                              ? AppColors.accent
-                              : Colors.transparent,
-                          width: 3,
-                        ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(9),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            CachedNetworkImage(
-                              imageUrl: _comparisonImages[1],
-                              fit: BoxFit.cover,
-                              errorWidget: (_, __, ___) => Container(
-                                color: AppColors.surfaceContainer,
-                                child: Icon(
-                                  Icons.image,
-                                  color: AppColors.textTertiary,
-                                  size: 48,
-                                ),
-                              ),
-                            ),
-                            if (_selectedPhotoIndex == 1)
-                              Container(
-                                color: AppColors.accent.withValues(alpha: 0.2),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.check_circle,
-                                    color: AppColors.accent,
-                                    size: 40,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            )
-          else
-            Container(
-              height: 160,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceContainer,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: Text(
-                  'Tidak ada foto tersedia',
-                  style: TextStyle(color: AppColors.textSecondary),
-                ),
-              ),
-            ),
-          
-        ],
-      ),
-    );
-  }
-
-  /// Step 3: Apakah tempat ini hidden gems?
-  Widget _buildStep3() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
+          // Centered title
+          Align(
+            alignment: Alignment.center,
+            child: Text(
+              'Umpan Balik Aplikasi',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),
-              children: [
-                const TextSpan(text: 'Apakah kamu setuju jika tempat ini disebut '),
-                TextSpan(
-                  text: 'hidden gems',
-                  style: TextStyle(
-                    fontStyle: FontStyle.italic,
-                    color: AppColors.textPrimary,
-                  ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          // Close button on the right
+          Align(
+            alignment: Alignment.centerRight,
+            child: GestureDetector(
+              onTap: () => Get.back(
+                result: FeedbackResult(
+                  completed: false,
+                  answers: Map.from(_answers),
                 ),
-                const TextSpan(text: '?'),
-              ],
+              ),
+              child: Icon(
+                Icons.close,
+                color: AppColors.textSecondary,
+                size: 24,
+              ),
             ),
           ),
         ],
@@ -468,166 +176,35 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
     );
   }
 
-  /// Build submit button(s) based on current step
-  Widget _buildSubmitButton() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-      // decoration: BoxDecoration(
-      //   color: AppColors.surface,
-      //   boxShadow: [
-      //     BoxShadow(
-      //       color: Colors.black.withValues(alpha: 0.05),
-      //       blurRadius: 10,
-      //       offset: const Offset(0, -4),
-      //     ),
-      //   ],
-      // ),
-      child: _buildStepButtons(),
-    );
-  }
-
-  Widget _buildStepButtons() {
-    switch (_currentStep) {
-      case 0:
-        return _buildYesNoButtons(
-          yesLabel: 'Iya sesuai',
-          noLabel: 'Tidak, ada yang berubah',
-          onYes: () {
-            _answers['info_accurate'] = true;
-            _goToNextStep();
-          },
-          onNo: () {
-            _answers['info_accurate'] = false;
-            _goToNextStep();
-          },
-        );
-      case 1:
-        return _buildSingleButton(
-          label: 'Lanjut',
-          onPressed: _selectedPhotoIndex >= 0
-              ? () {
-                  _answers['best_photo_index'] = _selectedPhotoIndex;
-                  _answers['best_photo_url'] = _comparisonImages[_selectedPhotoIndex];
-                  _goToNextStep();
-                }
-              : null,
-        );
-      case 2:
-        return _buildYesNoButtons(
-          yesLabel: 'Iya setuju',
-          noLabel: 'Tidak setuju',
-          onYes: () {
-            _answers['is_hidden_gem'] = true;
-            _goToNextStep();
-          },
-          onNo: () {
-            _answers['is_hidden_gem'] = false;
-            _goToNextStep();
-          },
-        );
-      case 3:
-        return _buildSingleButton(
-          label: 'Kirim',
-          onPressed: _submitFeedback,
-        );
-      default:
-        return const SizedBox.shrink();
-    }
-  }
-
-  Widget _buildYesNoButtons({
-    required String yesLabel,
-    required String noLabel,
-    required VoidCallback onYes,
-    required VoidCallback onNo,
-  }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: onYes,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.accent,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-            ),
-            child: Text(
-              yesLabel,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: onNo,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.accent,
-              side: BorderSide(color: AppColors.accent),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-            ),
-            child: Text(
-              noLabel,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSingleButton({
-    required String label,
-    required VoidCallback? onPressed,
-  }) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.accent,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: AppColors.border,
-          disabledForegroundColor: AppColors.textTertiary,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Step 4: Rating, tags, dan masukan
-  Widget _buildStep4() {
+  Widget _buildFeedbackContent() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // Coin reward badge
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                AppAssets.images.coin,
+                width: 28,
+                height: 28,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '${widget.coinReward} Koin',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.accent,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
           // Question 1: Rating
           Text(
             'Seberapa besar kamu merekomendasikan aplikasi Snappie kepada temanmu?',
@@ -768,8 +345,38 @@ class _MissionFeedbackModalState extends State<MissionFeedbackModal> {
               ),
             ),
           ),
-          
         ],
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: (_recommendRating > 0 && _selectedTags.isNotEmpty)
+              ? _submitFeedback
+              : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.accent,
+            foregroundColor: Colors.white,
+            disabledBackgroundColor: AppColors.border,
+            disabledForegroundColor: AppColors.textTertiary,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+          ),
+          child: const Text(
+            'Kirim',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ),
     );
   }

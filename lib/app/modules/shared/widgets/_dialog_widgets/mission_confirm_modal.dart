@@ -92,21 +92,49 @@ class _MissionConfirmModalState extends State<MissionConfirmModal> {
                 );
               },
             ),
-            const SizedBox(height: 16),
-
-            // Title/Description
-            Text(
-              'Temukan dan foto area duduk favoritmu yang paling nyaman di tempat ini!',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-                height: 1.4,
-              ),
-            ),
             const SizedBox(height: 20),
 
+            // Header container dengan background teal/accent
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(12),
+                // border: Border.all(color: AppColors.accent.withAlpha(100), width: 1),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'Misi kamu adalah',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textOnPrimary,
+                      height: 1.4,
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Mission Description
+                  Text(
+                    'Temukan dan foto area duduk favoritmu yang paling nyaman di tempat ini!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.textOnPrimary,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+                    
             // Checkbox 1 - Agree to share
             _buildCheckboxItem(
               value: _agreeToShare,
@@ -130,11 +158,11 @@ class _MissionConfirmModalState extends State<MissionConfirmModal> {
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
+                  child: ElevatedButton(
                     onPressed: _onCancel,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.error,
-                      side: BorderSide(color: AppColors.error),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                      foregroundColor: AppColors.textOnPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
@@ -153,15 +181,15 @@ class _MissionConfirmModalState extends State<MissionConfirmModal> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.textOnPrimary,
-                      disabledBackgroundColor: AppColors.primary.withAlpha(50),
+                      disabledBackgroundColor: AppColors.primary.withAlpha(150),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Lanjutkan',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                      style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textOnPrimary),
                     ),
                   ),
                 ),

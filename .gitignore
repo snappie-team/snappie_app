@@ -50,3 +50,8 @@ app.*.map.json
 
 assets/
 fonts/
+
+# AI Agents Tooling
+/graphify-out
+/.opencode
+*/.obsidian

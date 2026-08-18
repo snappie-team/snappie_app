@@ -20,6 +20,9 @@ class CheckinModel {
   double? longitude;
 
   @JsonKey(name: 'image_url') String? imageUrl;
+  @JsonKey(name: 'additional_info')
+  @ignore
+  Map<String, dynamic>? additionalInfo;
   bool? status;
 
   /// Flag anonim — sembunyikan username di galeri

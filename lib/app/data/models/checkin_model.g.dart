@@ -1924,6 +1924,7 @@ CheckinModel _$CheckinModelFromJson(Map<String, dynamic> json) => CheckinModel()
   ..latitude = (json['latitude'] as num?)?.toDouble()
   ..longitude = (json['longitude'] as num?)?.toDouble()
   ..imageUrl = json['image_url'] as String?
+  ..additionalInfo = json['additional_info'] as Map<String, dynamic>?
   ..status = json['status'] as bool?
   ..isAnonymous = _readIsAnonymous(json, 'is_anonymous') as bool?
   ..user = json['user'] == null
@@ -1944,6 +1945,7 @@ Map<String, dynamic> _$CheckinModelToJson(CheckinModel instance) =>
       'latitude': instance.latitude,
       'longitude': instance.longitude,
       'image_url': instance.imageUrl,
+      'additional_info': instance.additionalInfo,
       'status': instance.status,
       'is_anonymous': instance.isAnonymous,
       'user': instance.user,

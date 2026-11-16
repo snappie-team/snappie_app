@@ -117,6 +117,8 @@ Organized widget system for consistent UI development:
 - **Sharing**: share_plus + QR (qr_flutter)
 
 ## Getting Started
+> 📖 **Panduan Lengkap Run & Build:** Lihat [docs/BUILD_AND_RUN.md](docs/BUILD_AND_RUN.md) untuk panduan komprehensif penyiapan environment, penanganan error Windows/Gradle, menjalankan aplikasi di HP, dan build APK/AAB.
+
 
 ### Prerequisites
 - Flutter SDK (latest stable version)

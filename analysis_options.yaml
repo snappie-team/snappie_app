@@ -11,6 +11,9 @@ analyzer:
   errors:
     constant_identifier_names: ignore
     constant_pattern_never_matches_value_type: ignore
+  exclude:
+    - build/**
+    - android/**
 include: package:flutter_lints/flutter.yaml
 
 linter:

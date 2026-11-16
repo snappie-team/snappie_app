@@ -358,41 +358,43 @@ class RegisterView extends GetView<AuthController> {
           ),
         ),
         Obx(
-          () => RadioGroup<Gender>(
-            groupValue: controller.selectedGenderEnum,
-            onChanged: (Gender? value) {
-              if (value != null) controller.setGender(value);
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                GestureDetector(
-                  key: Key('register_gender_male'),
-                  onTap: () => controller.setGender(Gender.male),
-                  child: Row(
-                    children: [
-                      Radio<Gender>(
-                        value: Gender.male,
-                      ),
-                      Text(tr(LocaleKeys.register_male)),
-                    ],
-                  ),
+          () => Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              GestureDetector(
+                key: const Key('register_gender_male'),
+                onTap: () => controller.setGender(Gender.male),
+                child: Row(
+                  children: [
+                    Radio<Gender>(
+                      value: Gender.male,
+                      groupValue: controller.selectedGenderEnum,
+                      onChanged: (Gender? value) {
+                        if (value != null) controller.setGender(value);
+                      },
+                    ),
+                    Text(tr(LocaleKeys.register_male)),
+                  ],
                 ),
-                const SizedBox(width: 24),
-                GestureDetector(
-                  key: Key('register_gender_female'),
-                  onTap: () => controller.setGender(Gender.female),
-                  child: Row(
-                    children: [
-                      Radio<Gender>(
-                        value: Gender.female,
-                      ),
-                      Text(tr(LocaleKeys.register_female)),
-                    ],
-                  ),
+              ),
+              const SizedBox(width: 24),
+              GestureDetector(
+                key: const Key('register_gender_female'),
+                onTap: () => controller.setGender(Gender.female),
+                child: Row(
+                  children: [
+                    Radio<Gender>(
+                      value: Gender.female,
+                      groupValue: controller.selectedGenderEnum,
+                      onChanged: (Gender? value) {
+                        if (value != null) controller.setGender(value);
+                      },
+                    ),
+                    Text(tr(LocaleKeys.register_female)),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
 

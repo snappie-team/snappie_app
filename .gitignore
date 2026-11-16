@@ -55,3 +55,6 @@ fonts/
 /graphify-out
 /.opencode
 */.obsidian
+
+# FVM Version Cache
+.fvm/
